@@ -27,11 +27,26 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devtool-plus",
+          "title": "DevTool+",
+          "icon": "media/activity-bar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "devtool-plus": [
+        {
+          "type": "webview",
+          "id": "devtool-plus.toolsView",
+          "name": "DevTool+",
+          "icon": "media/activity-bar-icon.svg"
+        }
+      ]
+    },
     "commands": [
-      {
-        "command": "devtool-plus.helloWorld",
-        "title": "Hello World"
-      }
     ]
   },
   "scripts": {

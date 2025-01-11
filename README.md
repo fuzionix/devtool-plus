@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/DevToolPlusHero.png" alt="Case Converter Logo" width="640" />
+  <img src="media/devtool-plus-hero.png" alt="Case Converter Logo" width="640" />
 </p>
 
 ---
