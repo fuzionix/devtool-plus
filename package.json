@@ -41,8 +41,13 @@
         {
           "type": "webview",
           "id": "devtool-plus.toolsView",
-          "name": "DevTool+",
+          "name": "Input / Output",
           "icon": "media/activity-bar-icon.svg"
+        },
+        {
+          "type": "tree",
+          "id": "devtool-plus.toolsExplorer",
+          "name": "Explorer"
         }
       ]
     },
