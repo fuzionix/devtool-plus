@@ -9,7 +9,7 @@ export class CaseConverter extends BaseTool {
     protected setupTemplate(): void {
         this.toolContainer.innerHTML = `
             <div class="tool-container">
-                <p>Tool Case</p>
+                <p class="opacity-75">Tool Case</p>
             </div>
         `;
     }

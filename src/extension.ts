@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('devtool-plus.selectTool', (tool: Tool) => {
 		sidePanelProvider.updateTool(tool);
-	})
+	});
 
 	console.log('DevTool+ is now active!');
 }

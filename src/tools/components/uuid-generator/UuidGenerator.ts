@@ -9,7 +9,7 @@ export class UUIDGenerator extends BaseTool {
     protected setupTemplate(): void {
         this.toolContainer.innerHTML = `
             <div class="tool-container">
-                <p>Tool UUID</p>
+                <p class="opacity-75">Tool UUID</p>
             </div>
         `;
     }

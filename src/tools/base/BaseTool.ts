@@ -22,23 +22,14 @@ export abstract class BaseTool extends HTMLElement {
     }
 
     protected setupStyles(): void {
-        const style = document.createElement('style');
-        style.textContent = this.getBaseStyles() + this.getToolStyles();
-        this.shadow.appendChild(style);
+        const tailwindStyles = document.querySelector('#tailwind');
+        if (tailwindStyles) {
+            const style = document.createElement('style');
+            style.textContent = tailwindStyles.textContent || '';
+            this.shadow.prepend(style);
+        }
     }
 
-    protected getBaseStyles(): string {
-        return `
-            h4 {
-                font-weight: 400;
-            }
-            p {
-                opacity: 0.75;
-            }
-        `;
-    }
-
-    protected abstract getToolStyles(): string;
     protected abstract setupTemplate(): void;
     protected abstract setupEventListeners(): void;
 }

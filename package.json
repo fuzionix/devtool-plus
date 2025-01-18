@@ -24,6 +24,11 @@
     "generator",
     "encoder"
   ],
+  "icon": "media/icon.png",
+  "bugs": {
+    "url": "https://github.com/fuzionix/devtool-plus/issues"
+  },
+  "homepage": "https://github.com/fuzionix/devtool-plus",
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -51,8 +56,7 @@
         }
       ]
     },
-    "commands": [
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -69,16 +73,20 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.62.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
+    "@types/vscode": "^1.62.0",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.11.0",
-    "eslint": "^8.57.0",
-    "esbuild": "^0.21.5",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.4.5",
     "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.4.0"
+    "@vscode/test-electron": "^2.4.0",
+    "autoprefixer": "^10.4.20",
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.4.5"
   }
 }

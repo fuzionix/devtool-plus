@@ -1,5 +1,8 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { Tool } from '../types/tool';
+
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
@@ -11,7 +14,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
+        _context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
@@ -37,11 +40,6 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private handleToolAction(action: string, data: any) {
-        // TODO: Handle tool-specific actions here
-        console.log('Tool action:', action, data);
-    }
-
     private _getHtmlForWebview(toolComponentsUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
@@ -50,29 +48,19 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>DevTool+</title>
-                <style>
-                    body {
-                        margin-top: 1rem;
-                    }
-                    h4 {
-                        margin: 0;
-                        font-weight: 400;
-                    }
-                    p {
-                        margin: 0;
-                        opacity: 0.75;
-                    }
+                <style id="tailwind">
+                    ${fs.readFileSync(path.join(__dirname, '..', 'dist', 'tailwind.css'), 'utf8')}
                 </style>
             </head>
             <body>
-                <div id="empty-state">
-                    <p>Select a tool from the Tools Explorer below</p>
+                <div id="empty-state" class="pt-2">
+                    <p class="opacity-70">Select a tool from the Tools Explorer below</p>
                 </div>
-                <div id="tool-container">
+                <div id="tool-container" class="pt-2">
                     <div class="tool-header">
                         <h4 class="tool-title"></h4>
                     </div>
-                    <div id="tool-content"></div>
+                    <div id="tool-content" class="pt-1"></div>
                 </div>
                 <script>
                     const vscode = acquireVsCodeApi();

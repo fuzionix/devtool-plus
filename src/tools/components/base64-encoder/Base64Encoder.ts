@@ -9,7 +9,7 @@ export class Base64Encoder extends BaseTool {
     protected setupTemplate(): void {
         this.toolContainer.innerHTML = `
             <div class="tool-container">
-                <p>Tool Base</p>
+                <p class="opacity-75">Tool Base</p>
             </div>
         `;
     }

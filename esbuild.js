@@ -1,4 +1,9 @@
 const esbuild = require("esbuild");
+const postcss = require('postcss');
+const tailwindcss = require('tailwindcss');
+const autoprefixer = require('autoprefixer');
+const fs = require('fs');
+const path = require('path');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -23,6 +28,39 @@ const esbuildProblemMatcherPlugin = {
 	},
 };
 
+/**
+ * @type {import('esbuild').Plugin}
+ */
+const tailwindPlugin = {
+	name: 'tailwind',
+	
+	setup(build) {
+		build.onEnd(async () => {
+			const cssInput = path.join(__dirname, 'src', 'styles', 'tailwind.css');
+			const cssOutput = path.join(__dirname, 'dist', 'tailwind.css');
+
+			try {
+				const css = await fs.promises.readFile(cssInput, 'utf8');
+				const result = await postcss([
+					tailwindcss({
+						content: [
+							'./src/**/*.{ts,tsx}',
+							'./src/**/**/*.{ts,tsx}',
+						],
+					}),
+					autoprefixer,
+				]).process(css, { from: cssInput, to: cssOutput });
+
+				await fs.promises.mkdir(path.dirname(cssOutput), { recursive: true });
+				await fs.promises.writeFile(cssOutput, result.css);
+			} catch (error) {
+				console.error('Error processing Tailwind CSS:', error);
+			}
+		});
+	},
+};
+
+
 async function main() {
 	const contexts = await Promise.all([
 		esbuild.context({
@@ -36,7 +74,10 @@ async function main() {
 			outfile: 'dist/extension.js',
 			external: ['vscode'],
 			logLevel: 'silent',
-			plugins: [esbuildProblemMatcherPlugin],
+			plugins: [
+				esbuildProblemMatcherPlugin,
+				tailwindPlugin
+			],
 		}),
 		esbuild.context({
 			entryPoints: ['src/tools/toolComponents.ts'],
@@ -48,7 +89,10 @@ async function main() {
 			platform: 'browser',
 			outfile: 'dist/toolComponents.js',
 			logLevel: 'silent',
-			plugins: [esbuildProblemMatcherPlugin],
+			plugins: [
+				esbuildProblemMatcherPlugin,
+				tailwindPlugin
+			],
 		})
 	]);
 

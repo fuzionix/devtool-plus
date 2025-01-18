@@ -7,7 +7,7 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
     private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
-    constructor(private context: vscode.ExtensionContext) {}
+    constructor(readonly context: vscode.ExtensionContext) { }
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
@@ -21,14 +21,14 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
         if (!element) {
             const categories = [...new Set(TOOLS.map(tool => tool.category))];
             return Promise.resolve(
-                categories.map(category => 
+                categories.map(category =>
                     new CategoryTreeItem(category, vscode.TreeItemCollapsibleState.Expanded)
                 )
             );
         } else if (element instanceof CategoryTreeItem) {
             const toolsInCategory = TOOLS.filter(tool => tool.category === element.category);
             return Promise.resolve(
-                toolsInCategory.map(tool => 
+                toolsInCategory.map(tool =>
                     new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None)
                 )
             );
