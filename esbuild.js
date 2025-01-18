@@ -24,29 +24,39 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
-	const ctx = await esbuild.context({
-		entryPoints: [
-			'src/extension.ts'
-		],
-		bundle: true,
-		format: 'cjs',
-		minify: production,
-		sourcemap: !production,
-		sourcesContent: false,
-		platform: 'node',
-		outfile: 'dist/extension.js',
-		external: ['vscode'],
-		logLevel: 'silent',
-		plugins: [
-			/* add to the end of plugins array */
-			esbuildProblemMatcherPlugin,
-		],
-	});
+	const contexts = await Promise.all([
+		esbuild.context({
+			entryPoints: ['src/extension.ts'],
+			bundle: true,
+			format: 'cjs',
+			minify: production,
+			sourcemap: !production,
+			sourcesContent: false,
+			platform: 'node',
+			outfile: 'dist/extension.js',
+			external: ['vscode'],
+			logLevel: 'silent',
+			plugins: [esbuildProblemMatcherPlugin],
+		}),
+		esbuild.context({
+			entryPoints: ['src/tools/toolComponents.ts'],
+			bundle: true,
+			format: 'iife',
+			minify: production,
+			sourcemap: !production,
+			sourcesContent: false,
+			platform: 'browser',
+			outfile: 'dist/toolComponents.js',
+			logLevel: 'silent',
+			plugins: [esbuildProblemMatcherPlugin],
+		})
+	]);
+
 	if (watch) {
-		await ctx.watch();
+		await Promise.all(contexts.map(ctx => ctx.watch()));
 	} else {
-		await ctx.rebuild();
-		await ctx.dispose();
+		await Promise.all(contexts.map(ctx => ctx.rebuild()));
+		await Promise.all(contexts.map(ctx => ctx.dispose()));
 	}
 }
 

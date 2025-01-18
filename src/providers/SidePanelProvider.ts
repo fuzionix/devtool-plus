@@ -4,18 +4,10 @@ import { Tool } from '../types/tool';
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
     private _view?: vscode.WebviewView;
-    private _currentTool?: Tool;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
-    ) {}
-
-    public updateTool(tool: Tool) {
-        this._currentTool = tool;
-        if (this._view) {
-            this._view.webview.html = this._getHtmlForWebview(this._view.webview);
-        }
-    }
+    ) { }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -29,12 +21,18 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
             localResourceRoots: [this._extensionUri]
         };
 
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        const toolComponentsUri = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'dist', 'toolComponents.js')
+        );
+
+        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri);
         webviewView.webview.onDidReceiveMessage(message => {
-            switch (message.command) {
-                case 'toolAction':
-                    this.handleToolAction(message.action, message.data);
-                    return;
+            switch (message.type) {
+                case 'ready':
+                    break;
+                case 'error':
+                    vscode.window.showErrorMessage(message.value);
+                    break;
             }
         });
     }
@@ -44,7 +42,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         console.log('Tool action:', action, data);
     }
 
-    private _getHtmlForWebview(webview: vscode.Webview) {
+    private _getHtmlForWebview(toolComponentsUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
             <html lang="en">
@@ -53,41 +51,74 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>DevTool+</title>
                 <style>
+                    body {
+                        margin-top: 1rem;
+                    }
                     h4 {
-                        margin-top: 0.5rem;
+                        margin: 0;
                         font-weight: 400;
                     }
                     p {
+                        margin: 0;
                         opacity: 0.75;
                     }
                 </style>
             </head>
             <body>
-                <div class="container">
-                    ${this._currentTool ? 
-                        `<h4>${this._currentTool.label}</h4>
-                         ${this._currentTool.template}` : 
-                        '<p>Select a tool from the Tools Explorer below</p>'}
+                <div id="empty-state">
+                    <p>Select a tool from the Tools Explorer below</p>
+                </div>
+                <div id="tool-container">
+                    <div class="tool-header">
+                        <h4 class="tool-title"></h4>
+                    </div>
+                    <div id="tool-content"></div>
                 </div>
                 <script>
-                    (function() {
-                        const vscode = acquireVsCodeApi();
-                        
-                        document.addEventListener('click', (e) => {
-                            if (e.target.tagName === 'BUTTON') {
-                                vscode.postMessage({
-                                    command: 'toolAction',
-                                    action: e.target.className,
-                                    data: {
-                                        input: document.querySelector('.input-field')?.value
-                                    }
-                                });
-                            }
-                        });
-                    }())
+                    const vscode = acquireVsCodeApi();
+                    
+                    window.addEventListener('message', event => {
+                        const message = event.data;
+                        switch (message.type) {
+                            case 'updateTool':
+                                updateTool(message.tool);
+                                break;
+                        }
+                    });
+
+                    function updateTool(tool) {
+                        const emptyState = document.getElementById('empty-state');
+                        const toolContainer = document.getElementById('tool-container');
+
+                        if (!tool) {
+                            emptyState.style.display = 'block';
+                            toolContainer.style.display = 'none';
+                            return;
+                        } else {
+                            emptyState.style.display = 'none';
+                            toolContainer.style.display = 'block';
+                        }
+
+                        document.querySelector('.tool-title').textContent = tool.label;
+
+                        const toolContent = document.getElementById('tool-content');
+                        toolContent.innerHTML = tool.template;
+                    }
+
+                    vscode.postMessage({ type: 'ready' });
                 </script>
+                <script src="${toolComponentsUri}"></script>
             </body>
             </html>
         `;
+    }
+
+    public updateTool(tool: Tool) {
+        if (this._view) {
+            this._view.webview.postMessage({
+                type: 'updateTool',
+                tool: tool
+            });
+        }
     }
 }
