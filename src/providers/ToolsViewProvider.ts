@@ -29,7 +29,7 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
             const toolsInCategory = TOOLS.filter(tool => tool.category === element.category);
             return Promise.resolve(
                 toolsInCategory.map(tool =>
-                    new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None)
+                    new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None, this.context)
                 )
             );
         }
@@ -40,7 +40,8 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
 export class ToolTreeItem extends vscode.TreeItem {
     constructor(
         public readonly tool: Tool,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly context: vscode.ExtensionContext
     ) {
         super(tool.label, collapsibleState);
         this.tooltip = tool.description;
@@ -51,6 +52,9 @@ export class ToolTreeItem extends vscode.TreeItem {
             title: 'Select Tool',
             arguments: [tool]
         };
+        const iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'media', 'tools', `${tool.icon}.svg`);
+        this.iconPath = iconPath.path;
+        this.resourceUri = vscode.Uri.parse(`devtool-plus:/${tool.id}`);
     }
 }
 

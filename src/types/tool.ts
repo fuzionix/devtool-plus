@@ -16,4 +16,6 @@ export interface Tool {
     description?: string;
     category: ToolCategory;
     template: string;
+    icon: string;
+    isNew?: boolean;
 }

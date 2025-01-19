@@ -28,7 +28,11 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
             vscode.Uri.joinPath(this._extensionUri, 'dist', 'toolComponents.js')
         );
 
-        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri);
+        const toolIconUri = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'media', 'tools')
+        );
+
+        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri, toolIconUri);
         webviewView.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'ready':
@@ -40,7 +44,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private _getHtmlForWebview(toolComponentsUri: vscode.Uri): string {
+    private _getHtmlForWebview(toolComponentsUri: vscode.Uri, toolIconUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
             <html lang="en">
@@ -57,7 +61,8 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                     <p class="opacity-70">Select a tool from the Tools Explorer below</p>
                 </div>
                 <div id="tool-container" class="pt-2">
-                    <div class="tool-header">
+                    <div class="tool-header flex align-middle">
+                        <img class="tool-icon mr-2" src="//:0" width="16" alt="" />
                         <h4 class="tool-title"></h4>
                     </div>
                     <div id="tool-content" class="pt-1"></div>
@@ -88,6 +93,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                         }
 
                         document.querySelector('.tool-title').textContent = tool.label;
+                        document.querySelector('.tool-icon').src = '${toolIconUri}/' + tool.icon + '.svg';
 
                         const toolContent = document.getElementById('tool-content');
                         toolContent.innerHTML = tool.template;
