@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { Tool } from '../types/tool';
 
@@ -25,14 +23,18 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         };
 
         const toolComponentsUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'dist', 'toolComponents.js')
+            vscode.Uri.joinPath(this._extensionUri, 'dist', 'tools', 'toolComponents.js')
+        );
+
+        const styleUri = this._view!.webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'dist', 'styles', 'tailwind.css')
         );
 
         const toolIconUri = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this._extensionUri, 'media', 'tools')
         );
 
-        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri, toolIconUri);
+        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri, toolIconUri);
         webviewView.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'ready':
@@ -44,7 +46,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private _getHtmlForWebview(toolComponentsUri: vscode.Uri, toolIconUri: vscode.Uri): string {
+    private _getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri, toolIconUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
             <html lang="en">
@@ -52,9 +54,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>DevTool+</title>
-                <style id="tailwind">
-                    ${fs.readFileSync(path.join(__dirname, '..', 'dist', 'tailwind.css'), 'utf8')}
-                </style>
+                <link href="${styleUri}" rel="stylesheet">
             </head>
             <body>
                 <div id="empty-state" class="pt-2">

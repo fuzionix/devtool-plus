@@ -21,12 +21,15 @@ export abstract class BaseTool extends HTMLElement {
         this.shadow.appendChild(this.toolContainer);
     }
 
-    protected setupStyles(): void {
-        const tailwindStyles = document.querySelector('#tailwind');
-        if (tailwindStyles) {
+    protected async setupStyles(): Promise<void> {
+        try {
+            const response = await fetch(document.querySelector<HTMLLinkElement>('link[href$="tailwind.css"]')?.href || '');
+            const css = await response.text();
             const style = document.createElement('style');
-            style.textContent = tailwindStyles.textContent || '';
+            style.textContent = css;
             this.shadow.prepend(style);
+        } catch (error) {
+            console.error('Failed to inject styles:', error);
         }
     }
 

@@ -2,8 +2,7 @@ const esbuild = require("esbuild");
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs/promises');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -31,31 +30,22 @@ const esbuildProblemMatcherPlugin = {
 /**
  * @type {import('esbuild').Plugin}
  */
-const tailwindPlugin = {
-	name: 'tailwind',
-	
+const postcssPlugin = {
+	name: 'postcss',
 	setup(build) {
-		build.onEnd(async () => {
-			const cssInput = path.join(__dirname, 'src', 'styles', 'tailwind.css');
-			const cssOutput = path.join(__dirname, 'dist', 'tailwind.css');
+		build.onLoad({ filter: /\.css$/ }, async (args) => {
+			const css = await fs.readFile(args.path, 'utf8');
+			const result = await postcss([
+				tailwindcss,
+				autoprefixer,
+			]).process(css, {
+				from: args.path,
+			});
 
-			try {
-				const css = await fs.promises.readFile(cssInput, 'utf8');
-				const result = await postcss([
-					tailwindcss({
-						content: [
-							'./src/**/*.{ts,tsx}',
-							'./src/**/**/*.{ts,tsx}',
-						],
-					}),
-					autoprefixer,
-				]).process(css, { from: cssInput, to: cssOutput });
-
-				await fs.promises.mkdir(path.dirname(cssOutput), { recursive: true });
-				await fs.promises.writeFile(cssOutput, result.css);
-			} catch (error) {
-				console.error('Error processing Tailwind CSS:', error);
-			}
+			return {
+				contents: result.css,
+				loader: 'css',
+			};
 		});
 	},
 };
@@ -75,23 +65,22 @@ async function main() {
 			external: ['vscode'],
 			logLevel: 'silent',
 			plugins: [
-				esbuildProblemMatcherPlugin,
-				tailwindPlugin
+				esbuildProblemMatcherPlugin
 			],
 		}),
 		esbuild.context({
-			entryPoints: ['src/tools/toolComponents.ts'],
+			entryPoints: ['src/tools/toolComponents.ts', 'src/styles/tailwind.css'],
 			bundle: true,
 			format: 'iife',
 			minify: production,
 			sourcemap: !production,
 			sourcesContent: false,
 			platform: 'browser',
-			outfile: 'dist/toolComponents.js',
+			outdir: 'dist',
 			logLevel: 'silent',
 			plugins: [
 				esbuildProblemMatcherPlugin,
-				tailwindPlugin
+				postcssPlugin
 			],
 		})
 	]);
