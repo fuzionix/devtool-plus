@@ -1,3 +1,99 @@
 @tailwind base;
+@layer base {
+    p {
+        @apply mb-4;
+        color: var(--vscode-foreground);
+    }
+
+    a {
+        @apply no-underline;
+        color: var(--vscode-textLink-foreground);
+    }
+
+    a:hover {
+        @apply underline;
+        color: var(--vscode-textLink-activeForeground);
+    }
+
+    ul,
+    ol {
+        @apply my-2 pl-6;
+    }
+
+    li {
+        @apply my-1;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    input[type="email"],
+    input[type="search"],
+    textarea {
+        @apply block w-full pt-1 pb-0.5 pl-1.5 rounded-sm;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        border: 1px solid var(--vscode-input-border);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--vscode-input-placeholderForeground);
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        @apply outline-none;
+        border-color: var(--vscode-focusBorder);
+    }
+
+    input:disabled,
+    textarea:disabled,
+    select:disabled {
+        @apply opacity-50 cursor-not-allowed;
+        background-color: var(--vscode-input-background);
+    }
+
+    ::selection {
+        background-color: var(--vscode-menubar-selectionBackground);
+        color: var(--vscode-menubar-selectionForeground);
+    }
+
+    pre,
+    code {
+        @apply font-mono;
+        background-color: var(--vscode-textCodeBlock-background);
+        color: var(--vscode-textPreformat-foreground);
+    }
+
+    table {
+        @apply w-full border-collapse my-4;
+    }
+
+    th,
+    td {
+        @apply px-4 py-2;
+        border: 1px solid var(--vscode-widget-border);
+    }
+
+    th {
+        @apply font-semibold;
+        background-color: var(--vscode-editor-background);
+    }
+
+    blockquote {
+        @apply pl-4 my-4;
+        border-left: 4px solid var(--vscode-textBlockQuote-border);
+        background-color: var(--vscode-textBlockQuote-background);
+    }
+
+    hr {
+        @apply my-6;
+        border: none;
+        border-top: 1px solid var(--vscode-widget-border);
+    }
+}
+
 @tailwind components;
 @tailwind utilities;
