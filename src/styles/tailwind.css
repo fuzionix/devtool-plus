@@ -1,4 +1,5 @@
 @tailwind base;
+
 @layer base {
     html {
         scrollbar-color: unset;
@@ -40,7 +41,7 @@
     input[type="email"],
     input[type="search"],
     textarea {
-        @apply block w-full pt-1 pb-0.5 px-1.5 rounded-sm;
+        @apply block w-full pt-1 pb-1 px-1.5 rounded-sm;
         background-color: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
         border: 1px solid var(--vscode-input-border);
@@ -58,8 +59,11 @@
     input:focus,
     textarea:focus,
     select:focus {
-        @apply outline-none;
-        border-color: var(--vscode-focusBorder);
+        opacity: 1;
+        outline-color: var(--vscode-focusBorder);
+        outline-offset: -1px;
+        outline-style: solid;
+        outline-width: 1px;
     }
 
     input:disabled,
@@ -132,9 +136,10 @@
 }
 
 @tailwind components;
+
 @layer components {
     .btn {
-        @apply inline-flex items-center justify-center w-full min-w-16 h-7 pt-1.5 pb-0.5 px-1.5 rounded-sm font-medium select-none transition-all duration-100 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
+        @apply inline-flex items-center justify-center w-full min-w-16 h-8 py-1.5 px-1.5 rounded-sm select-none transition-all duration-100 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
     .btn-primary {
