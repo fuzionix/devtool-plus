@@ -41,7 +41,7 @@
     input[type="email"],
     input[type="search"],
     textarea {
-        @apply block w-full pt-1 pb-1 px-1.5 rounded-sm;
+        @apply block w-full pt-1 pb-0.5 px-1.5 rounded-sm;
         background-color: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
         border: 1px solid var(--vscode-input-border);
@@ -140,6 +140,7 @@
 @layer components {
     .btn {
         @apply inline-flex items-center justify-center w-full min-w-16 h-8 py-1.5 px-1.5 rounded-sm select-none transition-all duration-100 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
+        line-height: normal;
     }
 
     .btn-primary {
@@ -150,8 +151,12 @@
         @apply btn bg-[var(--vscode-button-secondaryBackground)] text-[var(--vscode-button-secondaryForeground)] hover:bg-[var(--vscode-button-secondaryHoverBackground)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
     }
 
+    .btn-outline {
+        @apply btn bg-transparent text-[var(--vscode-button-secondaryForeground)] border-[var(--vscode-button-secondaryBackground)] border-[1px] hover:border-[var(--vscode-button-background)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
+    }
+
     .btn-icon {
-        @apply btn min-w-0 w-[26px] px-0 bg-transparent text-[var(--vscode-foreground)] hover:bg-[var(--vscode-toolbar-hoverBackground)];
+        @apply btn min-w-0 w-6 h-6 px-0 bg-transparent text-[var(--vscode-foreground)] hover:bg-[var(--vscode-toolbar-hoverBackground)];
     }
 
     .btn-sm {
@@ -180,6 +185,10 @@
 
     .btn-group .btn:not(:last-child) {
         @apply rounded-r-none border-r border-r-[var(--vscode-button-separator)];
+    }
+
+    .input-expandable {
+        @apply w-full pr-16 min-h-[27.5px] max-h-[300px] resize-none overflow-hidden pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground border border-vscode-input-border focus:outline-none focus:border-vscode-focus-border disabled:opacity-50 disabled:cursor-not-allowed;
     }
 }
 

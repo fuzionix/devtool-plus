@@ -82,6 +82,9 @@ async function main() {
 				esbuildProblemMatcherPlugin,
 				postcssPlugin
 			],
+			loader: {
+				'.js': 'jsx',
+			},
 		})
 	]);
 

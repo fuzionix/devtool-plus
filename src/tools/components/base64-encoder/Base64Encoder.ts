@@ -11,11 +11,70 @@ export class Base64Encoder extends BaseTool {
             <div class="tool-container">
                 <p class="opacity-75">Encode text to Base64 or decode Base64 to text</p>
                 <hr />
-                <input id="input" type="text" placeholder="Enter text to encode" />
-                <button id="encode" class="btn-primary mt-2">Encode</button>
-                <textarea id="output" class="mt-2" placeholder="Output will appear here"></textarea>
+                <!-- Input field -->
+                <div class="relative flex items-center">
+                    <textarea
+                        id="input"
+                        class="input-expandable"
+                        placeholder="Enter text"
+                        rows="1"
+                    ></textarea>
+                    <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                        <button class="btn-icon" id="clipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        </button>
+                        <button class="btn-icon" id="clear">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-2 gap-2">
+                    <button id="encode" class="btn-primary gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-right-square"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 15-3-3 3-3"/><path d="m14 9 3 3-3 3"/></svg>
+                        <h4>Encode</h4>
+                    </button>
+                    <button id="decode" class="btn-outline gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        <h4>Decode</h4>
+                    </button>
+                </div>
+                <div class="flex justify-center mt-2 opacity-75">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                </div>
+                <!-- Output field -->
+                <div class="relative flex items-center">
+                    <textarea
+                        id="output"
+                        class="input-expandable mt-2 pr-6"
+                        placeholder="Output will appear here"
+                        rows="5"
+                        readonly
+                    ></textarea>
+                    <div class="absolute right-0 top-2.5 pr-0.5 flex justify-items-center">
+                        <button class="btn-icon" id="copy">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
+
+        this.setupAutoResize();
+    }
+
+    private setupAutoResize(): void {
+        const textareas = this.shadow.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            this.adjustHeight(textarea);
+            textarea.addEventListener('input', () => {
+                this.adjustHeight(textarea);
+            });
+        });
+    }
+
+    private adjustHeight(element: HTMLTextAreaElement): void {
+        element.style.height = 'auto';
+        element.style.height = `${element.scrollHeight + 2}px`;
     }
 
     protected setupEventListeners(): void {
