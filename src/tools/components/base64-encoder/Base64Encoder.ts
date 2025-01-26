@@ -8,8 +8,8 @@ export class Base64Encoder extends BaseTool {
 
     protected setupTemplate(): void {
         this.toolContainer.innerHTML = `
-            <div class="tool-container">
-                <p class="opacity-75">Encode text to Base64 or decode Base64 to text</p>
+            <div class="tool-inner-container">
+                <p class="opacity-75">Base64 is an encoding scheme that converts binary data into a text format using 64 characters (A-Z, a-z, 0-9, +, /) for safe data transmission across systems that handle text only.</p>
                 <hr />
                 <!-- Input field -->
                 <div class="relative flex items-center">
@@ -20,8 +20,8 @@ export class Base64Encoder extends BaseTool {
                         rows="1"
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <button class="btn-icon" id="clipboard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        <button class="btn-icon" id="file">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
                         </button>
                         <button class="btn-icon" id="clear">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -63,7 +63,7 @@ export class Base64Encoder extends BaseTool {
     }
 
     private setupAutoResize(): void {
-        const textareas = this.shadow.querySelectorAll('textarea');
+        const textareas = this.shadow.querySelectorAll('textarea') as NodeListOf<HTMLTextAreaElement>;
         textareas.forEach(textarea => {
             this.adjustHeight(textarea);
             textarea.addEventListener('input', () => {

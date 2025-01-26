@@ -8,8 +8,9 @@ export class CaseConverter extends BaseTool {
 
     protected setupTemplate(): void {
         this.toolContainer.innerHTML = `
-            <div class="tool-container">
-                <p class="opacity-75">Tool Case</p>
+            <div class="tool-inner-container">
+                <p class="opacity-75">Case conversion transforms text between different capitalizations to match various naming conventions and formatting requirements.</p>
+                <hr />
             </div>
         `;
     }
