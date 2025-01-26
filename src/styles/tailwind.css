@@ -152,7 +152,7 @@
     }
 
     .btn-outline {
-        @apply btn bg-[var(--vscode-panel-background)] text-[var(--vscode-button-secondaryForeground)] border-[var(--vscode-button-secondaryBackground)] border-[1px] hover:border-[var(--vscode-button-background)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
+        @apply btn bg-[var(--vscode-panel-background)] border-[var(--vscode-button-secondaryBackground)] border-[1px] hover:border-[var(--vscode-button-background)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
     }
 
     .btn-icon {
@@ -192,12 +192,12 @@
     }
 
     .radio-group {
-        @apply flex min-h-[28px] rounded-sm overflow-hidden border border-vscode-input-border;
+        @apply flex min-h-[28px] rounded-sm overflow-hidden border border-[var(--vscode-input-background)];
     }
 
     .radio-group-button {
         @apply flex-1 px-1.5 rounded-sm bg-[var(--vscode-panel-background)] text-center duration-100 cursor-pointer select-none;
-        @apply border-r border-vscode-input-border last:border-r-0;
+        @apply border-r border-[var(--vscode-input-background)] last:border-r-0;
         color: var(--vscode-foreground);
     }
 
