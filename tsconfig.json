@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
-		"module": "Node16",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 		"target": "ES2022",
 		"lib": [
 			"ES2022",
@@ -15,6 +16,8 @@
 		"noUnusedParameters": true,
 		"strictNullChecks": true,
 		"strictPropertyInitialization": true,
-		"noUnusedLocals": true, 
+		"noUnusedLocals": true,
+		"experimentalDecorators": true,
+		"useDefineForClassFields": false,
 	}
 }

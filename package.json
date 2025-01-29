@@ -90,6 +90,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "lit": "^3.2.1",
     "uuid": "^11.0.5"
   }
 }

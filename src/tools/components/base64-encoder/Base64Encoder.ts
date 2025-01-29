@@ -1,13 +1,16 @@
+import { html, css } from 'lit';
+import { customElement } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 
+@customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {
-    protected getToolStyles(): string {
-        return `
-        `;
-    }
+    static styles = css`
+        ${BaseTool.styles}
+        /* Minimal local styling if needed. */
+    `;
 
-    protected setupTemplate(): void {
-        this.toolContainer.innerHTML = `
+    protected renderTool() {
+        return html`
             <div class="tool-inner-container">
                 <p class="opacity-75">Base64 is an encoding scheme that converts binary data into a text format using 64 characters (A-Z, a-z, 0-9, +, /) for safe data transmission across systems that handle text only.</p>
                 <hr />
@@ -18,6 +21,7 @@ export class Base64Encoder extends BaseTool {
                         class="input-expandable"
                         placeholder="Enter text"
                         rows="1"
+                        @input=${this.handleInput}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
                         <button class="btn-icon" id="file">
@@ -58,18 +62,6 @@ export class Base64Encoder extends BaseTool {
                 </div>
             </div>
         `;
-
-        this.setupAutoResize();
-    }
-
-    private setupAutoResize(): void {
-        const textareas = this.shadow.querySelectorAll('textarea') as NodeListOf<HTMLTextAreaElement>;
-        textareas.forEach(textarea => {
-            this.adjustHeight(textarea);
-            textarea.addEventListener('input', () => {
-                this.adjustHeight(textarea);
-            });
-        });
     }
 
     private adjustHeight(element: HTMLTextAreaElement): void {
@@ -77,8 +69,11 @@ export class Base64Encoder extends BaseTool {
         element.style.height = `${element.scrollHeight + 2}px`;
     }
 
+    private handleInput(event: Event): void {
+        const target = event.target as HTMLTextAreaElement;
+        this.adjustHeight(target);
+    }
+
     protected setupEventListeners(): void {
     }
 }
-
-customElements.define('base64-encoder', Base64Encoder);

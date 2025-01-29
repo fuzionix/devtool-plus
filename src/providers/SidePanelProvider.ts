@@ -96,6 +96,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                         document.querySelector('.tool-icon').src = '${toolIconUri}/' + tool.icon + '.svg';
 
                         const toolContent = document.getElementById('tool-content');
+                        toolContent.innerHTML = '';
                         toolContent.innerHTML = tool.template;
                     }
 
