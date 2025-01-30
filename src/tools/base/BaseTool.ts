@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit';
 
 export abstract class BaseTool extends LitElement {
-
     createRenderRoot() {
         return this;
     }
