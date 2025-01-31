@@ -1,10 +1,23 @@
 import { html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import '../../common/tooltip/Tooltip';
 
 @customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {
+    @state() private inputText = '';
+    @state() private outputText = '';
+    @state() private fileName = '';
+    @state() private outputMode: 'text' | 'image' | 'document' = 'text';
+    @state() private decodedMimeType = '';
+    @state() private decodedData: string | Uint8Array | null = null;
+    @state() private inputMimeType = '';
+    @state() private isCopied = false;
+
+    @query('#input') input!: HTMLTextAreaElement;
+    @query('#output') output!: HTMLTextAreaElement;
+    @query('#file-input') fileInput!: HTMLInputElement;
+
     static styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
@@ -15,34 +28,39 @@ export class Base64Encoder extends BaseTool {
             <div class="tool-inner-container">
                 <p class="opacity-75">Base64 is an encoding scheme that converts binary data into a text format using 64 characters (A-Z, a-z, 0-9, +, /) for safe data transmission across systems that handle text only.</p>
                 <hr />
-                <!-- Input field -->
+                <!-- Hidden File Input -->
+                <input id="file-input" class="hidden" type="file" @change=${this.handleFileSelect}>
+                <!-- Input Field -->
                 <div class="relative flex items-center">
                     <textarea
                         id="input"
                         class="input-expandable"
-                        placeholder="Enter text"
+                        placeholder="Enter text or upload file"
                         rows="1"
+                        .value=${this.fileName || this.inputText}
                         @input=${this.handleInput}
+                        ?readonly=${Boolean(this.fileName)}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
                         <tool-tooltip text="Upload file">
-                            <button class="btn-icon" id="file">
+                            <button class="btn-icon" id="file" @click=${this.triggerFileInput}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
                             </button>
                         </tool-tooltip>
                         <tool-tooltip text="Clear">
-                            <button class="btn-icon" id="clear">
+                            <button class="btn-icon" id="clear" @click=${this.clearAll}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </tool-tooltip>
                     </div>
                 </div>
+                <!-- Arrow Divider -->
                 <div class="flex justify-between mt-2 gap-2">
-                    <button id="encode" class="btn-primary gap-2">
+                    <button id="encode" class="btn-primary gap-2" @click=${this.encode}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-right-square"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 15-3-3 3-3"/><path d="m14 9 3 3-3 3"/></svg>
                         <h4>Encode</h4>
                     </button>
-                    <button id="decode" class="btn-outline gap-2">
+                    <button id="decode" class="btn-outline gap-2" @click=${this.decode}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                         <h4>Decode</h4>
                     </button>
@@ -50,35 +68,340 @@ export class Base64Encoder extends BaseTool {
                 <div class="flex justify-center mt-2 opacity-75">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
-                <!-- Output field -->
-                <div class="relative flex items-center">
-                    <textarea
-                        id="output"
-                        class="input-expandable mt-2 pr-6"
-                        placeholder="Output will appear here"
-                        rows="5"
-                        readonly
-                    ></textarea>
-                    <div class="absolute right-0 top-2.5 pr-0.5 flex justify-items-center">
-                            <button class="btn-icon" id="copy">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                            </button>
-                    </div>
-                </div>
+                <!-- Output Field -->
+                ${this.renderOutput()}
             </div>
         `;
     }
 
+    /**
+     * Renders the output section based on the current output mode.
+     * Supports three modes:
+     *  - Txt: Displays the decoded text in a readonly textarea.
+     *  - Img: Displays the decoded image.
+     *  - Doc: Provides a download button.
+     */
+    private renderOutput() {
+        switch (this.outputMode) {
+            case 'image':
+                return html`
+                    <div class="relative flex items-center">
+                        <div class="asset-viewer flex justify-center mt-2 pr-8">
+                            <img src="${this.outputText}" alt="Base64 decoded" />
+                        </div>
+                        <div class="absolute right-0 top-2.5 pr-0.5 flex justify-items-center">
+                            <button 
+                                class="btn-icon" 
+                                @click=${() => this.downloadOutput()}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            case 'document':
+                return html`
+                    <div class="relative flex items-center">
+                        <button 
+                            class="btn-primary mt-2 gap-2"
+                            @click=${() => this.downloadOutput()}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            <h4>Download</h4>
+                        </button>
+                    </div>
+                `;
+            default:
+                return html`
+                    <div class="relative flex items-center">
+                        <textarea
+                            id="output"
+                            class="input-expandable mt-2 pr-6"
+                            placeholder="Output will appear here"
+                            rows="5"
+                            .value=${this.outputText}
+                            readonly
+                        ></textarea>
+                        <div class="absolute right-0 top-2.5 pr-0.5 flex justify-items-center">
+                            <button 
+                                class="btn-icon" 
+                                @click=${this.copyToClipboard}
+                            >
+                                ${this.renderCopyButton()}
+                            </button>
+                        </div>
+                    </div>
+                `;
+        }
+    }
+
+    protected updated(changedProperties: Map<string, unknown>): void {
+        super.updated(changedProperties);
+
+        if (this.output && changedProperties.has('outputText')) {
+            this.adjustHeight(this.output);
+        }
+    }
+
     private adjustHeight(element: HTMLTextAreaElement): void {
         element.style.height = 'auto';
-        element.style.height = `${element.scrollHeight + 2}px`;
+        element.style.height = `${element.scrollHeight}px`;
     }
 
     private handleInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
+        this.inputText = target.value;
         this.adjustHeight(target);
     }
 
-    protected setupEventListeners(): void {
+    /**
+     * Encodes input text or file content to Base64 format
+     * @returns Promise<void>
+     */
+    private async encode(): Promise<void> {
+        try {
+            if (!this.inputText && !this.fileName) {
+                this.outputText = '';
+                return;
+            }
+
+            let result: string;
+
+            if (this.fileName) {
+                result = this.outputText;
+            } else {
+                // For text input, convert to Base64 using built-in btoa()
+                result = btoa(this.inputText);
+            }
+
+            this.outputText = result;
+            this.requestUpdate();
+        } catch (error) {
+            console.error('Encoding error:', error);
+        }
+    }
+
+    /**
+     * Decodes Base64 input to either text, image, or document format
+     * Handles both raw Base64 and data:URI formats
+     * @returns Promise<void>
+     */
+    private async decode(): Promise<void> {
+        try {
+            if (!this.inputText) {
+                return;
+            }
+
+            let base64Data = this.inputText.trim();
+
+            // Handle data:URI format (e.g. data:image/png;base64,...)
+            if (base64Data.startsWith('data:')) {
+                const [header, content] = base64Data.split(',');
+                base64Data = content;
+                this.decodedMimeType = header.split(';')[0].split(':')[1];
+                this.decodedData = this.base64ToUint8Array(content);
+            } else {
+                try {
+                    // Attempt to decode as Base64
+                    const decodedText = atob(base64Data);
+                    // Check if the decoded data contains binary characters
+                    const isBinary = /[\x00-\x08\x0E-\x1F]/.test(decodedText);
+
+                    if (isBinary) {
+                        // Handle binary data
+                        this.decodedData = this.base64ToUint8Array(base64Data);
+                        this.decodedMimeType = this.detectMimeType(this.decodedData);
+                    } else {
+                        // Handle text data
+                        this.decodedData = decodedText;
+                        this.decodedMimeType = 'text/plain';
+                    }
+                } catch {
+                    throw new Error('Invalid Base64 string');
+                }
+            }
+
+            // Set output mode based on MIME type
+            if (this.decodedMimeType.startsWith('image/')) {
+                this.outputMode = 'image';
+                this.outputText = `data:${this.decodedMimeType};base64,${base64Data}`;
+            } else if (this.decodedMimeType.startsWith('text/')) {
+                this.outputMode = 'text';
+                this.outputText = this.decodedData as string;
+            } else {
+                this.outputMode = 'document';
+                this.outputText = `data:${this.decodedMimeType};base64,${base64Data}`;
+            }
+
+            this.requestUpdate();
+        } catch (error) {
+            console.error('Decoding error:', error);
+        }
+    }
+
+    /**
+     * Converts a Base64 encoded string to a Uint8Array of bytes
+     * @param base64 The Base64 encoded string to convert
+     * @returns Uint8Array containing the decoded bytes
+     */
+    private base64ToUint8Array(base64: string): Uint8Array {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        // Convert each character in binary string to its byte value
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    /**
+     * Detects the MIME type of a file based on its binary signature/magic numbers
+     * @param data - Uint8Array containing the file's binary data to analyze
+     * @returns string - The detected MIME type
+     */
+    private detectMimeType(data: Uint8Array): string {
+        // Define known file signatures (magic numbers) for common file types
+        const signatures: { [key: string]: number[] } = {
+            'image/jpeg': [0xFF, 0xD8, 0xFF],
+            'image/png': [0x89, 0x50, 0x4E, 0x47],
+            'image/gif': [0x47, 0x49, 0x46, 0x38],
+            'application/pdf': [0x25, 0x50, 0x44, 0x46],
+        };
+
+        // Check each known signature against the file data
+        for (const [mimeType, signature] of Object.entries(signatures)) {
+            // Compare each byte of the signature with the file data
+            if (signature.every((byte, i) => data[i] === byte)) {
+                return mimeType;
+            }
+        }
+
+        // Return default MIME type if no matches found
+        return 'application/octet-stream';
+    }
+
+    private triggerFileInput(): void {
+        this.fileInput.click();
+    }
+
+    /**
+     * Handles file selection event and converts file content to Base64
+     * @param event - File input change event
+     * @returns Promise<void>
+     */
+    private async handleFileSelect(event: Event): Promise<void> {
+        // Get selected file from input element
+        const fileInput = event.target as HTMLInputElement;
+        const file = fileInput.files?.[0];
+        this.clearAll();
+
+        if (file) {
+            try {
+                this.fileName = file.name;
+                this.inputMimeType = file.type;
+
+                const reader = new FileReader();
+                // Configure onload handler for when file is read
+                reader.onload = async (e) => {
+                    const result = e.target?.result;
+                    if (typeof result === 'string') {
+                        this.outputText = btoa(result);
+                    } else if (result instanceof ArrayBuffer) {
+                        const bytes = new Uint8Array(result);
+                        let binary = '';
+                        // Convert byte array to binary string
+                        bytes.forEach(byte => binary += String.fromCharCode(byte));
+                        this.outputText = btoa(binary);
+                    }
+                    this.outputText = `data:${this.inputMimeType};base64,${this.outputText}`;
+                    this.requestUpdate();
+                };
+
+                if (file.type.startsWith('text/')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            } catch (error) {
+                console.error('File reading error:', error);
+            }
+        }
+    }
+
+    private clearAll(): void {
+        this.inputText = '';
+        this.outputText = '';
+        this.fileName = '';
+        this.fileInput.value = '';
+        this.outputMode = 'text';
+        this.input.style.height = `28px`;
+        this.renderOutput();
+        this.requestUpdate();
+    }
+
+    private async copyToClipboard() {
+        if (!this.outputText) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(this.outputText);
+            this.isCopied = true;
+            setTimeout(() => {
+                this.isCopied = false;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text:', err);
+        }
+    }
+
+    private renderCopyButton() {
+        return this.isCopied
+            ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>`
+            : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+    }
+
+    /**
+     * Downloads the decoded data as either an image or document
+     * @returns Promise<void>
+     */
+    private async downloadOutput(): Promise<void> {
+        if (!this.decodedData) {
+            return;
+        }
+
+        try {
+            // Create blob from decoded data, handling both Uint8Array and base64 string cases
+            const blob = new Blob(
+                [this.decodedData instanceof Uint8Array ? this.decodedData : this.base64ToUint8Array(this.outputText)],
+                { type: this.decodedMimeType }
+            );
+
+            // Create temporary URL for download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+
+            // Configure and trigger download
+            a.href = url;
+            a.download = this.fileName || `decoded-file${this.getFileExtension()}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download error:', error);
+        }
+    }
+
+    private getFileExtension(): string {
+        const extensions: { [key: string]: string } = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/gif': '.gif',
+            'application/pdf': '.pdf',
+            'text/plain': '.txt',
+        };
+
+        return extensions[this.decodedMimeType] || '';
     }
 }

@@ -5,6 +5,10 @@
         scrollbar-color: unset;
     }
 
+    body {
+        @apply pb-4;
+    }
+
     p {
         @apply mb-4;
         color: var(--vscode-foreground);
@@ -44,7 +48,7 @@
         @apply block w-full min-h-[28px] pt-1 pb-0.5 px-1.5 rounded-sm;
         background-color: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
-        border: 1px solid var(--vscode-input-border);
+        box-shadow: 0 0 0 1px var(--vscode-input-border);
     }
 
     input[type=number]::-webkit-inner-spin-button {
@@ -188,7 +192,7 @@
     }
 
     .input-expandable {
-        @apply w-full pr-16 min-h-[28px] max-h-[300px] resize-none overflow-hidden pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground border border-vscode-input-border focus:opacity-100 focus:ring-1 focus:ring-offset-[-1px] focus:ring-[var(--vscode-focusBorder)] disabled:opacity-50 disabled:cursor-not-allowed;
+        @apply w-full pr-16 min-h-[28px] max-h-[300px] resize-none overflow-x-hidden pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground focus:opacity-100 focus:ring-1 focus:ring-offset-[-1px] focus:ring-[var(--vscode-focusBorder)] disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
     .radio-group {
@@ -208,6 +212,17 @@
 
     .radio-group-button:hover:not([aria-checked="true"]) {
         background-color: var(--vscode-menu-background);
+    }
+
+    .asset-viewer {
+        @apply block w-full p-1 min-h-[28px] rounded-sm;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        box-shadow: 0 0 0 1px var(--vscode-input-border);
+    }
+
+    .asset-viewer img {
+        @apply rounded-sm;
     }
 }
 
