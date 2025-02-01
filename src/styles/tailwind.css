@@ -142,6 +142,7 @@
 @tailwind components;
 
 @layer components {
+    /* Button */
     .btn {
         @apply inline-flex items-center justify-center w-full min-w-16 h-8 py-1.5 px-1.5 rounded-sm select-none transition-all duration-100 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
         line-height: normal;
@@ -191,10 +192,12 @@
         @apply rounded-r-none border-r border-r-[var(--vscode-button-separator)];
     }
 
+    /* Input Expandable */
     .input-expandable {
         @apply w-full pr-16 min-h-[28px] max-h-[300px] resize-none overflow-x-hidden pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground focus:opacity-100 focus:ring-1 focus:ring-offset-[-1px] focus:ring-[var(--vscode-focusBorder)] disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
+    /* Radio Button */
     .radio-group {
         @apply flex min-h-[28px] rounded-sm overflow-hidden border border-[var(--vscode-input-background)];
     }
@@ -214,6 +217,7 @@
         background-color: var(--vscode-menu-background);
     }
 
+    /* Asset Viewer */
     .asset-viewer {
         @apply block w-full p-1 min-h-[28px] rounded-sm;
         background-color: var(--vscode-input-background);

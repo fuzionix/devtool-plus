@@ -2,6 +2,7 @@ import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import '../../common/tooltip/Tooltip';
+import '../../common/alert/Alert';
 
 @customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {
@@ -12,6 +13,7 @@ export class Base64Encoder extends BaseTool {
     @state() private decodedMimeType = '';
     @state() private decodedData: string | Uint8Array | null = null;
     @state() private inputMimeType = '';
+    @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
 
     @query('#input') input!: HTMLTextAreaElement;
@@ -54,7 +56,12 @@ export class Base64Encoder extends BaseTool {
                         </tool-tooltip>
                     </div>
                 </div>
-                <!-- Arrow Divider -->
+                ${this.alert ? html`
+                    <tool-alert
+                        .type=${this.alert.type}
+                        .message=${this.alert.message}
+                    ></tool-alert>
+                ` : ''}
                 <div class="flex justify-between mt-2 gap-2">
                     <button id="encode" class="btn-primary gap-2" @click=${this.encode}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-right-square"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 15-3-3 3-3"/><path d="m14 9 3 3-3 3"/></svg>
@@ -65,6 +72,7 @@ export class Base64Encoder extends BaseTool {
                         <h4>Decode</h4>
                     </button>
                 </div>
+                <!-- Arrow Divider -->
                 <div class="flex justify-center mt-2 opacity-75">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
@@ -177,7 +185,10 @@ export class Base64Encoder extends BaseTool {
             this.outputText = result;
             this.requestUpdate();
         } catch (error) {
-            console.error('Encoding error:', error);
+            this.alert = {
+                type: 'error',
+                message: `Failed to Encode: ${String(error).split(':')[2]}`,
+            };
         }
     }
 
@@ -217,7 +228,10 @@ export class Base64Encoder extends BaseTool {
                         this.decodedMimeType = 'text/plain';
                     }
                 } catch {
-                    throw new Error('Invalid Base64 string');
+                    this.alert = {
+                        type: 'error',
+                        message: `Failed to Decode: Invalid Base64 string`,
+                    };
                 }
             }
 
@@ -235,7 +249,10 @@ export class Base64Encoder extends BaseTool {
 
             this.requestUpdate();
         } catch (error) {
-            console.error('Decoding error:', error);
+            this.alert = {
+                type: 'error',
+                message: `Failed to Decode`,
+            };
         }
     }
 
@@ -323,7 +340,10 @@ export class Base64Encoder extends BaseTool {
                     reader.readAsArrayBuffer(file);
                 }
             } catch (error) {
-                console.error('File reading error:', error);
+                this.alert = {
+                    type: 'error',
+                    message: `Failed to read file`,
+                };
             }
         }
     }
@@ -335,6 +355,7 @@ export class Base64Encoder extends BaseTool {
         this.fileInput.value = '';
         this.outputMode = 'text';
         this.input.style.height = `28px`;
+        this.alert = null;
         this.renderOutput();
         this.requestUpdate();
     }
@@ -351,7 +372,7 @@ export class Base64Encoder extends BaseTool {
                 this.isCopied = false;
             }, 2000);
         } catch (err) {
-            console.error('Failed to copy text:', err);
+            this.isCopied = false;
         }
     }
 
@@ -389,7 +410,6 @@ export class Base64Encoder extends BaseTool {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Download error:', error);
         }
     }
 
