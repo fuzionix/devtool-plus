@@ -9,7 +9,7 @@ export class Base64Encoder extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
     @state() private fileName = '';
-    @state() private outputMode: 'text' | 'image' | 'document' = 'text';
+    @state() private outputMode: 'text' | 'image' | 'document' | 'error' = 'text';
     @state() private decodedMimeType = '';
     @state() private decodedData: string | Uint8Array | null = null;
     @state() private inputMimeType = '';
@@ -119,7 +119,7 @@ export class Base64Encoder extends BaseTool {
                         </button>
                     </div>
                 `;
-            default:
+            case 'text':
                 return html`
                     <div class="relative flex items-center">
                         <textarea
@@ -138,6 +138,18 @@ export class Base64Encoder extends BaseTool {
                                 ${this.renderCopyButton()}
                             </button>
                         </div>
+                    </div>
+                `;
+            default:
+                return html`
+                    <div class="relative flex items-center opacity-30 select-none">
+                        <textarea
+                            id="output"
+                            class="input-expandable mt-2 pr-6 select-none"
+                            placeholder=""
+                            rows="2"
+                            readonly
+                        ></textarea>
                     </div>
                 `;
         }
@@ -167,6 +179,7 @@ export class Base64Encoder extends BaseTool {
      * @returns Promise<void>
      */
     private async encode(): Promise<void> {
+        this.alert = null;
         try {
             if (!this.inputText && !this.fileName) {
                 this.outputText = '';
@@ -176,15 +189,24 @@ export class Base64Encoder extends BaseTool {
             let result: string;
 
             if (this.fileName) {
+                // For file input, use the data:URI format
                 result = this.outputText;
             } else {
                 // For text input, convert to Base64 using built-in btoa()
-                result = btoa(this.inputText);
+                result = btoa(
+                    // Encode URI components to handle special characters
+                    encodeURIComponent(this.inputText).replace(/%([0-9A-F]{2})/g,
+                        (_, p1) => String.fromCharCode(parseInt(p1, 16))
+                    )
+                );
             }
 
             this.outputText = result;
+            this.outputMode = 'text';
+            this.renderOutput();
             this.requestUpdate();
         } catch (error) {
+            this.hideOutput();
             this.alert = {
                 type: 'error',
                 message: `Failed to Encode: ${String(error).split(':')[2]}`,
@@ -198,6 +220,7 @@ export class Base64Encoder extends BaseTool {
      * @returns Promise<void>
      */
     private async decode(): Promise<void> {
+        this.alert = null;
         try {
             if (!this.inputText) {
                 return;
@@ -228,10 +251,12 @@ export class Base64Encoder extends BaseTool {
                         this.decodedMimeType = 'text/plain';
                     }
                 } catch {
+                    this.hideOutput();
                     this.alert = {
                         type: 'error',
                         message: `Failed to Decode: Invalid Base64 string`,
                     };
+                    return;
                 }
             }
 
@@ -249,6 +274,7 @@ export class Base64Encoder extends BaseTool {
 
             this.requestUpdate();
         } catch (error) {
+            this.hideOutput();
             this.alert = {
                 type: 'error',
                 message: `Failed to Decode`,
@@ -374,6 +400,12 @@ export class Base64Encoder extends BaseTool {
         } catch (err) {
             this.isCopied = false;
         }
+    }
+
+    private hideOutput() {
+        this.outputText = '';
+        this.outputMode = 'error';
+        this.requestUpdate();
     }
 
     private renderCopyButton() {
