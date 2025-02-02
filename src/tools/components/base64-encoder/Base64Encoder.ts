@@ -238,7 +238,12 @@ export class Base64Encoder extends BaseTool {
             } else {
                 try {
                     // Attempt to decode as Base64
-                    const decodedText = atob(base64Data);
+                    const decodedText = decodeURIComponent(
+                        atob(base64Data)
+                            .split('')
+                            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                            .join('')
+                    );
                     // Check if the decoded data contains binary characters
                     const isBinary = /[\x00-\x08\x0E-\x1F]/.test(decodedText);
 
