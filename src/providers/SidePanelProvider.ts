@@ -1,6 +1,6 @@
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { Tool } from '../types/tool';
-
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
@@ -35,13 +35,34 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         );
 
         webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri, toolIconUri);
-        webviewView.webview.onDidReceiveMessage(message => {
+        webviewView.webview.onDidReceiveMessage(async message => {
             switch (message.type) {
                 case 'ready':
                     break;
                 case 'error':
                     vscode.window.showErrorMessage(message.value);
                     break;
+                case 'download': {
+                    const payload = message.payload;
+                    const fileBuffer = Buffer.from(payload.base64, 'base64');
+                    const uri = await vscode.window.showSaveDialog({
+                        defaultUri: vscode.Uri.file(payload.fileName),
+                        filters: {
+                            'Files': [payload.extension || 'bin'],
+                        },
+                    });
+
+                    if (uri) {
+                        fs.writeFile(uri.fsPath, fileBuffer, err => {
+                            if (err) {
+                                vscode.window.showErrorMessage('Error saving file: ' + err.message);
+                            } else {
+                                vscode.window.showInformationMessage('File saved successfully!');
+                            }
+                        });
+                    }
+                    break;
+                }
             }
         });
     }
@@ -69,7 +90,8 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 </div>
                 <script>
                     const vscode = acquireVsCodeApi();
-                    
+
+                    window.vscode = vscode;
                     window.addEventListener('message', event => {
                         const message = event.data;
                         switch (message.type) {

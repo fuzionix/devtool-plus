@@ -73,6 +73,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/mime-db": "^1.43.5",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
     "@types/vscode": "^1.62.0",
@@ -91,6 +92,7 @@
   },
   "dependencies": {
     "lit": "^3.2.1",
+    "mime-db": "^1.53.0",
     "uuid": "^11.0.5"
   }
 }

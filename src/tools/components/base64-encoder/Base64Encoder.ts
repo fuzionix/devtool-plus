@@ -1,6 +1,7 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import mimeDb from 'mime-db';
 import '../../common/tooltip/Tooltip';
 import '../../common/alert/Alert';
 
@@ -100,7 +101,7 @@ export class Base64Encoder extends BaseTool {
                         <div class="absolute right-0 top-2.5 pr-0.5 flex justify-items-center">
                             <button 
                                 class="btn-icon" 
-                                @click=${() => this.downloadOutput()}
+                                @click=${() => this.triggerDownload()}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                             </button>
@@ -112,7 +113,7 @@ export class Base64Encoder extends BaseTool {
                     <div class="relative flex items-center">
                         <button 
                             class="btn-primary mt-2 gap-2"
-                            @click=${() => this.downloadOutput()}
+                            @click=${() => this.triggerDownload()}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                             <h4>Download</h4>
@@ -264,7 +265,7 @@ export class Base64Encoder extends BaseTool {
             if (this.decodedMimeType.startsWith('image/')) {
                 this.outputMode = 'image';
                 this.outputText = `data:${this.decodedMimeType};base64,${base64Data}`;
-            } else if (this.decodedMimeType.startsWith('text/')) {
+            } else if (this.decodedMimeType.startsWith('text/plain')) {
                 this.outputMode = 'text';
                 this.outputText = this.decodedData as string;
             } else {
@@ -414,46 +415,33 @@ export class Base64Encoder extends BaseTool {
             : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
     }
 
-    /**
-     * Downloads the decoded data as either an image or document
-     * @returns Promise<void>
-     */
-    private async downloadOutput(): Promise<void> {
-        if (!this.decodedData) {
-            return;
+    private getBase64String(base64Data: string): { base64: string; mimeType: string } {
+        if (base64Data.startsWith('data:')) {
+            const [header, content] = base64Data.split(',');
+            const mimeType = header.split(';')[0].split(':')[1];
+            return { base64: content, mimeType };
         }
+        return { base64: base64Data, mimeType: this.decodedMimeType };
+    }
 
-        try {
-            // Create blob from decoded data, handling both Uint8Array and base64 string cases
-            const blob = new Blob(
-                [this.decodedData instanceof Uint8Array ? this.decodedData : this.base64ToUint8Array(this.outputText)],
-                { type: this.decodedMimeType }
-            );
-
-            // Create temporary URL for download
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-
-            // Configure and trigger download
-            a.href = url;
-            a.download = this.fileName || `decoded-file${this.getFileExtension()}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        } catch (error) {
-        }
+    private async triggerDownload(): Promise<void> {
+        const data = this.getBase64String(this.outputText);
+        (window as any).vscode.postMessage({
+            type: 'download',
+            payload: {
+                base64: data.base64,
+                mimeType: data.mimeType || this.decodedMimeType,
+                fileName: this.fileName || `decoded-file`,
+                extension: this.getFileExtension(),
+            }
+        });
     }
 
     private getFileExtension(): string {
-        const extensions: { [key: string]: string } = {
-            'image/jpeg': '.jpg',
-            'image/png': '.png',
-            'image/gif': '.gif',
-            'application/pdf': '.pdf',
-            'text/plain': '.txt',
-        };
-
-        return extensions[this.decodedMimeType] || '';
+        const mimeEntry = mimeDb[this.decodedMimeType];
+        if (mimeEntry && mimeEntry.extensions && mimeEntry.extensions.length > 0) {
+            return mimeEntry.extensions[0];
+        }
+        return '';
     }
 }
