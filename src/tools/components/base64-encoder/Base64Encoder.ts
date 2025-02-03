@@ -1,6 +1,10 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import { 
+    adjustTextareaHeight, 
+    renderCopyButton 
+} from '../../../utils/util';
 import mimeDb from 'mime-db';
 import '../../common/tooltip/Tooltip';
 import '../../common/alert/Alert';
@@ -136,7 +140,7 @@ export class Base64Encoder extends BaseTool {
                                 class="btn-icon" 
                                 @click=${this.copyToClipboard}
                             >
-                                ${this.renderCopyButton()}
+                                ${renderCopyButton(this.isCopied)}
                             </button>
                         </div>
                     </div>
@@ -160,19 +164,14 @@ export class Base64Encoder extends BaseTool {
         super.updated(changedProperties);
 
         if (this.output && changedProperties.has('outputText')) {
-            this.adjustHeight(this.output);
+            adjustTextareaHeight(this.output);
         }
-    }
-
-    private adjustHeight(element: HTMLTextAreaElement): void {
-        element.style.height = 'auto';
-        element.style.height = `${element.scrollHeight}px`;
     }
 
     private handleInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.inputText = target.value;
-        this.adjustHeight(target);
+        adjustTextareaHeight(target);
     }
 
     /**
@@ -412,12 +411,6 @@ export class Base64Encoder extends BaseTool {
         this.outputText = '';
         this.outputMode = 'error';
         this.requestUpdate();
-    }
-
-    private renderCopyButton() {
-        return this.isCopied
-            ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>`
-            : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
     }
 
     private getBase64String(base64Data: string): { base64: string; mimeType: string } {
