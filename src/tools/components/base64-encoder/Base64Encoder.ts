@@ -6,8 +6,9 @@ import {
     renderCopyButton 
 } from '../../../utils/util';
 import mimeDb from 'mime-db';
-import '../../common/tooltip/Tooltip';
 import '../../common/alert/Alert';
+import '../../common/switch/Switch';
+import '../../common/tooltip/Tooltip';
 
 @customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {
@@ -143,6 +144,12 @@ export class Base64Encoder extends BaseTool {
                                 ${renderCopyButton(this.isCopied)}
                             </button>
                         </div>
+                    </div>
+                    <div class="flex mt-1">
+                        <tool-switch
+                            .checked=${true}
+                            ariaLabel="Toggle encode/decode mode"
+                        ></tool-switch>
                     </div>
                 `;
             default:
