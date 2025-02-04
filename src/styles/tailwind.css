@@ -48,7 +48,7 @@
         @apply block w-full min-h-[28px] pt-1 pb-0.5 px-1.5 rounded-sm;
         background-color: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
-        box-shadow: 0 0 0 1px var(--vscode-input-border);
+        box-shadow: inset 0 0 0 1px var(--vscode-input-border);
     }
 
     input[type=number]::-webkit-inner-spin-button {
@@ -222,7 +222,7 @@
         @apply block w-full p-1 min-h-[28px] rounded-sm;
         background-color: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
-        box-shadow: 0 0 0 1px var(--vscode-input-border);
+        box-shadow: inset 0 0 0 1px var(--vscode-input-border);
     }
 
     .asset-viewer img {

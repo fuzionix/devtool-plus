@@ -1,9 +1,9 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import { 
-    adjustTextareaHeight, 
-    renderCopyButton 
+import {
+    adjustTextareaHeight,
+    renderCopyButton
 } from '../../../utils/util';
 import mimeDb from 'mime-db';
 import '../../common/alert/Alert';
@@ -19,8 +19,10 @@ export class Base64Encoder extends BaseTool {
     @state() private decodedMimeType = '';
     @state() private decodedData: string | Uint8Array | null = null;
     @state() private inputMimeType = '';
+    @state() private uriHeader = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
+    @state() private isShowUriHeader = true;
 
     @query('#input') input!: HTMLTextAreaElement;
     @query('#output') output!: HTMLTextAreaElement;
@@ -145,10 +147,12 @@ export class Base64Encoder extends BaseTool {
                             </button>
                         </div>
                     </div>
-                    <div class="flex mt-1">
+                    <div class="flex mt-2">
                         <tool-switch
-                            .checked=${true}
-                            ariaLabel="Toggle encode/decode mode"
+                            .checked=${this.isShowUriHeader}
+                            rightLabel="URI Header"
+                            ariaLabel="Toggle show URI Header"
+                            @change=${this.handleModeChange}
                         ></tool-switch>
                     </div>
                 `;
@@ -179,6 +183,15 @@ export class Base64Encoder extends BaseTool {
         const target = event.target as HTMLTextAreaElement;
         this.inputText = target.value;
         adjustTextareaHeight(target);
+    }
+
+    private handleModeChange(e: CustomEvent) {
+        this.isShowUriHeader = e.detail.checked;
+        if (this.outputText.startsWith(this.uriHeader)) {
+            this.outputText = this.outputText.replace(this.uriHeader, '');
+        }
+        this.outputText = this.isShowUriHeader ? `${this.uriHeader}${this.outputText}` : this.outputText;
+        this.requestUpdate();
     }
 
     /**
@@ -243,25 +256,20 @@ export class Base64Encoder extends BaseTool {
                 this.decodedData = this.base64ToUint8Array(content);
             } else {
                 try {
-                    // Attempt to decode as Base64
-                    const decodedText = decodeURIComponent(
-                        atob(base64Data)
-                            .split('')
-                            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                            .join('')
-                    );
-                    // Check if the decoded data contains binary characters
-                    const isBinary = /[\x00-\x08\x0E-\x1F]/.test(decodedText);
+                    this.decodedData = this.base64ToUint8Array(base64Data);
+                    this.decodedMimeType = this.detectMimeType(this.decodedData);
 
-                    if (isBinary) {
-                        // Handle binary data
-                        this.decodedData = this.base64ToUint8Array(base64Data);
-                        this.decodedMimeType = this.detectMimeType(this.decodedData);
-                    } else {
-                        // Handle text data
+                    if (this.decodedMimeType === 'text/plain') {
+                        // Attempt to decode as Base64
+                        const decodedText = decodeURIComponent(
+                            atob(base64Data)
+                                .split('')
+                                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                                .join('')
+                        );
                         this.decodedData = decodedText;
-                        this.decodedMimeType = 'text/plain';
                     }
+                    this.requestUpdate();
                 } catch {
                     this.hideOutput();
                     this.alert = {
@@ -318,9 +326,21 @@ export class Base64Encoder extends BaseTool {
         // Define known file signatures (magic numbers) for common file types
         const signatures: { [key: string]: number[] } = {
             'image/jpeg': [0xFF, 0xD8, 0xFF],
+            'image/webp': [0x52, 0x49, 0x46, 0x46],
             'image/png': [0x89, 0x50, 0x4E, 0x47],
             'image/gif': [0x47, 0x49, 0x46, 0x38],
+
             'application/pdf': [0x25, 0x50, 0x44, 0x46],
+            'application/zip': [0x50, 0x4B, 0x03, 0x04],
+            'application/x-rar-compressed': [0x52, 0x61, 0x72, 0x21],
+            'application/xml': [0x3C, 0x3F, 0x78, 0x6D],
+            'application/json': [0x7B],
+
+            'audio/mpeg': [0xFF, 0xFB],
+            'audio/wav': [0x52, 0x49, 0x46, 0x46],
+
+            'video/mp4': [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70],
+            'video/webm': [0x1A, 0x45, 0xDF, 0xA3],
         };
 
         // Check each known signature against the file data
@@ -332,7 +352,7 @@ export class Base64Encoder extends BaseTool {
         }
 
         // Return default MIME type if no matches found
-        return 'application/octet-stream';
+        return 'text/plain';
     }
 
     private triggerFileInput(): void {
@@ -368,7 +388,8 @@ export class Base64Encoder extends BaseTool {
                         bytes.forEach(byte => binary += String.fromCharCode(byte));
                         this.outputText = btoa(binary);
                     }
-                    this.outputText = `data:${this.inputMimeType};base64,${this.outputText}`;
+                    this.uriHeader = `data:${this.inputMimeType};base64,`;
+                    this.outputText = this.isShowUriHeader ? `${this.uriHeader}${this.outputText}` : this.outputText;
                     this.requestUpdate();
                 };
 
@@ -393,6 +414,7 @@ export class Base64Encoder extends BaseTool {
         this.fileInput.value = '';
         this.outputMode = 'text';
         this.input.style.height = `28px`;
+        this.uriHeader = '';
         this.alert = null;
         this.renderOutput();
         this.requestUpdate();
