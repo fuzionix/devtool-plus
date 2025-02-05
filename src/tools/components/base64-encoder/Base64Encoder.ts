@@ -15,6 +15,7 @@ export class Base64Encoder extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
     @state() private fileName = '';
+    @state() private file: File | null = null;
     @state() private outputMode: 'text' | 'image' | 'document' | 'error' = 'text';
     @state() private decodedMimeType = '';
     @state() private decodedData: string | Uint8Array | null = null;
@@ -123,7 +124,7 @@ export class Base64Encoder extends BaseTool {
                             @click=${() => this.triggerDownload()}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                            <h4>Download</h4>
+                            <h4>Download File</h4>
                         </button>
                     </div>
                 `;
@@ -201,16 +202,16 @@ export class Base64Encoder extends BaseTool {
     private async encode(): Promise<void> {
         this.alert = null;
         try {
-            if (!this.inputText && !this.fileName) {
+            if (!this.inputText && !this.file) {
                 this.outputText = '';
                 return;
             }
 
             let result: string;
 
-            if (this.fileName) {
+            if (this.file && this.fileName) {
                 // For file input, use the data:URI format
-                result = this.outputText;
+                await this.encodeFile(this.file);
             } else {
                 // For text input, convert to Base64 using built-in btoa()
                 result = btoa(
@@ -219,9 +220,9 @@ export class Base64Encoder extends BaseTool {
                         (_, p1) => String.fromCharCode(parseInt(p1, 16))
                     )
                 );
+                this.outputText = result;
             }
 
-            this.outputText = result;
             this.outputMode = 'text';
             this.renderOutput();
             this.requestUpdate();
@@ -297,7 +298,7 @@ export class Base64Encoder extends BaseTool {
             this.hideOutput();
             this.alert = {
                 type: 'error',
-                message: `Failed to Decode`,
+                message: `Failed to Decode. Please ensure the input is a valid Base64 string.`,
             };
         }
     }
@@ -375,9 +376,33 @@ export class Base64Encoder extends BaseTool {
                 this.fileName = file.name;
                 this.inputMimeType = file.type;
 
-                const reader = new FileReader();
-                // Configure onload handler for when file is read
-                reader.onload = async (e) => {
+                const MAX_AUTO_ENCODE_SIZE = 10 * 1024 * 1024;
+
+                if (file.size > MAX_AUTO_ENCODE_SIZE) {
+                    this.file = file;
+                    this.alert = {
+                        type: 'warning',
+                        message: `File exceeds 10MB which may cause performance issues. You can still encode the file manually.`,
+                    };
+                    return;
+                }
+
+                await this.encodeFile(file);
+            } catch (error) {
+                this.alert = {
+                    type: 'error',
+                    message: `Failed to read file. Please ensure it is not corrupted.`,
+                };
+            }
+        }
+    }
+
+    private async encodeFile(file: File): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
                     const result = e.target?.result;
                     if (typeof result === 'string') {
                         this.outputText = btoa(result);
@@ -391,26 +416,26 @@ export class Base64Encoder extends BaseTool {
                     this.uriHeader = `data:${this.inputMimeType};base64,`;
                     this.outputText = this.isShowUriHeader ? `${this.uriHeader}${this.outputText}` : this.outputText;
                     this.requestUpdate();
-                };
-
-                if (file.type.startsWith('text/')) {
-                    reader.readAsText(file);
-                } else {
-                    reader.readAsArrayBuffer(file);
+                    resolve();
+                } catch (error) {
+                    reject(error);
                 }
-            } catch (error) {
-                this.alert = {
-                    type: 'error',
-                    message: `Failed to read file`,
-                };
+            };
+
+            reader.onerror = () => reject(reader.error);
+            if (file.type.startsWith('text/')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
             }
-        }
+        });
     }
 
     private clearAll(): void {
         this.inputText = '';
         this.outputText = '';
         this.fileName = '';
+        this.file = null;
         this.fileInput.value = '';
         this.outputMode = 'text';
         this.input.style.height = `28px`;
