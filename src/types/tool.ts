@@ -2,12 +2,10 @@ export enum ToolCategory {
     Text = "Text",
     Data = "Data",
     Encode = "Encode / Decode",
-    Datetime = "Date & Time",
-    Asset = "Asset",
-    Utils = "Utilities",
+    Design = "UI Design",
+    Util = "Utility",
     Cryptography = "Cryptography",
     Productivity = "Productivity",
-    Misc = "Misc"
 }
 
 export interface Tool {
@@ -18,4 +16,14 @@ export interface Tool {
     template: string;
     icon: string;
     isNew?: boolean;
+    editor?: EditorConfig[];
+}
+
+interface EditorConfig {
+    id: string;
+    label: string;
+    language?: string;
+    readOnly?: boolean;
+    content?: string;
+    placeholder?: string;
 }

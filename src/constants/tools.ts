@@ -24,6 +24,22 @@ export const TOOLS: Tool[] = [
         description: '1.0.0',
         category: ToolCategory.Text,
         template: '<case-converter></case-converter>',
-        icon: 'case-camel'
+        icon: 'case-camel',
+        editor: [
+            {
+                id: 'original',
+                label: 'Original Text',
+                language: 'plaintext',
+                readOnly: false,
+                placeholder: 'Enter text to convert...',
+            },
+            {
+                id: 'converted',
+                label: 'Converted Text',
+                language: 'plaintext',
+                readOnly: true,
+                placeholder: 'Converted text will appear here...',
+            }
+        ]
     }
 ];
