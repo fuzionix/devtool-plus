@@ -3,46 +3,46 @@ import { Tool } from '../types/tool';
 
 export class EditorViewProvider {
     public static readonly viewType = 'devtool-plus.editorView';
-    private _panel?: vscode.WebviewPanel;
-    private _currentTool?: Tool;
+    private panel?: vscode.WebviewPanel;
+    private currentTool?: Tool;
 
     constructor(
-        private readonly _extensionUri: vscode.Uri,
+        private readonly extensionUri: vscode.Uri,
     ) { }
 
     public showTool(tool: Tool) {
         if (!tool.editor) {
-            if (this._panel) {
-                this._panel.dispose();
-                this._panel = undefined;
+            if (this.panel) {
+                this.panel.dispose();
+                this.panel = undefined;
             }
             return;
         }
 
-        this._currentTool = tool;
+        this.currentTool = tool;
 
-        if (this._panel) {
-            this._panel.reveal(vscode.ViewColumn.One);
+        if (this.panel) {
+            this.panel.reveal(vscode.ViewColumn.One);
             this._updateWebview();
             return;
         }
 
-        this._panel = vscode.window.createWebviewPanel(
+        this.panel = vscode.window.createWebviewPanel(
             EditorViewProvider.viewType,
             `DevTool+: ${tool.label}`,
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                localResourceRoots: [this._extensionUri],
+                localResourceRoots: [this.extensionUri],
                 retainContextWhenHidden: true
             }
         );
 
-        this._panel.onDidDispose(() => {
-            this._panel = undefined;
+        this.panel.onDidDispose(() => {
+            this.panel = undefined;
         }, null);
 
-        this._panel.webview.onDidReceiveMessage(message => {
+        this.panel.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'ready':
                     this._updateWebview();
@@ -53,15 +53,15 @@ export class EditorViewProvider {
             }
         });
 
-        const toolComponentsUri = this._panel.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'dist', 'tools', 'toolComponents.js')
+        const toolComponentsUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extensionUri, 'dist', 'tools', 'toolComponents.js')
         );
 
-        const styleUri = this._panel.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'dist', 'styles', 'tailwind.css')
+        const styleUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extensionUri, 'dist', 'styles', 'tailwind.css')
         );
 
-        this._panel.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri);
+        this.panel.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri);
     }
 
     private _getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri): string {
@@ -110,14 +110,14 @@ export class EditorViewProvider {
     }
 
     private _updateWebview() {
-        if (!this._panel || !this._currentTool) {
+        if (!this.panel || !this.currentTool) {
             return;
         }
 
-        this._panel.title = `DevTool+ - ${this._currentTool.label}`;
-        this._panel.webview.postMessage({
+        this.panel.title = `DevTool+ - ${this.currentTool.label}`;
+        this.panel.webview.postMessage({
             type: 'updateTool',
-            tool: this._currentTool
+            tool: this.currentTool
         });
     }
 }

@@ -4,7 +4,7 @@ import { Tool } from '../types/tool';
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
-    private _view?: vscode.WebviewView;
+    private view?: vscode.WebviewView;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -15,7 +15,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         _context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken,
     ) {
-        this._view = webviewView;
+        this.view = webviewView;
 
         webviewView.webview.options = {
             enableScripts: true,
@@ -26,7 +26,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
             vscode.Uri.joinPath(this._extensionUri, 'dist', 'tools', 'toolComponents.js')
         );
 
-        const styleUri = this._view!.webview.asWebviewUri(
+        const styleUri = this.view!.webview.asWebviewUri(
             vscode.Uri.joinPath(this._extensionUri, 'dist', 'styles', 'tailwind.css')
         );
 
@@ -78,15 +78,15 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 <link href="${styleUri}" rel="stylesheet">
             </head>
             <body>
-                <div id="empty-state" class="pt-2">
+                <div id="empty-state" class="pt-2 px-4">
                     <p class="opacity-70">Select a tool from the Tools Explorer below</p>
                 </div>
-                <div id="tool-container" class="pt-2">
+                <div id="tool-container" class="pt-2 px-4">
                     <div class="tool-header flex align-middle">
                         <img class="tool-icon mr-2" src="//:0" width="16" alt="" />
                         <h4 class="tool-title"></h4>
                     </div>
-                    <div id="tool-content" class="pt-1"></div>
+                    <div id="tool-content" class="pt-1 pb-4"></div>
                 </div>
                 <script>
                     const vscode = acquireVsCodeApi();
@@ -131,8 +131,8 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
     }
 
     public updateTool(tool: Tool) {
-        if (this._view) {
-            this._view.webview.postMessage({
+        if (this.view) {
+            this.view.webview.postMessage({
                 type: 'updateTool',
                 tool: tool
             });

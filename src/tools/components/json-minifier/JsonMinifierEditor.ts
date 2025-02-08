@@ -2,8 +2,8 @@ import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 
-@customElement('case-converter-editor')
-export class CaseConverterEditor extends BaseTool {
+@customElement('json-minifier-editor')
+export class JsonMinifierEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
 
