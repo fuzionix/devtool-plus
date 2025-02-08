@@ -38,6 +38,12 @@ export class EditorViewProvider {
             }
         );
 
+        const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', `${tool.icon}.svg`);
+        this.panel.iconPath = {
+            light: iconPath,
+            dark: iconPath
+        };
+
         this.panel.onDidDispose(() => {
             this.panel = undefined;
         }, null);
@@ -114,7 +120,12 @@ export class EditorViewProvider {
             return;
         }
 
+        const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', `${this.currentTool.icon}.svg`);
         this.panel.title = `DevTool+ - ${this.currentTool.label}`;
+        this.panel.iconPath = {
+            light: iconPath,
+            dark: iconPath
+        };
         this.panel.webview.postMessage({
             type: 'updateTool',
             tool: this.currentTool
