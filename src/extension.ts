@@ -2,12 +2,14 @@ import * as vscode from 'vscode';
 import { SidePanelProvider } from './providers/SidePanelProvider';
 import { ToolsViewProvider } from './providers/ToolsViewProvider';
 import { ToolDecorationProvider } from './providers/ToolDecorationProvider';
+import { EditorViewProvider } from './providers/EditorViewProvider';
 import { Tool } from './types/tool';
 
 export function activate(context: vscode.ExtensionContext) {
 	const sidePanelProvider = new SidePanelProvider(context.extensionUri);
 	const toolsViewProvider = new ToolsViewProvider(context);
 	const toolDecorationProvider = new ToolDecorationProvider();
+	const editorViewProvider = new EditorViewProvider(context.extensionUri);
 
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
@@ -15,17 +17,22 @@ export function activate(context: vscode.ExtensionContext) {
 			sidePanelProvider
 		),
 		vscode.window.registerTreeDataProvider(
-            ToolsViewProvider.viewType,
-            toolsViewProvider
-        ),
+			ToolsViewProvider.viewType,
+			toolsViewProvider
+		),
 		vscode.window.registerFileDecorationProvider(
 			toolDecorationProvider
-		)
+		),
 	);
 
-	vscode.commands.registerCommand('devtool-plus.selectTool', (tool: Tool) => {
-		sidePanelProvider.updateTool(tool);
-	});
+	context.subscriptions.push(
+		vscode.commands.registerCommand('devtool-plus.selectTool', (tool: Tool) => {
+			sidePanelProvider.updateTool(tool);
+			if (tool.editor) {
+				editorViewProvider.showTool(tool);
+			}
+		})
+	);
 
 	console.log('DevTool+ is now active!');
 }

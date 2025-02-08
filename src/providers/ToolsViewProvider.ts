@@ -44,8 +44,8 @@ export class ToolTreeItem extends vscode.TreeItem {
         public readonly context: vscode.ExtensionContext
     ) {
         super(tool.label, collapsibleState);
-        this.tooltip = tool.description;
-        this.description = tool.description;
+        this.tooltip = tool.label;
+        this.description = tool.version;
         this.contextValue = 'tool';
         this.command = {
             command: 'devtool-plus.selectTool',

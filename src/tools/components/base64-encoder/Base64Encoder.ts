@@ -5,10 +5,10 @@ import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
-import mimeDb from 'mime-db';
 import '../../common/alert/Alert';
 import '../../common/switch/Switch';
 import '../../common/tooltip/Tooltip';
+import mimeDb from 'mime-db';
 
 @customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {

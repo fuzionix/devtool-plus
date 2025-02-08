@@ -11,19 +11,10 @@ export enum ToolCategory {
 export interface Tool {
     id: string;
     label: string;
-    description?: string;
+    version?: string;
     category: ToolCategory;
     template: string;
     icon: string;
     isNew?: boolean;
-    editor?: EditorConfig[];
-}
-
-interface EditorConfig {
-    id: string;
-    label: string;
-    language?: string;
-    readOnly?: boolean;
-    content?: string;
-    placeholder?: string;
+    editor?: boolean;
 }
