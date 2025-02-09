@@ -151,6 +151,11 @@
 
 @layer components {
 
+    /* Frame */
+    .frame {
+        @apply flex items-center min-w-32 h-8 py-1.5 px-2.5 border-[var(--vscode-panel-border)] border-[1px] rounded-sm select-none transition-all duration-100;
+    }
+
     /* Button */
     .btn {
         @apply inline-flex items-center justify-center w-full min-w-16 h-8 py-1.5 px-1.5 rounded-sm select-none transition-all duration-100 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
@@ -166,7 +171,7 @@
     }
 
     .btn-outline {
-        @apply btn bg-[var(--vscode-panel-background)] border-[var(--vscode-button-secondaryBackground)] border-[1px] hover:border-[var(--vscode-button-background)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
+        @apply btn bg-[var(--vscode-panel-background)] border-[var(--vscode-panel-border)] border-[1px] hover:border-[var(--vscode-button-background)] disabled:hover:bg-[var(--vscode-button-secondaryBackground)];
     }
 
     .btn-icon {
@@ -245,6 +250,10 @@
         font-weight: var(--vscode-editor-font-weight);
         font-size: var(--vscode-editor-font-size);
         box-shadow: none;
+    }
+
+    .editor-textarea:focus {
+        @apply outline-0;
     }
 
     .editor-textarea::placeholder {

@@ -28,7 +28,7 @@ export class Switch extends LitElement {
             width: 36px;
             height: 20px;
             background-color: var(--vscode-panel-background);
-            border: 1px solid var(--vscode-button-secondaryBackground);
+            border: 1px solid var(--vscode-panel-border);
             border-radius: 2px;
             cursor: pointer;
             transition: border 100ms ease-in-out;
