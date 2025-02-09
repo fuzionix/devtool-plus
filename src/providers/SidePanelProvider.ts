@@ -1,14 +1,20 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
+import { EditorViewProvider } from '../providers/EditorViewProvider';
 import { Tool } from '../types/tool';
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
     private view?: vscode.WebviewView;
+    private editorViewProvider?: EditorViewProvider;
 
     constructor(
-        private readonly _extensionUri: vscode.Uri,
+        private readonly extensionUri: vscode.Uri,
     ) { }
+
+    public setEditorViewProvider(provider: EditorViewProvider) {
+        this.editorViewProvider = provider;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -19,22 +25,22 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [this._extensionUri]
+            localResourceRoots: [this.extensionUri]
         };
 
         const toolComponentsUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'dist', 'tools', 'toolComponents.js')
+            vscode.Uri.joinPath(this.extensionUri, 'dist', 'tools', 'toolComponents.js')
         );
 
         const styleUri = this.view!.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'dist', 'styles', 'tailwind.css')
+            vscode.Uri.joinPath(this.extensionUri, 'dist', 'styles', 'tailwind.css')
         );
 
         const toolIconUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.joinPath(this._extensionUri, 'media', 'tools')
+            vscode.Uri.joinPath(this.extensionUri, 'media', 'tools')
         );
 
-        webviewView.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri, toolIconUri);
+        webviewView.webview.html = this.getHtmlForWebview(toolComponentsUri, styleUri, toolIconUri);
         webviewView.webview.onDidReceiveMessage(async message => {
             switch (message.type) {
                 case 'ready':
@@ -63,11 +69,16 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                     }
                     break;
                 }
+                case 'update': {
+                    if (this.editorViewProvider) {
+                        this.editorViewProvider.updateFromSidePanel(message.toolId, message.value);
+                    }
+                }
             }
         });
     }
 
-    private _getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri, toolIconUri: vscode.Uri): string {
+    private getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri, toolIconUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
             <html lang="en">

@@ -4,18 +4,25 @@ import { BaseTool } from '../../base/BaseTool';
 import {
     renderCopyButton
 } from '../../../utils/util';
+import { CaseType } from './CaseConverterTypes';
 import '../../common/tooltip/Tooltip';
 
 @customElement('case-converter-editor')
 export class CaseConverterEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
+    @state() private selectedCase: CaseType | '' = '';
     @state() private isCopied = false;
 
     static styles = css`
         ${BaseTool.styles}
 
     `;
+
+    public updateSelectedCase(newCase: CaseType | '') {
+        this.selectedCase = newCase;
+        this.outputText = 'Received new case: ' + newCase;
+    }
 
     protected renderTool() {
         return html`

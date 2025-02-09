@@ -59,17 +59,21 @@ export class DropdownMenu extends LitElement {
             position: absolute;
             top: calc(100% + 4px);
             right: 0;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
             background-color: var(--vscode-panel-background);
             border: 1px solid var(--vscode-panel-border);
             border-radius: 6px;
-            z-index: 1000;
-            display: none;
-            max-height: 200px;
-            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 100ms ease-in-out;
         }
 
         .options-panel.open {
-            display: block;
+            visibility: visible;
+            opacity: 1;
         }
 
         .option {

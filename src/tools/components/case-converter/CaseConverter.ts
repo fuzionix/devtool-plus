@@ -1,11 +1,12 @@
 import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import { CaseType } from './CaseConverterTypes';
 import '../../common/dropdown-menu/DropdownMenu';
 
 @customElement('case-converter')
 export class CaseConverter extends BaseTool {
-    @state() private selectedValue = '';
+    @state() private selectedValue: CaseType | '' = '';
 
     static styles = css`
         ${BaseTool.styles}
@@ -44,6 +45,10 @@ export class CaseConverter extends BaseTool {
 
     private handleChange(e: CustomEvent) {
         this.selectedValue = e.detail.value;
-        // Handle the value change
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'case-converter',
+            value: this.selectedValue
+        });
     }
 }

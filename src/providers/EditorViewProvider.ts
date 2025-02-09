@@ -23,7 +23,7 @@ export class EditorViewProvider {
 
         if (this.panel) {
             this.panel.reveal(vscode.ViewColumn.One);
-            this._updateWebview();
+            this.updateWebview();
             return;
         }
 
@@ -51,7 +51,7 @@ export class EditorViewProvider {
         this.panel.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'ready':
-                    this._updateWebview();
+                    this.updateWebview();
                     break;
                 case 'error':
                     vscode.window.showErrorMessage(message.value);
@@ -67,10 +67,10 @@ export class EditorViewProvider {
             vscode.Uri.joinPath(this.extensionUri, 'dist', 'styles', 'tailwind.css')
         );
 
-        this.panel.webview.html = this._getHtmlForWebview(toolComponentsUri, styleUri);
+        this.panel.webview.html = this.getHtmlForWebview(toolComponentsUri, styleUri);
     }
 
-    private _getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri): string {
+    private getHtmlForWebview(toolComponentsUri: vscode.Uri, styleUri: vscode.Uri): string {
         return `
             <!DOCTYPE html>
             <html lang="en">
@@ -94,6 +94,9 @@ export class EditorViewProvider {
                             case 'updateTool':
                                 updateTool(message.tool);
                                 break;
+                            case 'update':
+                                update(message.toolId, message.value);
+                                break;
                         }
                     });
 
@@ -107,6 +110,9 @@ export class EditorViewProvider {
                         container.innerHTML = tool.template.replace(tool.id, tool.id + '-editor');
                     }
 
+                    function update(toolId, value) {
+                    }
+
                     vscode.postMessage({ type: 'ready' });
                 </script>
                 <script src="${toolComponentsUri}"></script>
@@ -115,7 +121,7 @@ export class EditorViewProvider {
         `;
     }
 
-    private _updateWebview() {
+    private updateWebview() {
         if (!this.panel || !this.currentTool) {
             return;
         }
@@ -130,5 +136,21 @@ export class EditorViewProvider {
             type: 'updateTool',
             tool: this.currentTool
         });
+
+        this.panel.webview.postMessage({
+            type: 'update',
+            toolId: '',
+            value: ''
+        });
+    }
+
+    public updateFromSidePanel(toolId: string, value: any) {
+        if (this.panel) {
+            this.panel.webview.postMessage({
+                type: 'update',
+                toolId: toolId,
+                value: value
+            });
+        }
     }
 }
