@@ -43,7 +43,7 @@ export class CaseConverterEditor extends BaseTool {
                     .value=${this.outputText}
                     readonly
                 ></textarea>
-                <div class="absolute flex justify-items-center right-[50%] bottom-2 p-0.5 border-[var(--vscode-panel-border)] border-[1px] rounded-sm translate-x-[50%] bg-[var(--vscode-panel-background)]">
+                <div class="absolute flex flex-col justify-items-center right-[50%] bottom-2 p-0.5 border-[var(--vscode-panel-border)] border-[1px] rounded-sm translate-x-[50%] bg-[var(--vscode-panel-background)]">
                     <tool-tooltip text="Clear">
                         <button class="btn-icon" id="clear" @click=${this.clearAll}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>

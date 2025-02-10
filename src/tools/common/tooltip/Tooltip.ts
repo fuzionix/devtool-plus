@@ -31,6 +31,8 @@ export class Tooltip extends LitElement {
         :host(:hover) .tooltip {
             visibility: visible;
             opacity: 1;
+            user-select: none;
+            pointer-events: none;
         }
 
         .tooltip::after {
