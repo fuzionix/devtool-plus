@@ -19,6 +19,14 @@ export class CaseConverterEditor extends BaseTool {
 
     `;
 
+    constructor() {
+        super();
+        this.addEventListener('updated', ((e: CustomEvent) => {
+            this.outputText = e.detail.value;
+            this.requestUpdate();
+        }) as EventListener);
+    }
+
     public updateSelectedCase(newCase: CaseType | '') {
         this.selectedCase = newCase;
         this.outputText = 'Received new case: ' + newCase;
