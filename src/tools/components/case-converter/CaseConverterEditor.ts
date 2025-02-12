@@ -11,7 +11,7 @@ import '../../common/tooltip/Tooltip';
 export class CaseConverterEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
-    @state() private selectedCase: CaseType | '' = '';
+    @state() private selectedCase: CaseType | '' = 'upper';
     @state() private isCopied = false;
 
     static styles = css`
@@ -22,14 +22,12 @@ export class CaseConverterEditor extends BaseTool {
     constructor() {
         super();
         this.addEventListener('updated', ((e: CustomEvent) => {
-            this.outputText = e.detail.value;
-            this.requestUpdate();
+            if (e.detail.value) {
+                const caseType = e.detail.value;
+                this.selectedCase = caseType;
+                this.updateOutput();
+            }
         }) as EventListener);
-    }
-
-    public updateSelectedCase(newCase: CaseType | '') {
-        this.selectedCase = newCase;
-        this.outputText = 'Received new case: ' + newCase;
     }
 
     protected renderTool() {
@@ -67,10 +65,67 @@ export class CaseConverterEditor extends BaseTool {
         `;
     }
 
+    private convertCase(text: string, caseType: CaseType): string {
+        if (!text) return '';
+
+        switch (caseType) {
+            case 'upper':
+                return text.toUpperCase();
+            case 'lower':
+                return text.toLowerCase();
+            case 'title':
+                return text
+                    .toLowerCase()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            case 'sentence':
+                let result = text.toLowerCase();
+                result = result.charAt(0).toUpperCase() + result.slice(1);
+
+                // Capitalize the first character after each sentence ending punctuation
+                result = result.replace(
+                    /([.!?]\s+)([a-z])/g,
+                    (_, punctuation, letter) => punctuation + letter.toUpperCase()
+                );
+
+                // Capitalize the first character after each newline
+                result = result.replace(
+                    /(\n\s*)([a-z])/g,
+                    (_, newline, letter) => newline + letter.toUpperCase()
+                );
+
+                // Capitalize the first character after ellipsis
+                result = result.replace(
+                    /(\.\.\.\s+)([a-z])/g,
+                    (_, ellipsis, letter) => ellipsis + letter.toUpperCase()
+                );
+
+                // Handle abbreviations (e.g., Mr., Dr., etc.)
+                const abbreviations = /(\b)(mr\.|mrs\.|ms\.|dr\.|prof\.|sr\.|jr\.|vs\.|etc\.)\s+([a-z])/gi;
+                result = result.replace(
+                    abbreviations,
+                    (_, start, abbr, letter) => start + abbr + ' ' + letter.toLowerCase()
+                );
+
+                return result;
+            default:
+                return text;
+        }
+    }
+
     private handleInput(e: Event) {
         const target = e.target as HTMLTextAreaElement;
         this.inputText = target.value;
-        this.outputText = this.inputText.toUpperCase();
+        this.updateOutput();
+    }
+
+    private updateOutput() {
+        if (this.selectedCase && this.inputText) {
+            this.outputText = this.convertCase(this.inputText, this.selectedCase);
+        } else {
+            this.outputText = this.inputText;
+        }
     }
 
     private async copyToClipboard() {

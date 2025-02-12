@@ -23,7 +23,8 @@
         "no-throw-literal": "warn",
         "semi": "off",
         "unicorn/no-useless-switch-case": "warn",
-        "unicorn/no-lonely-if": "warn"
+        "unicorn/no-useless-undefined": "warn",
+        "unicorn/no-unnecessary-await": "warn"
     },
     "ignorePatterns": [
         "out",

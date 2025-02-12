@@ -31,7 +31,7 @@ export class CaseConverter extends BaseTool {
                                 { label: 'Upper', value: 'upper' },
                                 { label: 'Lower', value: 'lower' },
                                 { label: 'Title', value: 'title' },
-                                { label: 'Sentence', value: 'Sentence' }
+                                { label: 'Sentence', value: 'sentence' }
                             ]
                         }
                         .value=${this.selectedValue}
