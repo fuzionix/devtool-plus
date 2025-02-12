@@ -80,25 +80,13 @@ export class CaseConverterEditor extends BaseTool {
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
             case 'sentence':
-                let result = text.toLowerCase();
+                let result = text;
                 result = result.charAt(0).toUpperCase() + result.slice(1);
 
-                // Capitalize the first character after each sentence ending punctuation
+                // Capitalize first character after sentence endings, newlines, and ellipsis
                 result = result.replace(
-                    /([.!?]\s+)([a-z])/g,
-                    (_, punctuation, letter) => punctuation + letter.toUpperCase()
-                );
-
-                // Capitalize the first character after each newline
-                result = result.replace(
-                    /(\n\s*)([a-z])/g,
-                    (_, newline, letter) => newline + letter.toUpperCase()
-                );
-
-                // Capitalize the first character after ellipsis
-                result = result.replace(
-                    /(\.\.\.\s+)([a-z])/g,
-                    (_, ellipsis, letter) => ellipsis + letter.toUpperCase()
+                    /([.!?]\s+|\\n\s*|\.\.\.\s+)([a-z])/g,
+                    (_, separator, letter) => separator + letter.toUpperCase()
                 );
 
                 // Handle abbreviations (e.g., Mr., Dr., etc.)
