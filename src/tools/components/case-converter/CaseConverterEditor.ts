@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     renderCopyButton
@@ -13,6 +13,9 @@ export class CaseConverterEditor extends BaseTool {
     @state() private outputText = '';
     @state() private selectedCase: CaseType | '' = 'upper';
     @state() private isCopied = false;
+
+    @query('#original') private originalTextarea!: HTMLTextAreaElement;
+    @query('#modified') private modifiedTextarea!: HTMLTextAreaElement;
 
     static styles = css`
         ${BaseTool.styles}
@@ -43,13 +46,13 @@ export class CaseConverterEditor extends BaseTool {
                 ></textarea>
                 <div class="editor-divider"></div>
                 <textarea
-                    id="converted"
+                    id="modified"
                     class="editor-textarea"
                     placeholder="Converted text will appear here"
                     .value=${this.outputText}
                     readonly
                 ></textarea>
-                <div class="absolute flex flex-col justify-items-center right-[50%] bottom-2 p-0.5 border-[var(--vscode-panel-border)] border-[1px] rounded-sm translate-x-[50%] bg-[var(--vscode-panel-background)]">
+                <div class="absolute flex flex-col justify-items-center right-[50%] bottom-[50%] p-0.5 border-[var(--vscode-panel-border)] border-[1px] rounded-sm translate-x-[50%] translate-y-[50%] bg-[var(--vscode-panel-background)]">
                     <tool-tooltip text="Clear">
                         <button class="btn-icon" id="clear" @click=${this.clearAll}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -63,6 +66,19 @@ export class CaseConverterEditor extends BaseTool {
                 </div>
             </div>
         `;
+    }
+
+    firstUpdated() {
+        this.originalTextarea.addEventListener('scroll', () => this.syncScroll('input'));
+        this.modifiedTextarea.addEventListener('scroll', () => this.syncScroll('output'));
+    }
+
+    private syncScroll(source: 'input' | 'output') {
+        if (!this.originalTextarea || !this.modifiedTextarea) return;
+        const sourceElement = source === 'input' ? this.originalTextarea : this.modifiedTextarea;
+        const targetElement = source === 'input' ? this.modifiedTextarea : this.originalTextarea;
+        targetElement.scrollTop = sourceElement.scrollTop;
+        targetElement.scrollLeft = sourceElement.scrollLeft;
     }
 
     private convertCase(text: string, caseType: CaseType): string {
@@ -85,7 +101,7 @@ export class CaseConverterEditor extends BaseTool {
 
                 // Capitalize first character after sentence endings, newlines, and ellipsis
                 result = result.replace(
-                    /([.!?]\s+|\\n\s*|\.\.\.\s+)([a-z])/g,
+                    /([.!?]\s+|\n\s*|\.\.\.\s+)([a-z])/g,
                     (_, separator, letter) => separator + letter.toUpperCase()
                 );
 

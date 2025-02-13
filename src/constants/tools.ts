@@ -28,6 +28,14 @@ export const TOOLS: Tool[] = [
         icon: 'file-digit'
     },
     {
+        id: 'url-encoder',
+        label: 'URL Encoder',
+        version: '1.0.0',
+        category: ToolCategory.Encode,
+        template: '<url-encoder></url-encoder>',
+        icon: 'link-2'
+    },
+    {
         id: 'case-converter',
         label: 'Case Converter',
         version: '1.0.0',

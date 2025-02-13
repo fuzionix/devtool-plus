@@ -6,7 +6,7 @@ import '../../common/dropdown-menu/DropdownMenu';
 
 @customElement('case-converter')
 export class CaseConverter extends BaseTool {
-    @state() private selectedValue: CaseType | '' = '';
+    @state() private selectedValue: CaseType | '' = 'upper';
 
     static styles = css`
         ${BaseTool.styles}
