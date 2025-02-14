@@ -43,5 +43,13 @@ export const TOOLS: Tool[] = [
         template: '<case-converter></case-converter>',
         icon: 'case-camel',
         editor: true
+    },
+    {
+        id: 'token-generator',
+        label: 'Token Generator',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<token-generator></token-generator>',
+        icon: 'tag'
     }
 ];
