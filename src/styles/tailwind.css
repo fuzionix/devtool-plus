@@ -213,7 +213,7 @@
 
     /* Radio Button */
     .radio-group {
-        @apply flex min-h-[28px] rounded-sm overflow-hidden border border-[var(--vscode-input-background)];
+        @apply flex min-h-[30px] rounded-sm overflow-hidden border border-[var(--vscode-input-background)];
     }
 
     .radio-group-button {
