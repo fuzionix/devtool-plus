@@ -36,12 +36,12 @@ export const TOOLS: Tool[] = [
         icon: 'link-2'
     },
     {
-        id: 'case-converter',
-        label: 'Case Converter',
+        id: 'text-editor',
+        label: 'Text Editor',
         version: '1.0.0',
         category: ToolCategory.Text,
-        template: '<case-converter></case-converter>',
-        icon: 'case-camel',
+        template: '<text-editor></text-editor>',
+        icon: 'type',
         editor: true
     },
     {

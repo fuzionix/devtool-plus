@@ -1,11 +1,11 @@
 import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import { CaseType } from './CaseConverterTypes';
+import { CaseType } from './TextEditorTypes';
 import '../../common/dropdown-menu/DropdownMenu';
 
-@customElement('case-converter')
-export class CaseConverter extends BaseTool {
+@customElement('text-editor')
+export class TextEditor extends BaseTool {
     @state() private selectedValue: CaseType | '' = 'upper';
 
     static styles = css`
@@ -16,7 +16,7 @@ export class CaseConverter extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">Case conversion transforms text between different capitalizations to match various naming conventions and formatting requirements.</p>
+                <p class="opacity-75">Text editor provides various text transformation tools to manipulate and format text.</p>
                 <hr />
                 <div class="flex justify-between items-center">
                     <div class="frame">

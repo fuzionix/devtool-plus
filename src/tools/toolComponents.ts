@@ -1,6 +1,6 @@
 import './components/base64-encoder/Base64Encoder';
-import './components/case-converter/CaseConverter';
-import './components/case-converter/CaseConverterEditor';
+import './components/text-editor/TextEditor';
+import './components/text-editor/TextEditorEditor';
 import './components/json-minifier/JsonMinifier';
 import './components/json-minifier/JsonMinifierEditor';
 import './components/token-generator/TokenGenerator';

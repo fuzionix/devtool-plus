@@ -4,11 +4,11 @@ import { BaseTool } from '../../base/BaseTool';
 import {
     renderCopyButton
 } from '../../../utils/util';
-import { CaseType } from './CaseConverterTypes';
+import { CaseType } from './TextEditorTypes';
 import '../../common/tooltip/Tooltip';
 
-@customElement('case-converter-editor')
-export class CaseConverterEditor extends BaseTool {
+@customElement('text-editor-editor')
+export class TextEditorEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
     @state() private selectedCase: CaseType | '' = 'upper';
@@ -39,7 +39,7 @@ export class CaseConverterEditor extends BaseTool {
                 <textarea
                     id="original"
                     class="editor-textarea"
-                    placeholder="Enter text to convert"
+                    placeholder="Enter text to edit"
                     .value=${this.inputText}
                     @input=${this.handleInput}
                     autofocus
@@ -48,7 +48,7 @@ export class CaseConverterEditor extends BaseTool {
                 <textarea
                     id="modified"
                     class="editor-textarea"
-                    placeholder="Converted text will appear here"
+                    placeholder="Edited text will appear here"
                     .value=${this.outputText}
                     readonly
                 ></textarea>

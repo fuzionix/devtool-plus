@@ -101,12 +101,14 @@ export class UrlEncoder extends BaseTool {
 
     private handleModeChange(mode: 'encode' | 'decode') {
         this.selectedMode = mode;
+        this.processInput();
     }
 
     private handleInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.input = target.value;
         adjustTextareaHeight(target);
+        this.processInput();
     }
 
     private async copyToClipboard() {
@@ -122,7 +124,55 @@ export class UrlEncoder extends BaseTool {
         }
     }
 
+    private processInput(): void {
+        if (!this.input) {
+            this.output = '';
+            return;
+        }
+
+        try {
+            if (this.selectedMode === 'encode') {
+                this.output = this.encodeURL(this.input);
+            } else {
+                this.output = this.decodeURL(this.input);
+            }
+        } catch (error) {
+            this.output = `Error: ${(error as Error).message}`;
+        }
+
+        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
+        if (outputTextarea) {
+            adjustTextareaHeight(outputTextarea);
+        }
+    }
+
+    private encodeURL(input: string): string {
+        try {
+            return encodeURIComponent(input);
+        } catch (error) {
+            console.error('Error encoding URL:', error);
+            throw new Error('Failed to encode the URL');
+        }
+    }
+
+    private decodeURL(input: string): string {
+        try {
+            return decodeURIComponent(input);
+        } catch (error) {
+            console.error('Error decoding URL:', error);
+            throw new Error('Invalid URL encoding');
+        }
+    }
+
     private clearAll(): void {
+        this.input = '';
+        this.output = '';
+
+        const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
+        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
+
+        inputTextarea.style.height = `28px`;
+        outputTextarea.style.height = `auto`;
         this.requestUpdate();
     }
 }
