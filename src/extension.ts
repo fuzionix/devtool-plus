@@ -17,7 +17,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SidePanelProvider.viewType,
-			sidePanelProvider
+			sidePanelProvider,
+			{
+				webviewOptions: {
+					retainContextWhenHidden: true
+				}
+			}
 		),
 		vscode.window.registerTreeDataProvider(
 			ToolsViewProvider.viewType,
