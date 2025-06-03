@@ -5,13 +5,17 @@ import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
+import '../../common/alert/Alert';
+import '../../common/switch/Switch';
 
 @customElement('url-encoder')
 export class UrlEncoder extends BaseTool {
     @state() private selectedMode: 'encode' | 'decode' = 'encode';
     @state() private input = '';
     @state() private output = '';
+    @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
+    @state() private preserveUrl = false;
 
     static styles = css`
         ${BaseTool.styles}
@@ -69,6 +73,12 @@ export class UrlEncoder extends BaseTool {
                         </tool-tooltip>
                     </div>
                 </div>
+                ${this.alert ? html`
+                    <tool-alert
+                        .type=${this.alert.type}
+                        .message=${this.alert.message}
+                    ></tool-alert>
+                ` : ''}
 
                 <!-- Arrow Divider -->
                 <div class="flex justify-center mt-2 opacity-75">
@@ -95,12 +105,26 @@ export class UrlEncoder extends BaseTool {
                         </button>
                     </div>
                 </div>
+
+                <div class="mt-2">
+                    <tool-switch
+                        .checked=${this.preserveUrl}
+                        rightLabel="Preserve URL structure"
+                        ariaLabel="Encoding Method"
+                        @change=${this.handleEncodingMethodChange}
+                    ></tool-switch>
+                </div>
             </div>
         `;
     }
 
     private handleModeChange(mode: 'encode' | 'decode') {
         this.selectedMode = mode;
+        this.processInput();
+    }
+
+    private handleEncodingMethodChange(event: CustomEvent) {
+        this.preserveUrl = event.detail.checked;
         this.processInput();
     }
 
@@ -125,6 +149,7 @@ export class UrlEncoder extends BaseTool {
     }
 
     private processInput(): void {
+        this.alert = null;
         if (!this.input) {
             this.output = '';
             return;
@@ -137,7 +162,11 @@ export class UrlEncoder extends BaseTool {
                 this.output = this.decodeURL(this.input);
             }
         } catch (error) {
-            this.output = `Error: ${(error as Error).message}`;
+            this.alert = {
+                type: 'error',
+                message: `Failed to ${this.selectedMode} URL: ${(error as Error).message}`
+            };
+            this.output = '';
         }
 
         const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
@@ -148,25 +177,40 @@ export class UrlEncoder extends BaseTool {
 
     private encodeURL(input: string): string {
         try {
-            return encodeURIComponent(input);
+            if (this.preserveUrl) {
+                return encodeURI(input);
+            } else {
+                return encodeURIComponent(input);
+            }
         } catch (error) {
-            console.error('Error encoding URL:', error);
-            throw new Error('Failed to encode the URL');
+            this.alert = {
+                type: 'error',
+                message: `Failed to encode URL: ${(error as Error).message}`
+            };
+            return '';
         }
     }
 
     private decodeURL(input: string): string {
         try {
-            return decodeURIComponent(input);
+            if (this.preserveUrl) {
+                return decodeURI(input);
+            } else {
+                return decodeURIComponent(input);
+            }
         } catch (error) {
-            console.error('Error decoding URL:', error);
-            throw new Error('Invalid URL encoding');
+            this.alert = {
+                type: 'error',
+                message: `Failed to decode URL: ${(error as Error).message}`
+            };
+            return '';
         }
     }
 
     private clearAll(): void {
         this.input = '';
         this.output = '';
+        this.alert = null;
 
         const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
         const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
