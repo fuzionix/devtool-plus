@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import '../tooltip/Tooltip';
+import { customElement, property, state, query } from 'lit/decorators.js';
 
 @customElement('tool-slider')
 export class Slider extends LitElement {
@@ -12,8 +11,18 @@ export class Slider extends LitElement {
         
         .slider-container {
             position: relative;
-            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 0px;
+            padding-bottom: 16px;
             width: 100%;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            flex: 1;
+            transform: translateY(-4px);
         }
         
         .slider-value {
@@ -65,6 +74,74 @@ export class Slider extends LitElement {
         .slider::-moz-range-thumb:hover {
             background: var(--vscode-button-hoverBackground);
         }
+
+        .value-tooltip {
+            position: absolute;
+            top: -24px;
+            font-size: 12px;
+            color: var(--vscode-foreground);
+            background-color: var(--vscode-panel-background);
+            border: 1px solid var(--vscode-panel-border);
+            padding: 2px 6px;
+            border-radius: 2px;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 100ms ease-in-out;
+            pointer-events: none;
+        }
+        
+        .value-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 4px;
+            border-style: solid;
+            border-color: var(--vscode-panel-border) transparent transparent transparent;
+        }
+        
+        .slider:active + .value-tooltip, 
+        .slider:hover + .value-tooltip,
+        .is-dragging .value-tooltip {
+            opacity: 1;
+        }
+
+        .number-input {
+            width: 60px;
+            height: 24px;
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+            border-radius: 2px;
+            margin-left: 10px;
+            padding: 0 6px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .number-input:focus {
+            outline: 1px solid var(--vscode-focusBorder);
+            outline-offset: -1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance:textfield;
+        }
     `;
 
     @property({ type: Number }) min = 0;
@@ -73,33 +150,109 @@ export class Slider extends LitElement {
     @property({ type: Number }) value = 50;
     @property({ type: String }) unit = '';
     @property({ type: Function }) formatter = (val: number) => val.toString();
+    @property({ type: Number }) inputWidth = 30;
 
     @state() private isDragging = false;
+    @state() private inputValue = '';
+    @query('.slider') private sliderElement!: HTMLInputElement;
+    @query('.value-tooltip') private tooltipElement!: HTMLDivElement;
+    @query('.number-input') private numberInput!: HTMLInputElement;
+
+    private readonly THUMB_WIDTH = 14;
+
+    constructor() {
+        super();
+        this.inputValue = this.value.toString();
+    }
 
     render() {
+        const formattedValue = this.formatter(this.value) + (this.unit ? ` ${this.unit}` : '');
+
         return html`
-            <div class="slider-container">
-                <input 
-                    type="range" 
-                    class="slider" 
-                    .min=${this.min} 
-                    .max=${this.max} 
-                    .step=${this.step} 
-                    .value=${this.value}
-                    @input=${this.handleSliderInput}
-                    @mousedown=${() => this.isDragging = true}
-                    @mouseup=${() => this.isDragging = false}
-                    @mouseleave=${() => this.isDragging && (this.isDragging = false)}
-                />
+            <div class="slider-container ${this.isDragging ? 'is-dragging' : ''}">
+            <div class="slider-wrapper">
+                    <input 
+                        type="range" 
+                        class="slider" 
+                        .min=${this.min} 
+                        .max=${this.max} 
+                        .step=${this.step} 
+                        .value=${this.value}
+                        @input=${this.handleSliderInput}
+                        @mouseover=${this.updateTooltipPosition}
+                        @mousedown=${this.handleMouseDown}
+                        @mouseup=${this.handleMouseUp}
+                        @mouseleave=${this.handleMouseLeave}
+                    />
+                    <div class="value-tooltip">${formattedValue}</div>
+                </div>
+                <div class="input-wrapper">
+                    <input 
+                        type="number"
+                        class="number-input"
+                        style="width: ${this.inputWidth}px;"
+                        .min=${this.min}
+                        .max=${this.max}
+                        .step=${this.step}
+                        .value=${this.inputValue}
+                    />
+                </div>
             </div>
         `;
     }
+
+    firstUpdated() {
+        this.updateTooltipPosition();
+    }
+
+    updated(changedProperties: Map<string, unknown>) {
+        if (changedProperties.has('value')) {
+            if (this.value < this.min) this.value = this.min;
+            if (this.value > this.max) this.value = this.max;
+            this.updateTooltipPosition();
+        }
+    }
+
+    handleMouseDown() {
+        this.isDragging = true;
+        document.addEventListener('mouseup', this.handleGlobalMouseUp);
+    }
+
+    handleMouseUp() {
+        this.isDragging = false;
+    }
+
+    handleMouseLeave() {
+        if (this.isDragging) {
+        }
+    }
+
+    private handleGlobalMouseUp = () => {
+        this.isDragging = false;
+        document.removeEventListener('mouseup', this.handleGlobalMouseUp);
+    };
 
     handleSliderInput(e: Event) {
         const target = e.target as HTMLInputElement;
         const newValue = Number(target.value);
         this.value = newValue;
+        this.updateTooltipPosition();
         this.dispatchChange();
+    }
+
+    updateTooltipPosition() {
+        if (!this.sliderElement || !this.tooltipElement) return;
+
+        const sliderRect = this.sliderElement.getBoundingClientRect();
+        const effectiveWidth = sliderRect.width - this.THUMB_WIDTH;
+
+        const range = this.max - this.min;
+        const valuePercentage = (this.value - this.min) / range;
+
+        const leftPosition = (this.THUMB_WIDTH / 2) + (valuePercentage * effectiveWidth);
+        const leftPercentage = (leftPosition / sliderRect.width) * 100;
+
+        this.tooltipElement.style.left = `calc(${leftPercentage}% + 2px)`;
     }
 
     dispatchChange() {
@@ -108,12 +261,5 @@ export class Slider extends LitElement {
             bubbles: true,
             composed: true
         }));
-    }
-
-    updated(changedProperties: Map<string, unknown>) {
-        if (changedProperties.has('value')) {
-            if (this.value < this.min) this.value = this.min;
-            if (this.value > this.max) this.value = this.max;
-        }
     }
 }
