@@ -44,13 +44,15 @@ export class Switch extends LitElement {
             left: 2px;
             width: 14px;
             height: 14px;
-            background-color: var(--vscode-button-background);
+            background-color: #686868;
             border-radius: 2px;
             transition: transform 100ms ease-in-out;
         }
 
         .switch-container.checked .switch-handle {
             transform: translateX(16px);
+            background-color: var(--vscode-button-background);
+            border-color: transparent;
         }
     `;
 

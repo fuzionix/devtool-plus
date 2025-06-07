@@ -15,7 +15,7 @@ export class Slider extends LitElement {
             align-items: center;
             gap: 10px;
             padding-top: 0px;
-            padding-bottom: 16px;
+            padding-bottom: 8px;
             width: 100%;
         }
 
