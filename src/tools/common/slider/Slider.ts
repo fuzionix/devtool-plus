@@ -153,24 +153,17 @@ export class Slider extends LitElement {
     @property({ type: Number }) inputWidth = 30;
 
     @state() private isDragging = false;
-    @state() private inputValue = '';
     @query('.slider') private sliderElement!: HTMLInputElement;
     @query('.value-tooltip') private tooltipElement!: HTMLDivElement;
-    @query('.number-input') private numberInput!: HTMLInputElement;
 
     private readonly THUMB_WIDTH = 14;
-
-    constructor() {
-        super();
-        this.inputValue = this.value.toString();
-    }
 
     render() {
         const formattedValue = this.formatter(this.value) + (this.unit ? ` ${this.unit}` : '');
 
         return html`
             <div class="slider-container ${this.isDragging ? 'is-dragging' : ''}">
-            <div class="slider-wrapper">
+                <div class="slider-wrapper">
                     <input 
                         type="range" 
                         class="slider" 
@@ -194,7 +187,8 @@ export class Slider extends LitElement {
                         .min=${this.min}
                         .max=${this.max}
                         .step=${this.step}
-                        .value=${this.inputValue}
+                        .value=${this.value}
+                        @input=${this.handleNumberInput}
                     />
                 </div>
             </div>
@@ -237,7 +231,34 @@ export class Slider extends LitElement {
         const newValue = Number(target.value);
         this.value = newValue;
         this.updateTooltipPosition();
+        this.setValue(newValue);
         this.dispatchChange();
+    }
+
+    handleNumberInput(e: Event) {
+        const target = e.target as HTMLInputElement;
+        let newValue = Number(target.value);
+
+        if (isNaN(newValue)) {
+            newValue = this.value;
+        } else {
+            newValue = Math.max(this.min, Math.min(this.max, newValue));
+        }
+        
+        this.setValue(newValue);
+    }
+
+    setValue(newValue: number) {
+        // Enforce step constraints and ensure value is within bounds
+        const nearestStep = Math.round((newValue - this.min) / this.step) * this.step + this.min;
+        newValue = Number(nearestStep.toFixed(10));
+        newValue = Math.max(this.min, Math.min(this.max, newValue));
+        
+        if (this.value !== newValue) {
+            this.value = newValue;
+            this.updateTooltipPosition();
+            this.dispatchChange();
+        }
     }
 
     updateTooltipPosition() {
