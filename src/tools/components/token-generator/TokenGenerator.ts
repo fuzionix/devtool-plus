@@ -7,6 +7,7 @@ import {
 } from '../../../utils/util';
 import '../../common/slider/Slider';
 import '../../common/switch/Switch';
+import '../../common/expandable/Expandable';
 
 @customElement('token-generator')
 export class TokenGenerator extends BaseTool {
@@ -17,8 +18,13 @@ export class TokenGenerator extends BaseTool {
     @state() private includeSpecial = true;
     @state() private includeLowercase = true;
     @state() private includeUppercase = true;
+    @state() private formatPattern = '';
+    @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
+
+    private readonly MAX_LENGTH = 256;
 
     @query('#output') outputArea!: HTMLTextAreaElement;
+    @query('#formatPattern') formatPatternInput!: HTMLInputElement;
 
     // Character sets for token generation
     private readonly numbers = '0123456789';
@@ -78,11 +84,33 @@ export class TokenGenerator extends BaseTool {
                 </div>
                 <tool-slider
                     min="1"
-                    max="256"
+                    max="${this.MAX_LENGTH}"
                     step="1"
                     .value=${this.sliderValue}
                     @change=${this.handleSliderChange}
                 ></tool-slider>
+
+                <tool-expandable label="Advanced Settings">
+                    <div class="content-to-expand">
+                        <p class="mb-2 text-xs">Format Pattern</p>
+                        <p class="mb-2 text-xs opacity-75">
+                            Use the format <code>8-4-4-4-12</code> to generate tokens in a specific pattern. For example, a UUID format.
+                        </p>
+                        <input 
+                            id="formatPattern"
+                            type="text" 
+                            placeholder="8-4-4-4-12"
+                            .value=${this.formatPattern}
+                            @input=${this.handlePatternChange}
+                        >
+                        ${this.alert ? html`
+                            <tool-alert
+                                .type=${this.alert.type}
+                                .message=${this.alert.message}
+                            ></tool-alert>
+                        ` : ''}
+                    </div>
+                </tool-expandable>
 
                 <!-- Arrow Divider -->
                 <div class="flex justify-center mt-2 opacity-75">
@@ -143,6 +171,13 @@ export class TokenGenerator extends BaseTool {
         this.generateToken();
     }
 
+    private handlePatternChange(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.formatPattern = target.value;
+        this.validatePattern();
+        this.generateToken();
+    }
+
     private handleCharsetChange(e: CustomEvent) {
         const target = e.currentTarget as HTMLElement;
         const charset = target.getAttribute('data-charset');
@@ -180,7 +215,64 @@ export class TokenGenerator extends BaseTool {
         }
 
         let token = '';
-        const length = this.sliderValue;
+
+        if (this.formatPattern && this.formatPattern.trim() && this.validatePattern()) {
+            // Parse the pattern (e.g., "4-2-4")
+            const segments = this.formatPattern.split('-').map(segment => parseInt(segment, 10));
+
+            // Generate each segment and join with hyphens
+            const tokenSegments = segments.map(length => this.generateRandomString(charset, length));
+            token = tokenSegments.join('-');
+        } else {
+            token = this.generateRandomString(charset, this.sliderValue);
+        }
+
+        this.output = token;
+
+        setTimeout(() => {
+            if (this.outputArea) {
+                adjustTextareaHeight(this.outputArea);
+            }
+        }, 0);
+    }
+
+    private validatePattern(): boolean {  
+        this.alert = null;
+
+        if (!this.formatPattern || !this.formatPattern.trim()) {
+            return true; // Empty pattern is valid
+        }
+        
+        // Parse the pattern (e.g., "4-2-4")
+        const segments = this.formatPattern.split('-').map(segment => parseInt(segment, 10));
+        
+        // Check if all segments are valid numbers
+        if (!segments.every(segment => !isNaN(segment) && segment > 0)) {
+            this.alert = {
+                type: 'error',
+                message: 'Invalid format pattern. Use a pattern like "4-2-4".',
+            };
+            return false;
+        }
+        
+        // Calculate total length including hyphens
+        const totalChars = segments.reduce((sum, segment) => sum + segment, 0);
+        const hyphens = segments.length - 1;
+        const totalLength = totalChars + hyphens;
+        
+        if (totalLength > this.MAX_LENGTH) {
+            this.alert = {
+                type: 'error',
+                message: `Exceeds maximum length of ${this.MAX_LENGTH} characters.`,
+            };
+            return false;
+        }
+        
+        return true;
+    }
+
+    private generateRandomString(charset: string, length: number): string {
+        let result = '';
         const charsetLength = charset.length;
 
         // Use crypto API for better randomness when available
@@ -188,16 +280,15 @@ export class TokenGenerator extends BaseTool {
             const values = new Uint32Array(length);
             window.crypto.getRandomValues(values);
             for (let i = 0; i < length; i++) {
-                token += charset[values[i] % charsetLength];
+                result += charset[values[i] % charsetLength];
             }
         } else {
             for (let i = 0; i < length; i++) {
-                token += charset.charAt(Math.floor(Math.random() * charsetLength));
+                result += charset.charAt(Math.floor(Math.random() * charsetLength));
             }
         }
 
-        adjustTextareaHeight(this.outputArea);
-        this.output = token;
+        return result;
     }
 
     private async copyToClipboard() {
