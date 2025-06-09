@@ -30,7 +30,7 @@ export class UrlEncoder extends BaseTool {
 
                 <!-- Radio Group -->
                 <div class="">
-                    <div class="radio-group" role="radiogroup" aria-label="UUID Version">
+                    <div class="radio-group" role="radiogroup" aria-label="URL Encoding Mode">
                         <button 
                             role="radio"
                             aria-checked=${this.selectedMode === 'encode' ? 'true' : 'false'}

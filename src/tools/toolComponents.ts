@@ -1,3 +1,4 @@
+import './components/aes-encryption/AesEncryption';
 import './components/base64-encoder/Base64Encoder';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';

@@ -51,5 +51,13 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<token-generator></token-generator>',
         icon: 'tag'
+    },
+    {
+        id: 'aes-encryption',
+        label: 'AES Encryption / Decryption',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<aes-encryption></aes-encryption>',
+        icon: 'lock-keyhole',
     }
 ];
