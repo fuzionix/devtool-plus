@@ -57,6 +57,7 @@ export class Slider extends LitElement {
             border-radius: 2px;
             background: var(--vscode-button-background);
             cursor: pointer;
+            z-index: 3;
         }
         
         .slider::-moz-range-thumb {
@@ -65,6 +66,7 @@ export class Slider extends LitElement {
             border-radius: 2px;
             background: var(--vscode-button-background);
             cursor: pointer;
+            z-index: 3;
         }
         
         .slider::-webkit-slider-thumb:hover {
@@ -73,6 +75,18 @@ export class Slider extends LitElement {
         
         .slider::-moz-range-thumb:hover {
             background: var(--vscode-button-hoverBackground);
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 1px;
+            background: var(--vscode-button-background);
+            border-radius: 2px;
+            transform: translateY(4px) translateX(2px);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .value-tooltip {
@@ -103,8 +117,8 @@ export class Slider extends LitElement {
             border-color: var(--vscode-panel-border) transparent transparent transparent;
         }
         
-        .slider:active + .value-tooltip, 
-        .slider:hover + .value-tooltip,
+        .slider:active + .slider-track + .value-tooltip, 
+        .slider:hover + .slider-track + .value-tooltip,
         .is-dragging .value-tooltip {
             opacity: 1;
         }
@@ -154,12 +168,14 @@ export class Slider extends LitElement {
 
     @state() private isDragging = false;
     @query('.slider') private sliderElement!: HTMLInputElement;
+    @query('.slider-track') private trackElement!: HTMLDivElement;
     @query('.value-tooltip') private tooltipElement!: HTMLDivElement;
 
     private readonly THUMB_WIDTH = 14;
 
     render() {
         const formattedValue = this.formatter(this.value) + (this.unit ? ` ${this.unit}` : '');
+        const trackWidth = this.calculateTrackWidth();
 
         return html`
             <div class="slider-container ${this.isDragging ? 'is-dragging' : ''}">
@@ -177,6 +193,7 @@ export class Slider extends LitElement {
                         @mouseup=${this.handleMouseUp}
                         @mouseleave=${this.handleMouseLeave}
                     />
+                    <div class="slider-track" style="width: ${trackWidth}%"></div>
                     <div class="value-tooltip">${formattedValue}</div>
                 </div>
                 <div class="input-wrapper">
@@ -205,6 +222,11 @@ export class Slider extends LitElement {
             if (this.value > this.max) this.value = this.max;
             this.updateTooltipPosition();
         }
+    }
+
+    calculateTrackWidth() {
+        const percentage = ((this.value - this.min) / (this.max - this.min)) * 100;
+        return Math.max(0, Math.min(100, percentage));
     }
 
     handleMouseDown() {
