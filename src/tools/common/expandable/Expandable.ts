@@ -17,8 +17,13 @@ export class Expandable extends LitElement {
         .expandable-header {
             display: flex;
             align-items: center;
-            cursor: pointer;
             padding: 4px 0;
+        }
+
+        .expandable-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
         }
         
         .expandable-icon {
@@ -41,7 +46,7 @@ export class Expandable extends LitElement {
         }
         
         .expandable-label {
-            margin-top: -4px;
+            margin-top: -2px;
             font-size: 12px;
         }
     `;
@@ -74,13 +79,15 @@ export class Expandable extends LitElement {
     render() {
         return html`
             <div class="expandable">
-                <div class="expandable-header" @click=${this.toggleExpand}>
-                    <span class="expandable-icon ${this.isExpanded ? 'expanded' : ''}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </span>
-                    <span class="expandable-label">${this.label}</span>
+                <div class="expandable-header">
+                    <div class="expandable-toggle" @click=${this.toggleExpand}>
+                        <span class="expandable-icon ${this.isExpanded ? 'expanded' : ''}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                        <span class="expandable-label">${this.label}</span>
+                    </div>
                 </div>
                 <div class="expandable-content ${this.isExpanded ? 'expanded' : ''}">
                     <slot></slot>

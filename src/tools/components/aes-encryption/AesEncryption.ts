@@ -1,7 +1,7 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import { renderCopyButton } from '../../../utils/util';
+import { adjustTextareaHeight, renderCopyButton } from '../../../utils/util';
 import '../../common/alert/Alert';
 import '../../common/dropdown-menu/DropdownMenu';
 import '../../common/switch/Switch';
@@ -22,10 +22,13 @@ export class AesEncryption extends BaseTool {
     @state() private selectedKeySize: KeySize = '256';
     @state() private selectedOperation: Operation = 'encrypt';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
+    @state() private isProcessing = false;
     @state() private isCopied = false;
     @state() private errorMessage = '';
 
+    @query('#key') private key!: HTMLTextAreaElement;
     @query('#input') private input!: HTMLTextAreaElement;
+    @query('#iv') private iv!: HTMLTextAreaElement;
     @query('#output') private output!: HTMLTextAreaElement;
 
     static styles = css`
@@ -108,14 +111,19 @@ export class AesEncryption extends BaseTool {
                     Key
                 </div>
                 <div class="relative flex items-center mb-4">
-                    <input
+                    <textarea
                         id="key"
-                        type="text"
                         class="input-expandable"
                         placeholder="Enter Key"
+                        rows="1"
                         .value=${this.keyText}
                         @input=${this.handleKeyChange}
-                    ></input>
+                    ></textarea>
+                    <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                        <button class="btn-icon" @click=${this.generateRandomKey}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Input Field -->
@@ -152,19 +160,22 @@ export class AesEncryption extends BaseTool {
                         <p class="mb-2 text-xs opacity-75">
                             Initialization Vector (IV) is used to ensure that identical plaintexts encrypt to different ciphertexts.
                         </p>
-                        <input 
-                            id="iv"
-                            type="text" 
-                            placeholder="Enter IV (optional)"
-                            .value=${this.ivText}
-                            @input=${this.handleIvChange}
-                        ></input>
-                        ${this.alert ? html`
-                            <tool-alert
-                                .type=${this.alert.type}
-                                .message=${this.alert.message}
-                            ></tool-alert>
-                        ` : ''}
+                        <div class="relative flex items-center mb-4">
+                            <textarea 
+                                id="iv"
+                                class="input-expandable"
+                                placeholder="Enter IV (optional)"
+                                rows="1"
+                                .value=${this.ivText}
+                                @input=${this.handleIvChange}
+                                ?disabled=${this.selectedMode === 'ECB'}
+                            ></textarea>
+                            <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                                <button class="btn-icon" @click=${this.generateRandomIv} ?disabled=${this.selectedMode === 'ECB'}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </tool-expandable>
 
@@ -188,6 +199,7 @@ export class AesEncryption extends BaseTool {
                             id="copy" 
                             class="btn-icon"
                             @click=${this.copyToClipboard}
+                            ?disabled=${!this.outputText}
                         >
                             ${renderCopyButton(this.isCopied)}
                         </button>
@@ -199,6 +211,308 @@ export class AesEncryption extends BaseTool {
 
     private handleModeChange(mode: 'encrypt' | 'decrypt') {
         this.selectedOperation = mode;
+        this.processInput();
+    }
+
+    private handleEncryptionModeChange(e: CustomEvent) {
+        const newMode = e.detail.value as EncryptionMode;
+        this.selectedMode = newMode;
+
+        if (newMode === 'ECB') {
+            this.ivText = '';
+        } else if (!this.ivText) {
+            this.generateRandomIv();
+        }
+
+        this.processInput();
+    }
+
+    private handleKeySizeChange(e: CustomEvent) {
+        this.selectedKeySize = e.detail.value as KeySize;
+        this.processInput();
+    }
+
+    private handleKeyChange(e: Event) {
+        const target = e.target as HTMLTextAreaElement;
+        this.keyText = target.value;
+        this.processInput();
+        adjustTextareaHeight(this.key);
+    }
+
+    private handleInput(e: Event) {
+        const target = e.target as HTMLTextAreaElement;
+        this.inputText = target.value;
+        this.processInput();
+        adjustTextareaHeight(this.input);
+    }
+
+    private handleIvChange(e: Event) {
+        const target = e.target as HTMLTextAreaElement;
+        this.ivText = target.value;
+        this.processInput();
+        adjustTextareaHeight(this.iv);
+    }
+
+    private generateRandomKey(): void {
+        const keySize = parseInt(this.selectedKeySize);
+        const byteLength = keySize / 8;
+        const randomBytes = new Uint8Array(byteLength);
+        window.crypto.getRandomValues(randomBytes);
+        this.keyText = this.arrayBufferToHex(randomBytes);
+        this.processInput();
+        adjustTextareaHeight(this.key);
+    }
+
+    private generateRandomIv(): void {
+        // IV should be 16 bytes (128 bits) for AES
+        const ivBytes = new Uint8Array(16);
+        window.crypto.getRandomValues(ivBytes);
+        this.ivText = this.arrayBufferToHex(ivBytes);
+        this.processInput();
+        adjustTextareaHeight(this.iv);
+    }
+
+    private async processInput(): Promise<void> {
+        this.alert = null;
+
+        if (!this.inputText || !this.keyText) {
+            this.outputText = '';
+            return;
+        }
+
+        try {
+            if (this.selectedOperation === 'encrypt') {
+                this.outputText = await this.encrypt(this.inputText, this.keyText, this.ivText);
+            } else {
+                this.outputText = await this.decrypt(this.inputText, this.keyText, this.ivText);
+            }
+        } catch (error) {
+            console.error('Encryption/Decryption error:', error);
+            this.alert = {
+                type: 'error',
+                message: error instanceof Error ? error.message : 'An error occurred during processing'
+            };
+            this.outputText = '';
+        }
+    }
+
+    private async encrypt(plaintext: string, key: string, iv: string): Promise<string> {
+        try {
+            this.validateInputs();
+
+            const keyBuffer = this.hexToArrayBuffer(key);
+            let ivBuffer: ArrayBuffer | undefined;
+
+            if (this.selectedMode !== 'ECB') {
+                if (!iv) {
+                    throw new Error('IV is required for this encryption mode');
+                }
+                ivBuffer = this.hexToArrayBuffer(iv);
+            }
+
+            const encoder = new TextEncoder();
+            const plaintextBuffer = encoder.encode(plaintext);
+
+            const cryptoKey = await window.crypto.subtle.importKey(
+                'raw',
+                keyBuffer,
+                {
+                    name: this.getAlgorithmName(),
+                    length: parseInt(this.selectedKeySize)
+                },
+                false,
+                ['encrypt']
+            );
+
+            const algorithmParams = this.createAlgorithmParams(ivBuffer);
+            const encryptedBuffer = await window.crypto.subtle.encrypt(
+                algorithmParams,
+                cryptoKey,
+                plaintextBuffer
+            );
+
+            return this.arrayBufferToBase64(encryptedBuffer);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Encryption failed: ${error.message}`);
+            } else {
+                throw new Error('Encryption failed with an unknown error');
+            }
+        }
+    }
+
+    private async decrypt(ciphertext: string, key: string, iv: string): Promise<string> {
+        try {
+            this.validateInputs();
+
+            const keyBuffer = this.hexToArrayBuffer(key);
+            let ivBuffer: ArrayBuffer | undefined;
+            
+            if (this.selectedMode !== 'ECB') {
+                if (!iv) {
+                    throw new Error('IV is required for this decryption mode');
+                }
+                ivBuffer = this.hexToArrayBuffer(iv);
+            }
+
+            const ciphertextBuffer = this.base64ToArrayBuffer(ciphertext);
+            const cryptoKey = await window.crypto.subtle.importKey(
+                'raw',
+                keyBuffer,
+                {
+                    name: this.getAlgorithmName(),
+                    length: parseInt(this.selectedKeySize)
+                },
+                false,
+                ['decrypt']
+            );
+
+            const algorithmParams = this.createAlgorithmParams(ivBuffer);
+            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                algorithmParams,
+                cryptoKey,
+                ciphertextBuffer
+            );
+
+            const decoder = new TextDecoder();
+            return decoder.decode(decryptedBuffer);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Decryption failed: ${error.message}`);
+            } else {
+                throw new Error('Decryption failed with an unknown error');
+            }
+        }
+    }
+
+    private validateInputs(): void {
+        const keyLength = this.keyText.replace(/\s/g, '').length;
+
+        // Convert bits to hex characters
+        const requiredKeyLength = parseInt(this.selectedKeySize) / 4;
+
+        if (keyLength !== requiredKeyLength) {
+            throw new Error(`Key must be exactly ${requiredKeyLength} hex characters (${this.selectedKeySize} bits)`);
+        }
+
+        // Validate IV length for modes that use it
+        if (this.selectedMode !== 'ECB' && this.ivText) {
+            const ivLength = this.ivText.replace(/\s/g, '').length;
+            if (ivLength !== 32) { // 16 bytes = 32 hex characters
+                throw new Error('IV must be exactly 32 hex characters (128 bits)');
+            }
+        }
+
+        const hexRegex = /^[0-9a-fA-F]+$/;
+        if (!hexRegex.test(this.keyText.replace(/\s/g, ''))) {
+            throw new Error('Key must contain only hexadecimal characters (0-9, a-f, A-F)');
+        }
+
+        if (this.selectedMode !== 'ECB' && this.ivText && !hexRegex.test(this.ivText.replace(/\s/g, ''))) {
+            throw new Error('IV must contain only hexadecimal characters (0-9, a-f, A-F)');
+        }
+
+        if (this.selectedOperation === 'decrypt') {
+            const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+            if (!base64Regex.test(this.inputText.trim())) {
+                throw new Error('Ciphertext must be in Base64 format');
+            }
+        }
+    }
+
+    private getAlgorithmName(): string {
+        switch (this.selectedMode) {
+            case 'CBC': return 'AES-CBC';
+            case 'ECB': return 'AES-ECB';
+            case 'CFB': return 'AES-CFB';
+            case 'OFB': return 'AES-OFB';
+            case 'CTR': return 'AES-CTR';
+            case 'GCM': return 'AES-GCM';
+            default: return 'AES-CBC';
+        }
+    }
+
+    private createAlgorithmParams(iv?: ArrayBuffer): any {
+        if (!iv && this.selectedMode !== 'ECB') {
+            throw new Error('IV is required for this encryption mode');
+        }
+
+        switch (this.selectedMode) {
+            case 'CBC':
+                return {
+                    name: 'AES-CBC',
+                    iv
+                };
+            case 'ECB':
+                // ECB doesn't use an IV
+                return {
+                    name: 'AES-ECB'
+                };
+            case 'CFB':
+                return {
+                    name: 'AES-CFB',
+                    iv
+                };
+            case 'OFB':
+                return {
+                    name: 'AES-OFB',
+                    iv
+                };
+            case 'CTR':
+                return {
+                    name: 'AES-CTR',
+                    counter: iv,
+                    length: 128
+                };
+            case 'GCM':
+                return {
+                    name: 'AES-GCM',
+                    iv,
+                    tagLength: 128
+                };
+            default:
+                return {
+                    name: 'AES-CBC',
+                    iv
+                };
+        }
+    }
+
+    private hexToArrayBuffer(hexString: string): ArrayBuffer {
+        // Remove any spaces or non-hex characters
+        const cleanHex = hexString.replace(/[^0-9a-fA-F]/g, '');
+        const bytes = new Uint8Array(cleanHex.length / 2);
+        
+        for (let i = 0; i < cleanHex.length; i += 2) {
+            bytes[i / 2] = parseInt(cleanHex.substring(i, i + 2), 16);
+        }
+        
+        return bytes.buffer;
+    }
+
+    private arrayBufferToHex(buffer: ArrayBuffer | Uint8Array): string {
+        const bytes = new Uint8Array(buffer);
+        return Array.from(bytes)
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+    }
+
+    private arrayBufferToBase64(buffer: ArrayBuffer): string {
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+    private base64ToArrayBuffer(base64: string): ArrayBuffer {
+        const binaryString = atob(base64.trim());
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
     }
 
     private async copyToClipboard() {
