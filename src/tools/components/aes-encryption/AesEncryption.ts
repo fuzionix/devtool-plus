@@ -7,7 +7,7 @@ import '../../common/dropdown-menu/DropdownMenu';
 import '../../common/switch/Switch';
 import '../../common/tooltip/Tooltip';
 
-type EncryptionMode = 'CBC' | 'ECB' | 'CFB' | 'OFB' | 'CTR' | 'GCM';
+type EncryptionMode = 'CBC' | 'CTR' | 'GCM';
 type KeySize = '128' | '192' | '256';
 type Operation = 'encrypt' | 'decrypt';
 
@@ -19,7 +19,7 @@ export class AesEncryption extends BaseTool {
     @state() private ivText = '';
     @state() private keyEncoding = false;
     @state() private inputEncoding = false;
-    @state() private outputEncoding = false;
+    @state() private outputEncoding = true;
     @state() private selectedMode: EncryptionMode = 'CBC';
     @state() private selectedKeySize: KeySize = '256';
     @state() private selectedOperation: Operation = 'encrypt';
@@ -78,9 +78,6 @@ export class AesEncryption extends BaseTool {
                         <tool-dropdown-menu
                             .options=${[
                                 { label: 'CBC', value: 'CBC' },
-                                { label: 'ECB', value: 'ECB' },
-                                { label: 'CFB', value: 'CFB' },
-                                { label: 'OFB', value: 'OFB' },
                                 { label: 'CTR', value: 'CTR' },
                                 { label: 'GCM', value: 'GCM' }
                             ]}
@@ -186,10 +183,9 @@ export class AesEncryption extends BaseTool {
                                 rows="1"
                                 .value=${this.ivText}
                                 @input=${this.handleIvChange}
-                                ?disabled=${this.selectedMode === 'ECB'}
                             ></textarea>
                             <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                                <button class="btn-icon" @click=${this.generateRandomIv} ?disabled=${this.selectedMode === 'ECB'}>
+                                <button class="btn-icon" @click=${this.generateRandomIv}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
                                 </button>
                             </div>
@@ -246,9 +242,7 @@ export class AesEncryption extends BaseTool {
         const newMode = e.detail.value as EncryptionMode;
         this.selectedMode = newMode;
 
-        if (newMode === 'ECB') {
-            this.ivText = '';
-        } else if (!this.ivText) {
+        if (!this.ivText) {
             this.generateRandomIv();
         }
 
@@ -421,14 +415,12 @@ export class AesEncryption extends BaseTool {
             keyBuffer = this.adjustKeyLength(keyBuffer, parseInt(this.selectedKeySize) / 8);
 
             let ivBuffer: ArrayBuffer | undefined;
-            if (this.selectedMode !== 'ECB') {
-                if (!iv) {
-                    // Create a zero-filled IV when none is provided
-                    const zeroIv = new Uint8Array(16);
-                    ivBuffer = zeroIv.buffer;
-                } else {
-                    ivBuffer = this.hexToArrayBuffer(iv);
-                }
+            if (!iv) {
+                // Create a zero-filled IV when none is provided
+                const zeroIv = new Uint8Array(16);
+                ivBuffer = zeroIv.buffer;
+            } else {
+                ivBuffer = this.hexToArrayBuffer(iv);
             }
 
             let plaintextBuffer: ArrayBuffer;
@@ -496,12 +488,10 @@ export class AesEncryption extends BaseTool {
             keyBuffer = this.adjustKeyLength(keyBuffer, parseInt(this.selectedKeySize) / 8);
 
             let ivBuffer: ArrayBuffer | undefined;
-            if (this.selectedMode !== 'ECB') {
-                if (!iv) {
-                    throw new Error('IV is required for this decryption mode');
-                }
-                ivBuffer = this.hexToArrayBuffer(iv);
+            if (!iv) {
+                throw new Error('IV is required for this decryption mode');
             }
+            ivBuffer = this.hexToArrayBuffer(iv);
 
             let ciphertextBuffer: ArrayBuffer;
             if (this.inputEncoding) {
@@ -547,7 +537,7 @@ export class AesEncryption extends BaseTool {
             }
         }
 
-        if (this.selectedMode !== 'ECB' && this.ivText) {
+        if (this.ivText) {
             const hexRegex = /^[0-9a-fA-F]+$/;
             if (!hexRegex.test(this.ivText.replace(/\s/g, ''))) {
                 throw new Error('IV must contain only hexadecimal characters (0-9, a-f, A-F)');
@@ -599,9 +589,6 @@ export class AesEncryption extends BaseTool {
     private getAlgorithmName(): string {
         switch (this.selectedMode) {
             case 'CBC': return 'AES-CBC';
-            case 'ECB': return 'AES-ECB';
-            case 'CFB': return 'AES-CFB';
-            case 'OFB': return 'AES-OFB';
             case 'CTR': return 'AES-CTR';
             case 'GCM': return 'AES-GCM';
             default: return 'AES-CBC';
@@ -609,7 +596,7 @@ export class AesEncryption extends BaseTool {
     }
 
     private createAlgorithmParams(iv?: ArrayBuffer): any {
-        if (!iv && this.selectedMode !== 'ECB') {
+        if (!iv) {
             throw new Error('IV is required for this encryption mode');
         }
 
@@ -617,21 +604,6 @@ export class AesEncryption extends BaseTool {
             case 'CBC':
                 return {
                     name: 'AES-CBC',
-                    iv
-                };
-            case 'ECB':
-                // ECB doesn't use an IV
-                return {
-                    name: 'AES-ECB'
-                };
-            case 'CFB':
-                return {
-                    name: 'AES-CFB',
-                    iv
-                };
-            case 'OFB':
-                return {
-                    name: 'AES-OFB',
                     iv
                 };
             case 'CTR':
