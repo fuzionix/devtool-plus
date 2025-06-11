@@ -17,6 +17,7 @@ export class AesEncryption extends BaseTool {
     @state() private outputText = '';
     @state() private keyText = '';
     @state() private ivText = '';
+    @state() private outputEncoding = false; // true for Base64, false for Hex
     @state() private isEncrypt = true;
     @state() private selectedMode: EncryptionMode = 'CBC';
     @state() private selectedKeySize: KeySize = '256';
@@ -205,6 +206,16 @@ export class AesEncryption extends BaseTool {
                         </button>
                     </div>
                 </div>
+                <div class="mt-2">
+                    <tool-switch
+                        .checked=${this.outputEncoding}
+                        leftLabel="Hex"
+                        rightLabel="Base64"
+                        ariaLabel="Output Encoding"
+                        data-charset="numbers"
+                        @change=${this.handleOutputEncodingChange}
+                    ></tool-switch>
+                </div>
             </div>
         `;
     }
@@ -251,6 +262,11 @@ export class AesEncryption extends BaseTool {
         this.ivText = target.value;
         this.processInput();
         adjustTextareaHeight(this.iv);
+    }
+
+    private handleOutputEncodingChange(e: CustomEvent) {
+        this.outputEncoding = e.detail.checked;
+        this.processInput();
     }
 
     private generateRandomKey(): void {
@@ -305,9 +321,13 @@ export class AesEncryption extends BaseTool {
 
             if (this.selectedMode !== 'ECB') {
                 if (!iv) {
-                    throw new Error('IV is required for this encryption mode');
+                    // Create a zero-filled IV when none is provided
+                    const zeroIv = new Uint8Array(16);
+                    ivBuffer = zeroIv.buffer;
+                    adjustTextareaHeight(this.iv);
+                } else {
+                    ivBuffer = this.hexToArrayBuffer(iv);
                 }
-                ivBuffer = this.hexToArrayBuffer(iv);
             }
 
             const encoder = new TextEncoder();
@@ -347,7 +367,7 @@ export class AesEncryption extends BaseTool {
 
             const keyBuffer = this.hexToArrayBuffer(key);
             let ivBuffer: ArrayBuffer | undefined;
-            
+
             if (this.selectedMode !== 'ECB') {
                 if (!iv) {
                     throw new Error('IV is required for this decryption mode');
