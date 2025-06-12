@@ -168,7 +168,6 @@ export class Slider extends LitElement {
 
     @state() private isDragging = false;
     @query('.slider') private sliderElement!: HTMLInputElement;
-    @query('.slider-track') private trackElement!: HTMLDivElement;
     @query('.value-tooltip') private tooltipElement!: HTMLDivElement;
 
     private readonly THUMB_WIDTH = 14;

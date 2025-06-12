@@ -4,31 +4,31 @@ import { BaseTool } from '../../base/BaseTool';
 import { adjustTextareaHeight, renderCopyButton } from '../../../utils/util';
 import '../../common/alert/Alert';
 import '../../common/dropdown-menu/DropdownMenu';
+import '../../common/slider/Slider';
 import '../../common/switch/Switch';
 import '../../common/tooltip/Tooltip';
 
 type EncryptionMode = 'CBC' | 'CTR' | 'GCM';
-type KeySize = '128' | '192' | '256';
+type KeySize = '128' | '256';
 type Operation = 'encrypt' | 'decrypt';
 
 @customElement('aes-encryption')
 export class AesEncryption extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
-    @state() private keyText = '';
+    @state() private passwordText = '';
+    @state() private saltText = '';
     @state() private ivText = '';
-    @state() private keyEncoding = false;
     @state() private inputEncoding = false;
     @state() private outputEncoding = true;
     @state() private selectedMode: EncryptionMode = 'CBC';
     @state() private selectedKeySize: KeySize = '256';
     @state() private selectedOperation: Operation = 'encrypt';
+    @state() private iterations = 100000; // PBKDF2 iterations
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
 
-    @query('#key') private key!: HTMLTextAreaElement;
     @query('#input') private input!: HTMLTextAreaElement;
-    @query('#iv') private iv!: HTMLTextAreaElement;
     @query('#output') private output!: HTMLTextAreaElement;
 
     static styles = css`
@@ -69,7 +69,7 @@ export class AesEncryption extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Key and Encryption Input -->
+                <!-- Encryption Settings -->
                 <div class="flex flex-col min-[320px]:flex-row gap-4 my-4">
                     <div class="flex-1">
                         <div class="mb-2 text-xs">
@@ -93,7 +93,6 @@ export class AesEncryption extends BaseTool {
                         <tool-dropdown-menu
                             .options=${[
                                 { label: '128 bits', value: '128' },
-                                { label: '192 bits', value: '192' },
                                 { label: '256 bits', value: '256' }
                             ]}
                             .value=${this.selectedKeySize}
@@ -103,29 +102,21 @@ export class AesEncryption extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Key Input -->
+                <!-- Password Input -->
                 <div class="flex justify-between items-baseline mb-2 text-xs">
-                    <p class="mb-0">Key</p>
-                    <tool-switch
-                        .checked=${this.keyEncoding}
-                        leftLabel="UTF-8"
-                        rightLabel="Hex"
-                        ariaLabel="Key Encoding"
-                        data-charset="numbers"
-                        @change=${this.handleKeyEncodingChange}
-                    ></tool-switch>
+                    <p class="mb-0">Password</p>
                 </div>
                 <div class="relative flex items-center mb-4">
                     <textarea
-                        id="key"
+                        id="password"
                         class="input-expandable"
-                        placeholder="Enter Key"
+                        placeholder="Enter Password"
                         rows="1"
-                        .value=${this.keyText}
-                        @input=${this.handleKeyChange}
+                        .value=${this.passwordText}
+                        @input=${this.handlePasswordChange}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <button class="btn-icon" @click=${this.generateRandomKey}>
+                        <button class="btn-icon" @click=${this.generateRandomPassword}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
                         </button>
                     </div>
@@ -171,6 +162,28 @@ export class AesEncryption extends BaseTool {
 
                 <tool-expandable label="Advanced Settings">
                     <div class="content-to-expand">
+                        <!-- Salt -->
+                        <p class="mb-2 text-xs">Salt</p>
+                        <p class="mb-2 text-xs opacity-75">
+                            Adds randomness to the key derivation process.
+                        </p>
+                        <div class="relative flex items-center mb-4">
+                            <textarea 
+                                id="salt"
+                                class="input-expandable"
+                                placeholder="Enter Salt (or auto-generated)"
+                                rows="1"
+                                .value=${this.saltText}
+                                @input=${this.handleSaltChange}
+                            ></textarea>
+                            <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                                <button class="btn-icon" @click=${this.generateRandomSalt}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- IV -->
                         <p class="mb-2 text-xs">IV</p>
                         <p class="mb-2 text-xs opacity-75">
                             Initialization Vector (IV) is used to ensure that identical plaintexts encrypt to different ciphertexts.
@@ -179,7 +192,7 @@ export class AesEncryption extends BaseTool {
                             <textarea 
                                 id="iv"
                                 class="input-expandable"
-                                placeholder="Enter IV (optional)"
+                                placeholder="Enter IV (or auto-generated)"
                                 rows="1"
                                 .value=${this.ivText}
                                 @input=${this.handleIvChange}
@@ -190,6 +203,19 @@ export class AesEncryption extends BaseTool {
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Iterations slider -->
+                        <p class="mb-2 text-xs">PBKDF2 Iterations: ${this.iterations.toLocaleString()}</p>
+                        <p class="mb-2 text-xs opacity-75">
+                            Higher values increase security but also processing time. Recommended: 100,000+
+                        </p>
+                        <tool-slider
+                            min="10000"
+                            max="1000000"
+                            step="10000"
+                            .value=${this.iterations.toString()}
+                            @change=${this.handleIterationsChange}
+                        ></tool-slider>
                     </div>
                 </tool-expandable>
 
@@ -235,17 +261,14 @@ export class AesEncryption extends BaseTool {
 
     private handleModeChange(mode: 'encrypt' | 'decrypt') {
         this.selectedOperation = mode;
+        this.inputText = '';
+        this.outputText = '';
         this.processInput();
     }
 
     private handleEncryptionModeChange(e: CustomEvent) {
         const newMode = e.detail.value as EncryptionMode;
         this.selectedMode = newMode;
-
-        if (!this.ivText) {
-            this.generateRandomIv();
-        }
-
         this.processInput();
     }
 
@@ -254,43 +277,16 @@ export class AesEncryption extends BaseTool {
         this.processInput();
     }
 
-    private handleKeyEncodingChange(e: CustomEvent) {
-        if (this.keyText) {
-            const oldEncoding = this.keyEncoding;
-            const newEncoding = e.detail.checked;
-            
-            try {
-                // Converting from UTF-8 to Hex
-                if (!oldEncoding && newEncoding) {
-                    const encoder = new TextEncoder();
-                    const keyBytes = encoder.encode(this.keyText);
-                    this.keyText = this.arrayBufferToHex(keyBytes);
-                }
-                // Converting from Hex to UTF-8
-                else if (oldEncoding && !newEncoding) {
-                    const keyBuffer = this.hexToArrayBuffer(this.keyText);
-                    const decoder = new TextDecoder();
-                    this.keyText = decoder.decode(keyBuffer);
-                }
-            } catch (error) {
-                this.alert = {
-                    type: 'error',
-                    message: 'Failed to convert key format. The key may contain invalid characters.'
-                };
-                this.keyEncoding = oldEncoding;
-                return;
-            }
-        }
-        
-        this.keyEncoding = e.detail.checked;
+    private handlePasswordChange(e: Event) {
+        const target = e.target as HTMLTextAreaElement;
+        this.passwordText = target.value;
         this.processInput();
     }
 
-    private handleKeyChange(e: Event) {
+    private handleSaltChange(e: Event) {
         const target = e.target as HTMLTextAreaElement;
-        this.keyText = target.value;
+        this.saltText = target.value;
         this.processInput();
-        adjustTextareaHeight(this.key);
     }
 
     private handleInput(e: Event) {
@@ -298,13 +294,19 @@ export class AesEncryption extends BaseTool {
         this.inputText = target.value;
         this.processInput();
         adjustTextareaHeight(this.input);
+        adjustTextareaHeight(this.output);
     }
 
     private handleIvChange(e: Event) {
         const target = e.target as HTMLTextAreaElement;
         this.ivText = target.value;
         this.processInput();
-        adjustTextareaHeight(this.iv);
+    }
+
+    private handleIterationsChange(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.iterations = parseInt(target.value);
+        this.processInput();
     }
 
     private handleInputEncodingChange(e: CustomEvent) {
@@ -351,20 +353,27 @@ export class AesEncryption extends BaseTool {
         this.processInput();
     }
 
-    private generateRandomKey(): void {
-        const keySize = parseInt(this.selectedKeySize);
-        const byteLength = keySize / 8;
-        const randomBytes = new Uint8Array(byteLength);
-        window.crypto.getRandomValues(randomBytes);
+    private generateRandomPassword(): void {
+        // Generate a secure random password (16 characters)
+        const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+        const randomValues = new Uint8Array(16);
+        window.crypto.getRandomValues(randomValues);
         
-        if (this.keyEncoding) {
-            this.keyText = this.arrayBufferToHex(randomBytes);
-        } else {
-            this.keyText = this.arrayBufferToBase64(randomBytes);
+        let password = "";
+        for (let i = 0; i < 16; i++) {
+            password += charset[randomValues[i] % charset.length];
         }
         
+        this.passwordText = password;
         this.processInput();
-        adjustTextareaHeight(this.key);
+    }
+
+    private generateRandomSalt(): void {
+        // Salt should be at least 16 bytes (128 bits)
+        const saltBytes = new Uint8Array(16);
+        window.crypto.getRandomValues(saltBytes);
+        this.saltText = this.arrayBufferToHex(saltBytes);
+        this.processInput();
     }
 
     private generateRandomIv(): void {
@@ -373,97 +382,120 @@ export class AesEncryption extends BaseTool {
         window.crypto.getRandomValues(ivBytes);
         this.ivText = this.arrayBufferToHex(ivBytes);
         this.processInput();
-        adjustTextareaHeight(this.iv);
     }
 
     private async processInput(): Promise<void> {
         this.alert = null;
 
-        if (!this.inputText || !this.keyText) {
+        if (!this.inputText || !this.passwordText) {
             this.outputText = '';
             return;
         }
 
         try {
             if (this.selectedOperation === 'encrypt') {
-                this.outputText = await this.encrypt(this.inputText, this.keyText, this.ivText);
+                if (!this.saltText) {
+                    this.generateRandomSalt();
+                    return;
+                }
+                
+                if (!this.ivText) {
+                    this.generateRandomIv();
+                    return;
+                }
+                
+                this.outputText = await this.encrypt(this.inputText, this.passwordText, this.saltText, this.ivText); 
             } else {
-                this.outputText = await this.decrypt(this.inputText, this.keyText, this.ivText);
+                if (!this.saltText || !this.ivText) {
+                    this.alert = {
+                        type: 'error',
+                        message: 'Both Salt and IV are required for decryption'
+                    };
+                    this.outputText = '';
+                    return;
+                }
+                
+                this.outputText = await this.decrypt(this.inputText, this.passwordText, this.saltText, this.ivText);
             }
         } catch (error) {
-            console.error('Encryption/Decryption error:', error);
             this.alert = {
                 type: 'error',
                 message: error instanceof Error ? error.message : 'An error occurred during processing'
             };
             this.outputText = '';
         }
+
+        setTimeout(() => adjustTextareaHeight(this.output), 0);
     }
 
-    private async encrypt(plaintext: string, key: string, iv: string): Promise<string> {
+    private async deriveKey(password: string, salt: string, keySize: number): Promise<CryptoKey> {
+        try {
+            const encoder = new TextEncoder();
+            const passwordBuffer = encoder.encode(password);
+            
+            const saltBuffer = this.hexToArrayBuffer(salt);
+            
+            const baseKey = await window.crypto.subtle.importKey(
+                'raw',
+                passwordBuffer,
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            
+            return await window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: saltBuffer,
+                    iterations: this.iterations,
+                    hash: 'SHA-256'
+                },
+                baseKey,
+                {
+                    name: this.getAlgorithmName(),
+                    length: keySize
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        } catch (error) {
+            throw new Error('Failed to derive encryption key from password');
+        }
+    }
+
+    private async encrypt(plaintext: string, password: string, salt: string, iv: string): Promise<string> {
         try {
             this.validateInputs();
 
-            let keyBuffer: ArrayBuffer;
-            if (this.keyEncoding) {
-                keyBuffer = this.hexToArrayBuffer(key);
-            } else {
-                const encoder = new TextEncoder();
-                keyBuffer = encoder.encode(key);
-            }
-
-            keyBuffer = this.adjustKeyLength(keyBuffer, parseInt(this.selectedKeySize) / 8);
-
-            let ivBuffer: ArrayBuffer | undefined;
-            if (!iv) {
-                // Create a zero-filled IV when none is provided
-                const zeroIv = new Uint8Array(16);
-                ivBuffer = zeroIv.buffer;
-            } else {
-                ivBuffer = this.hexToArrayBuffer(iv);
-            }
-
             let plaintextBuffer: ArrayBuffer;
-            if (this.selectedOperation === 'encrypt') {
-                if (this.inputEncoding) {
-                    // Input is in Hex format
-                    plaintextBuffer = this.hexToArrayBuffer(plaintext);
-                } else {
-                    // Input is in UTF-8 format
-                    const encoder = new TextEncoder();
-                    plaintextBuffer = encoder.encode(plaintext);
-                }
+            if (this.inputEncoding) {
+                // Input is in Hex format
+                plaintextBuffer = this.hexToArrayBuffer(plaintext);
             } else {
-                if (this.inputEncoding) {
-                    // Input is in Hex format
-                    plaintextBuffer = this.hexToArrayBuffer(plaintext);
-                } else {
-                    // Input is in Base64 format
-                    plaintextBuffer = this.base64ToArrayBuffer(plaintext);
-                }
+                // Input is in UTF-8 format
+                const encoder = new TextEncoder();
+                plaintextBuffer = encoder.encode(plaintext);
             }
 
-            const cryptoKey = await window.crypto.subtle.importKey(
-                'raw',
-                keyBuffer,
-                {
-                    name: this.getAlgorithmName(),
-                    length: parseInt(this.selectedKeySize)
-                },
-                false,
-                ['encrypt']
-            );
+            const ivBuffer = this.hexToArrayBuffer(iv);
+            const keySize = parseInt(this.selectedKeySize);
+            
+            const cryptoKey = await this.deriveKey(password, salt, keySize);
 
             const algorithmParams = this.createAlgorithmParams(ivBuffer);
-            const encryptedBuffer = await window.crypto.subtle.encrypt(
-                algorithmParams,
-                cryptoKey,
-                plaintextBuffer
-            );
-
-            return this.outputEncoding 
-                ? this.arrayBufferToBase64(encryptedBuffer)
-                : this.arrayBufferToHex(encryptedBuffer);
+            try {
+                const encryptedBuffer = await window.crypto.subtle.encrypt(
+                    algorithmParams,
+                    cryptoKey,
+                    plaintextBuffer
+                );
+    
+                return this.outputEncoding 
+                    ? this.arrayBufferToBase64(encryptedBuffer)
+                    : this.arrayBufferToHex(encryptedBuffer);
+            } catch (err) {
+                throw new Error('The plaintext or key may be incorrect.');
+            }
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(`Encryption failed: ${error.message}`);
@@ -473,55 +505,44 @@ export class AesEncryption extends BaseTool {
         }
     }
 
-    private async decrypt(ciphertext: string, key: string, iv: string): Promise<string> {
+    private async decrypt(ciphertext: string, password: string, salt: string, iv: string): Promise<string> {
         try {
             this.validateInputs();
 
-            let keyBuffer: ArrayBuffer;
-            if (this.keyEncoding) {
-                keyBuffer = this.hexToArrayBuffer(key);
-            } else {
-                const encoder = new TextEncoder();
-                keyBuffer = encoder.encode(key);
-            }
-
-            keyBuffer = this.adjustKeyLength(keyBuffer, parseInt(this.selectedKeySize) / 8);
-
-            let ivBuffer: ArrayBuffer | undefined;
-            if (!iv) {
-                throw new Error('IV is required for this decryption mode');
-            }
-            ivBuffer = this.hexToArrayBuffer(iv);
-
             let ciphertextBuffer: ArrayBuffer;
-            if (this.inputEncoding) {
-                ciphertextBuffer = this.hexToArrayBuffer(ciphertext);
-            } else {
-                ciphertextBuffer = this.base64ToArrayBuffer(ciphertext);
+            try {
+                if (this.inputEncoding) {
+                    // Input is in Hex format
+                    ciphertextBuffer = this.hexToArrayBuffer(ciphertext);
+                } else {
+                    // Input is in Base64 format
+                    ciphertextBuffer = this.base64ToArrayBuffer(ciphertext);
+                }
+            } catch (error) {
+                throw new Error(`Invalid ciphertext format: ${error}`);
             }
 
-            const cryptoKey = await window.crypto.subtle.importKey(
-                'raw',
-                keyBuffer,
-                {
-                    name: this.getAlgorithmName(),
-                    length: parseInt(this.selectedKeySize)
-                },
-                false,
-                ['decrypt']
-            );
+            const ivBuffer = this.hexToArrayBuffer(iv);
+            const keySize = parseInt(this.selectedKeySize);
+            
+            const cryptoKey = await this.deriveKey(password, salt, keySize);
 
             const algorithmParams = this.createAlgorithmParams(ivBuffer);
-            const decryptedBuffer = await window.crypto.subtle.decrypt(
-                algorithmParams,
-                cryptoKey,
-                ciphertextBuffer
-            );
-
-            const decoder = new TextDecoder();
-            return decoder.decode(decryptedBuffer);
+            try {
+                const decryptedBuffer = await window.crypto.subtle.decrypt(
+                    algorithmParams,
+                    cryptoKey,
+                    ciphertextBuffer
+                );
+    
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedBuffer);
+            } catch (err) {
+                throw new Error('The ciphertext, key, or IV may be incorrect');
+            }
         } catch (error) {
             if (error instanceof Error) {
+                console.log('Decryption error:', error);
                 throw new Error(`Decryption failed: ${error.message}`);
             } else {
                 throw new Error('Decryption failed with an unknown error');
@@ -530,10 +551,14 @@ export class AesEncryption extends BaseTool {
     }
 
     private validateInputs(): void {
-        if (this.keyEncoding) {
+        if (!this.passwordText) {
+            throw new Error('Password is required');
+        }
+
+        if (this.saltText) {
             const hexRegex = /^[0-9a-fA-F]+$/;
-            if (!hexRegex.test(this.keyText.replace(/\s/g, ''))) {
-                throw new Error('Hex-encoded key must contain only hexadecimal characters (0-9, a-f, A-F)');
+            if (!hexRegex.test(this.saltText.replace(/\s/g, ''))) {
+                throw new Error('Salt must contain only hexadecimal characters (0-9, a-f, A-F)');
             }
         }
 
@@ -548,42 +573,6 @@ export class AesEncryption extends BaseTool {
                 throw new Error('IV must be exactly 32 hex characters (128 bits)');
             }
         }
-
-        if (this.selectedOperation === 'decrypt' && !this.inputEncoding) {
-            const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-            if (!base64Regex.test(this.inputText.trim())) {
-                throw new Error('Base64-encoded ciphertext must be in valid Base64 format');
-            }
-        }
-
-        if (this.selectedOperation === 'decrypt' && this.inputEncoding) {
-            const hexRegex = /^[0-9a-fA-F]+$/;
-            if (!hexRegex.test(this.inputText.replace(/\s/g, ''))) {
-                throw new Error('Hex-encoded ciphertext must contain only hexadecimal characters (0-9, a-f, A-F)');
-            }
-        }
-    }
-
-    private adjustKeyLength(keyBuffer: ArrayBuffer, targetByteLength: number): ArrayBuffer {
-        const keyBytes = new Uint8Array(keyBuffer);
-        
-        if (keyBytes.length === targetByteLength) {
-            return keyBuffer;
-        }
-        
-        // Padding (using PKCS#7 style)
-        if (keyBytes.length < targetByteLength) {
-            const paddedKey = new Uint8Array(targetByteLength);
-            paddedKey.set(keyBytes);
-            const paddingValue = targetByteLength - keyBytes.length;
-            for (let i = keyBytes.length; i < targetByteLength; i++) {
-                paddedKey[i] = paddingValue;
-            }
-            return paddedKey.buffer;
-        }
-        
-        // If key is too long, truncate it to the target length
-        return keyBytes.slice(0, targetByteLength).buffer;
     }
 
     private getAlgorithmName(): string {
@@ -595,7 +584,7 @@ export class AesEncryption extends BaseTool {
         }
     }
 
-    private createAlgorithmParams(iv?: ArrayBuffer): any {
+    private createAlgorithmParams(iv: ArrayBuffer): any {
         if (!iv) {
             throw new Error('IV is required for this encryption mode');
         }
