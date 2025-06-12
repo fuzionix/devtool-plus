@@ -4,6 +4,7 @@ import { BaseTool } from '../../base/BaseTool';
 import { adjustTextareaHeight, renderCopyButton } from '../../../utils/util';
 import '../../common/alert/Alert';
 import '../../common/dropdown-menu/DropdownMenu';
+import '../../common/inline-menu/InlineMenu';
 import '../../common/slider/Slider';
 import '../../common/switch/Switch';
 import '../../common/tooltip/Tooltip';
@@ -11,6 +12,7 @@ import '../../common/tooltip/Tooltip';
 type EncryptionMode = 'CBC' | 'CTR' | 'GCM';
 type KeySize = '128' | '256';
 type Operation = 'encrypt' | 'decrypt';
+type InputEncoding = 'utf-8' | 'hex' | 'base64';
 
 @customElement('aes-encryption')
 export class AesEncryption extends BaseTool {
@@ -19,8 +21,8 @@ export class AesEncryption extends BaseTool {
     @state() private passwordText = '';
     @state() private saltText = '';
     @state() private ivText = '';
-    @state() private inputEncoding = false;
-    @state() private outputEncoding = true;
+    @state() private inputEncoding: InputEncoding = 'utf-8';
+    @state() private outputEncoding = true; // true = Base64, false = Hex
     @state() private selectedMode: EncryptionMode = 'CBC';
     @state() private selectedKeySize: KeySize = '256';
     @state() private selectedOperation: Operation = 'encrypt';
@@ -127,14 +129,23 @@ export class AesEncryption extends BaseTool {
                     <p class="mb-0">
                         ${this.selectedOperation === 'encrypt' ? 'Plaintext' : 'Ciphertext'}
                     </p>
-                    <tool-switch
-                        .checked=${this.inputEncoding}
-                        leftLabel=${this.selectedOperation === 'encrypt' ? 'UTF-8' : 'Base64'}
-                        rightLabel="Hex"
-                        ariaLabel="Input Encoding"
-                        data-charset="numbers"
-                        @change=${this.handleInputEncodingChange}
-                    ></tool-switch>
+                    <div>
+                        <tool-inline-menu
+                            .options=${this.selectedOperation === 'encrypt' 
+                                ? [
+                                    { label: 'UTF-8', value: 'utf-8' },
+                                    { label: 'Hex', value: 'hex' }
+                                  ] 
+                                : [
+                                    { label: 'Base64', value: 'base64' },
+                                    { label: 'Hex', value: 'hex' }
+                                  ]
+                            }
+                            .value=${this.inputEncoding}
+                            placeholder="Input Encoding"
+                            @change=${this.handleInputEncodingChange}
+                        ></tool-inline-menu>
+                    </div>
                 </div>
                 <div class="relative flex items-center my-2">
                     <textarea
@@ -261,6 +272,13 @@ export class AesEncryption extends BaseTool {
 
     private handleModeChange(mode: 'encrypt' | 'decrypt') {
         this.selectedOperation = mode;
+        
+        if (mode === 'encrypt') {
+            this.inputEncoding = 'utf-8';
+        } else {
+            this.inputEncoding = 'base64';
+        }
+        
         this.inputText = '';
         this.outputText = '';
         this.processInput();
@@ -310,41 +328,43 @@ export class AesEncryption extends BaseTool {
     }
 
     private handleInputEncodingChange(e: CustomEvent) {
-        if (this.inputText) {
-            const oldEncoding = this.inputEncoding;
-            const newEncoding = e.detail.checked;
-            
-            try {
-                if (this.selectedOperation === 'encrypt') {
-                    if (!oldEncoding && newEncoding) {
-                        const encoder = new TextEncoder();
-                        const inputBytes = encoder.encode(this.inputText);
-                        this.inputText = this.arrayBufferToHex(inputBytes);
-                    } else if (oldEncoding && !newEncoding) {
-                        const inputBuffer = this.hexToArrayBuffer(this.inputText);
-                        const decoder = new TextDecoder();
-                        this.inputText = decoder.decode(inputBuffer);
-                    }
-                } else {
-                    if (!oldEncoding && newEncoding) {
-                        const inputBuffer = this.base64ToArrayBuffer(this.inputText);
-                        this.inputText = this.arrayBufferToHex(inputBuffer);
-                    } else if (oldEncoding && !newEncoding) {
-                        const inputBuffer = this.hexToArrayBuffer(this.inputText);
-                        this.inputText = this.arrayBufferToBase64(inputBuffer);
-                    }
-                }
-            } catch (error) {
-                this.alert = {
-                    type: 'error',
-                    message: 'Failed to convert input format. The input may contain invalid characters.'
-                };
-                this.inputEncoding = oldEncoding;
-                return;
-            }
+        if (!this.inputText) {
+            this.inputEncoding = e.detail.value;
+            return;
         }
         
-        this.inputEncoding = e.detail.checked;
+        const oldEncoding = this.inputEncoding;
+        const newEncoding = e.detail.value as InputEncoding;
+        
+        try {
+            if (this.selectedOperation === 'encrypt') {
+                if (oldEncoding === 'utf-8' && newEncoding === 'hex') {
+                    const encoder = new TextEncoder();
+                    const inputBytes = encoder.encode(this.inputText);
+                    this.inputText = this.arrayBufferToHex(inputBytes);
+                } else if (oldEncoding === 'hex' && newEncoding === 'utf-8') {
+                    const inputBuffer = this.hexToArrayBuffer(this.inputText);
+                    const decoder = new TextDecoder();
+                    this.inputText = decoder.decode(inputBuffer);
+                }
+            } else {
+                if (oldEncoding === 'base64' && newEncoding === 'hex') {
+                    const inputBuffer = this.base64ToArrayBuffer(this.inputText);
+                    this.inputText = this.arrayBufferToHex(inputBuffer);
+                } else if (oldEncoding === 'hex' && newEncoding === 'base64') {
+                    const inputBuffer = this.hexToArrayBuffer(this.inputText);
+                    this.inputText = this.arrayBufferToBase64(inputBuffer);
+                }
+            }
+        } catch (error) {
+            this.alert = {
+                type: 'error',
+                message: 'Failed to convert input format. The input may contain invalid characters.'
+            };
+            return;
+        }
+        
+        this.inputEncoding = newEncoding;
         this.processInput();
     }
 
@@ -468,7 +488,7 @@ export class AesEncryption extends BaseTool {
             this.validateInputs();
 
             let plaintextBuffer: ArrayBuffer;
-            if (this.inputEncoding) {
+            if (this.inputEncoding === 'hex') {
                 // Input is in Hex format
                 plaintextBuffer = this.hexToArrayBuffer(plaintext);
             } else {
@@ -511,7 +531,7 @@ export class AesEncryption extends BaseTool {
 
             let ciphertextBuffer: ArrayBuffer;
             try {
-                if (this.inputEncoding) {
+                if (this.inputEncoding === 'hex') {
                     // Input is in Hex format
                     ciphertextBuffer = this.hexToArrayBuffer(ciphertext);
                 } else {
