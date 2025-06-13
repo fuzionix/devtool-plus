@@ -21,6 +21,8 @@ export class AesEncryption extends BaseTool {
     @state() private passwordText = '';
     @state() private saltText = '';
     @state() private ivText = '';
+    @state() private fileName = '';
+    @state() private file: File | null = null;
     @state() private inputEncoding: InputEncoding = 'utf-8';
     @state() private outputEncoding = true; // true = Base64, false = Hex
     @state() private selectedMode: EncryptionMode = 'CBC';
@@ -32,6 +34,7 @@ export class AesEncryption extends BaseTool {
 
     @query('#input') private input!: HTMLTextAreaElement;
     @query('#output') private output!: HTMLTextAreaElement;
+    @query('#file-input') private fileInput!: HTMLInputElement;
 
     static styles = css`
         ${BaseTool.styles}
@@ -42,6 +45,9 @@ export class AesEncryption extends BaseTool {
             <div class="tool-inner-container">
                 <p class="opacity-75">AES (Advanced Encryption Standard) is a symmetric encryption algorithm that securely transforms data using various block cipher modes and key sizes.</p>
                 <hr />
+
+                <!-- Hidden File Input -->
+                <input id="file-input" class="hidden" type="file" @change=${this.handleFileSelect}>
 
                 <!-- Radio Group -->
                 <div class="">
@@ -154,12 +160,13 @@ export class AesEncryption extends BaseTool {
                         class="input-expandable"
                         placeholder="Enter text to ${this.selectedOperation === 'encrypt' ? 'encrypt' : 'decrypt'}"
                         rows="3"
-                        .value=${this.inputText}
+                        .value=${this.fileName || this.inputText}
                         @input=${this.handleInput}
+                        ?readonly=${Boolean(this.fileName)}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
                         <tool-tooltip text="Upload file">
-                            <button class="btn-icon" id="file" @click="">
+                            <button class="btn-icon" id="file" @click=${this.triggerFileInput}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
                             </button>
                         </tool-tooltip>
@@ -281,6 +288,9 @@ export class AesEncryption extends BaseTool {
     private handleModeChange(mode: 'encrypt' | 'decrypt') {
         this.selectedOperation = mode;
         
+        this.fileName = '';
+        this.file = null;
+        
         if (mode === 'encrypt') {
             this.inputEncoding = 'utf-8';
         } else {
@@ -316,9 +326,11 @@ export class AesEncryption extends BaseTool {
     }
 
     private handleInput(e: Event) {
-        const target = e.target as HTMLTextAreaElement;
-        this.inputText = target.value;
-        this.processInput();
+        if (!this.fileName) {
+            const target = e.target as HTMLTextAreaElement;
+            this.inputText = target.value;
+            this.processInput();
+        }
         adjustTextareaHeight(this.input);
         adjustTextareaHeight(this.output);
     }
@@ -338,6 +350,14 @@ export class AesEncryption extends BaseTool {
     private handleInputEncodingChange(e: CustomEvent) {
         if (!this.inputText) {
             this.inputEncoding = e.detail.value;
+            return;
+        }
+        
+        if (this.fileName) {
+            this.alert = {
+                type: 'warning',
+                message: 'Please clear the current file before changing encoding.'
+            };
             return;
         }
         
@@ -428,7 +448,7 @@ export class AesEncryption extends BaseTool {
     private async processInput(): Promise<void> {
         this.alert = null;
 
-        if (!this.inputText || !this.passwordText) {
+        if ((!this.inputText && !this.file) || !this.passwordText) {
             this.outputText = '';
             return;
         }
@@ -509,7 +529,11 @@ export class AesEncryption extends BaseTool {
             this.validateInputs();
 
             let plaintextBuffer: ArrayBuffer;
-            if (this.inputEncoding === 'hex') {
+            
+            if (this.file && this.fileName) {
+                // If we have a file, use the cached file data
+                plaintextBuffer = await this.readFileAsArrayBuffer(this.file);
+            } else if (this.inputEncoding === 'hex') {
                 // Input is in Hex format
                 plaintextBuffer = this.hexToArrayBuffer(plaintext);
             } else if (this.inputEncoding === 'base64') {
@@ -618,7 +642,7 @@ export class AesEncryption extends BaseTool {
             }
         }
 
-        if (this.selectedOperation === 'encrypt' && this.inputEncoding === 'base64') {
+        if (this.selectedOperation === 'encrypt' && this.inputEncoding === 'base64' && !this.file) {
             try {
                 this.base64ToArrayBuffer(this.inputText);
             } catch (error) {
@@ -725,6 +749,9 @@ export class AesEncryption extends BaseTool {
         this.inputText = '';
         this.outputText = '';
         this.alert = null;
+        this.fileName = '';
+        this.file = null;
+        this.fileInput.value = '';
 
         this.input.value = '';
         this.output.value = '';
@@ -732,5 +759,75 @@ export class AesEncryption extends BaseTool {
         this.input.style.height = `auto`;
         this.output.style.height = `auto`;
         this.requestUpdate();
+    }
+    
+    private triggerFileInput(): void {
+        this.fileInput.click();
+    }
+
+    private async handleFileSelect(event: Event): Promise<void> {
+        const fileInput = event.target as HTMLInputElement;
+        const file = fileInput.files?.[0];
+        
+        this.clearAll();
+
+        if (file) {
+            try {
+                this.file = file;
+                this.fileName = file.name;
+                
+                if (this.selectedOperation === 'encrypt') {
+                    // Automatically set input encoding to match file type
+                    if (file.type.startsWith('text/')) {
+                        this.inputEncoding = 'utf-8';
+                    } else {
+                        this.inputEncoding = 'base64';
+                    }
+                    
+                    const MAX_AUTO_PROCESS_SIZE = 10 * 1024 * 1024;
+                    
+                    if (file.size > MAX_AUTO_PROCESS_SIZE) {
+                        this.alert = {
+                            type: 'warning',
+                            message: `File exceeds 10MB which may cause performance issues. You can still encrypt the file manually.`,
+                        };
+                    } else {
+                        this.processInput();
+                    }
+                } else {
+                    this.alert = {
+                        type: 'error',
+                        message: 'File upload is only supported in encryption mode.',
+                    };
+                    this.clearAll();
+                }
+            } catch (error) {
+                this.alert = {
+                    type: 'error',
+                    message: `Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                };
+                this.clearAll();
+            }
+        }
+    }
+
+    private readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                if (e.target?.result instanceof ArrayBuffer) {
+                    resolve(e.target.result);
+                } else {
+                    reject(new Error('Failed to read file as ArrayBuffer'));
+                }
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Error reading file'));
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
     }
 }
