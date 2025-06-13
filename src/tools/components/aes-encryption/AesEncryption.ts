@@ -24,7 +24,8 @@ export class AesEncryption extends BaseTool {
     @state() private fileName = '';
     @state() private file: File | null = null;
     @state() private inputEncoding: InputEncoding = 'utf-8';
-    @state() private outputEncoding = true; // true = Base64, false = Hex
+    @state() private encryptionOutputEncoding = true;   // true = Base64, false = Hex
+    @state() private decryptionOutputEncoding = false;  // true = Base64, false = UTF-8
     @state() private selectedMode: EncryptionMode = 'CBC';
     @state() private selectedKeySize: KeySize = '256';
     @state() private selectedOperation: Operation = 'encrypt';
@@ -272,14 +273,23 @@ export class AesEncryption extends BaseTool {
                 <div class="mt-2">
                     ${this.selectedOperation === 'encrypt' ? html`
                         <tool-switch
-                            .checked=${this.outputEncoding}
+                            .checked=${this.encryptionOutputEncoding}
                             leftLabel="Hex"
                             rightLabel="Base64"
-                            ariaLabel="Output Encoding"
+                            ariaLabel="Encryption Output Encoding"
                             data-charset="numbers"
-                            @change=${this.handleOutputEncodingChange}
+                            @change=${this.handleEncryptionOutputEncodingChange}
                         ></tool-switch>
-                    ` : ''}
+                    ` : html`
+                        <tool-switch
+                            .checked=${this.decryptionOutputEncoding}
+                            leftLabel="UTF-8"
+                            rightLabel="Base64"
+                            ariaLabel="Decryption Output Encoding"
+                            data-charset="numbers"
+                            @change=${this.handleDecryptionOutputEncodingChange}
+                        ></tool-switch>
+                    `}
                 </div>
             </div>
         `;
@@ -294,7 +304,7 @@ export class AesEncryption extends BaseTool {
         if (mode === 'encrypt') {
             this.inputEncoding = 'utf-8';
         } else {
-            this.inputEncoding = this.outputEncoding ? 'base64' : 'hex';
+            this.inputEncoding = this.encryptionOutputEncoding ? 'base64' : 'hex';
         }
         
         this.inputText = '';
@@ -409,8 +419,13 @@ export class AesEncryption extends BaseTool {
         }
     }
 
-    private handleOutputEncodingChange(e: CustomEvent) {
-        this.outputEncoding = e.detail.checked;
+    private handleEncryptionOutputEncodingChange(e: CustomEvent) {
+        this.encryptionOutputEncoding = e.detail.checked;
+        this.processInput();
+    }
+    
+    private handleDecryptionOutputEncodingChange(e: CustomEvent) {
+        this.decryptionOutputEncoding = e.detail.checked;
         this.processInput();
     }
 
@@ -558,7 +573,7 @@ export class AesEncryption extends BaseTool {
                     plaintextBuffer
                 );
     
-                return this.outputEncoding 
+                return this.encryptionOutputEncoding 
                     ? this.arrayBufferToBase64(encryptedBuffer)
                     : this.arrayBufferToHex(encryptedBuffer);
             } catch (err) {
@@ -603,8 +618,24 @@ export class AesEncryption extends BaseTool {
                     ciphertextBuffer
                 );
     
-                const decoder = new TextDecoder();
-                return decoder.decode(decryptedBuffer);
+                if (this.decryptionOutputEncoding) {
+                    // Output as Base64 (preserves binary data)
+                    return this.arrayBufferToBase64(decryptedBuffer);
+                } else {
+                    // Output as UTF-8 text (may fail for binary data)
+                    try {
+                        const decoder = new TextDecoder();
+                        return decoder.decode(decryptedBuffer);
+                    } catch (error) {
+                        // Fallback to Base64 if UTF-8 decoding fails
+                        this.alert = {
+                            type: 'warning',
+                            message: 'The decrypted data cannot be displayed as UTF-8 text. Showing as Base64 instead.'
+                        };
+                        this.decryptionOutputEncoding = true;
+                        return this.arrayBufferToBase64(decryptedBuffer);
+                    }
+                }
             } catch (err) {
                 throw new Error('The ciphertext, key, or IV may be incorrect');
             }
