@@ -134,7 +134,8 @@ export class AesEncryption extends BaseTool {
                             .options=${this.selectedOperation === 'encrypt' 
                                 ? [
                                     { label: 'UTF-8', value: 'utf-8' },
-                                    { label: 'Hex', value: 'hex' }
+                                    { label: 'Hex', value: 'hex' },
+                                    { label: 'Base64', value: 'base64' }
                                   ] 
                                 : [
                                     { label: 'Base64', value: 'base64' },
@@ -157,6 +158,11 @@ export class AesEncryption extends BaseTool {
                         @input=${this.handleInput}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                        <tool-tooltip text="Upload file">
+                            <button class="btn-icon" id="file" @click="">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                            </button>
+                        </tool-tooltip>
                         <tool-tooltip text="Clear">
                             <button class="btn-icon" id="clear" @click=${this.clearAll}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -257,14 +263,16 @@ export class AesEncryption extends BaseTool {
                     </div>
                 </div>
                 <div class="mt-2">
-                    <tool-switch
-                        .checked=${this.outputEncoding}
-                        leftLabel="Hex"
-                        rightLabel="Base64"
-                        ariaLabel="Output Encoding"
-                        data-charset="numbers"
-                        @change=${this.handleOutputEncodingChange}
-                    ></tool-switch>
+                    ${this.selectedOperation === 'encrypt' ? html`
+                        <tool-switch
+                            .checked=${this.outputEncoding}
+                            leftLabel="Hex"
+                            rightLabel="Base64"
+                            ariaLabel="Output Encoding"
+                            data-charset="numbers"
+                            @change=${this.handleOutputEncodingChange}
+                        ></tool-switch>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -276,7 +284,7 @@ export class AesEncryption extends BaseTool {
         if (mode === 'encrypt') {
             this.inputEncoding = 'utf-8';
         } else {
-            this.inputEncoding = 'base64';
+            this.inputEncoding = this.outputEncoding ? 'base64' : 'hex';
         }
         
         this.inputText = '';
@@ -336,36 +344,49 @@ export class AesEncryption extends BaseTool {
         const oldEncoding = this.inputEncoding;
         const newEncoding = e.detail.value as InputEncoding;
         
+        if (oldEncoding === newEncoding) return;
+        
         try {
-            if (this.selectedOperation === 'encrypt') {
-                if (oldEncoding === 'utf-8' && newEncoding === 'hex') {
-                    const encoder = new TextEncoder();
-                    const inputBytes = encoder.encode(this.inputText);
-                    this.inputText = this.arrayBufferToHex(inputBytes);
-                } else if (oldEncoding === 'hex' && newEncoding === 'utf-8') {
-                    const inputBuffer = this.hexToArrayBuffer(this.inputText);
-                    const decoder = new TextDecoder();
-                    this.inputText = decoder.decode(inputBuffer);
-                }
-            } else {
-                if (oldEncoding === 'base64' && newEncoding === 'hex') {
-                    const inputBuffer = this.base64ToArrayBuffer(this.inputText);
-                    this.inputText = this.arrayBufferToHex(inputBuffer);
-                } else if (oldEncoding === 'hex' && newEncoding === 'base64') {
-                    const inputBuffer = this.hexToArrayBuffer(this.inputText);
-                    this.inputText = this.arrayBufferToBase64(inputBuffer);
-                }
+            // Step 1: Convert from current encoding to binary data (ArrayBuffer)
+            let binaryData: ArrayBuffer;
+            
+            switch (oldEncoding) {
+                case 'utf-8':
+                    binaryData = new TextEncoder().encode(this.inputText).buffer;
+                    break;
+                case 'hex':
+                    binaryData = this.hexToArrayBuffer(this.inputText);
+                    break;
+                case 'base64':
+                    binaryData = this.base64ToArrayBuffer(this.inputText);
+                    break;
+                default:
+                    throw new Error(`Unsupported input encoding: ${oldEncoding}`);
             }
+            
+            // Step 2: Convert from binary data to target encoding
+            switch (newEncoding) {
+                case 'utf-8':
+                    this.inputText = new TextDecoder().decode(binaryData);
+                    break;
+                case 'hex':
+                    this.inputText = this.arrayBufferToHex(binaryData);
+                    break;
+                case 'base64':
+                    this.inputText = this.arrayBufferToBase64(binaryData);
+                    break;
+                default:
+                    throw new Error(`Unsupported target encoding: ${newEncoding}`);
+            }
+            
+            this.inputEncoding = newEncoding;
+            this.processInput();
         } catch (error) {
             this.alert = {
                 type: 'error',
                 message: 'Failed to convert input format. The input may contain invalid characters.'
             };
-            return;
         }
-        
-        this.inputEncoding = newEncoding;
-        this.processInput();
     }
 
     private handleOutputEncodingChange(e: CustomEvent) {
@@ -491,10 +512,13 @@ export class AesEncryption extends BaseTool {
             if (this.inputEncoding === 'hex') {
                 // Input is in Hex format
                 plaintextBuffer = this.hexToArrayBuffer(plaintext);
+            } else if (this.inputEncoding === 'base64') {
+                // Input is in Base64 format
+                plaintextBuffer = this.base64ToArrayBuffer(plaintext);
             } else {
                 // Input is in UTF-8 format
                 const encoder = new TextEncoder();
-                plaintextBuffer = encoder.encode(plaintext);
+                plaintextBuffer = encoder.encode(plaintext).buffer;
             }
 
             const ivBuffer = this.hexToArrayBuffer(iv);
@@ -593,6 +617,14 @@ export class AesEncryption extends BaseTool {
                 throw new Error('IV must be exactly 32 hex characters (128 bits)');
             }
         }
+
+        if (this.selectedOperation === 'encrypt' && this.inputEncoding === 'base64') {
+            try {
+                this.base64ToArrayBuffer(this.inputText);
+            } catch (error) {
+                throw new Error('Invalid Base64 input. Please provide a valid Base64 string.');
+            }
+        }
     }
 
     private getAlgorithmName(): string {
@@ -664,12 +696,16 @@ export class AesEncryption extends BaseTool {
     }
 
     private base64ToArrayBuffer(base64: string): ArrayBuffer {
-        const binaryString = atob(base64.trim());
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
+        try {
+            const binaryString = atob(base64.trim());
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        } catch (error) {
+            throw new Error('Invalid Base64 input');
         }
-        return bytes.buffer;
     }
 
     private async copyToClipboard() {
