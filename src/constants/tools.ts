@@ -61,12 +61,11 @@ export const TOOLS: Tool[] = [
         icon: 'lock-keyhole',
     },
     {
-        id: "hmac-generator",
-        label: "HMAC Generator",
+        id: 'sha-hashing',
+        label: 'SHA Hashing',
         version: '1.0.0',
         category: ToolCategory.Cryptography,
-        template: '<hmac-generator></hmac-generator>',
-        icon: 'book-key'
+        template: '<sha-hashing></sha-hashing>',
+        icon: 'hash'
     }
-
 ];
