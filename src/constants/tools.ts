@@ -59,5 +59,14 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<aes-encryption></aes-encryption>',
         icon: 'lock-keyhole',
+    },
+    {
+        id: "hmac-generator",
+        label: "HMAC Generator",
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<hmac-generator></hmac-generator>',
+        icon: 'book-key'
     }
+
 ];
