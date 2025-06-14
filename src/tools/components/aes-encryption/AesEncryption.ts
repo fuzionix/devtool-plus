@@ -12,6 +12,7 @@ import '../../common/tooltip/Tooltip';
 type EncryptionMode = 'CBC' | 'CTR' | 'GCM';
 type KeySize = '128' | '256';
 type Operation = 'encrypt' | 'decrypt';
+type KeyInputMode = 'password' | 'key';
 type InputEncoding = 'utf-8' | 'hex' | 'base64';
 
 @customElement('aes-encryption')
@@ -19,6 +20,8 @@ export class AesEncryption extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
     @state() private passwordText = '';
+    @state() private rawKeyText = '';
+    @state() private keyInputMode: KeyInputMode = 'password';
     @state() private saltText = '';
     @state() private ivText = '';
     @state() private fileName = '';
@@ -111,25 +114,64 @@ export class AesEncryption extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Password Input -->
+                <!-- Key Input Mode Selection -->
                 <div class="flex justify-between items-baseline mb-2 text-xs">
-                    <p class="mb-0">Password</p>
-                </div>
-                <div class="relative flex items-center mb-4">
-                    <textarea
-                        id="password"
-                        class="input-expandable"
-                        placeholder="Enter Password"
-                        rows="1"
-                        .value=${this.passwordText}
-                        @input=${this.handlePasswordChange}
-                    ></textarea>
-                    <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <button class="btn-icon" @click=${this.generateRandomPassword}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
-                        </button>
+                    <p class="mb-0">
+                        ${this.keyInputMode === 'password' ? 'Password' : 'Raw Key'}
+                    </p>
+                    <div>
+                        <tool-inline-menu
+                            .options=${[
+                                { label: 'Password', value: 'password' },
+                                { label: 'Raw Key', value: 'key' },
+                            ]}
+                            .value=${this.keyInputMode}
+                            placeholder="Key Input Mode"
+                            @change=${this.handleKeyInputModeChange}
+                        ></tool-inline-menu>
                     </div>
                 </div>
+
+                ${this.keyInputMode === 'password' ? html`
+                    <!-- Password Input -->
+                    <div class="relative flex items-center mb-4">
+                        <textarea
+                            id="password"
+                            class="input-expandable"
+                            placeholder="Enter Password"
+                            rows="1"
+                            .value=${this.passwordText}
+                            @input=${this.handlePasswordChange}
+                        ></textarea>
+                        <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                            <button class="btn-icon" @click=${this.generateRandomPassword}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                ` : html`
+                    <!-- Raw Key Input -->
+                    <div class="relative flex items-center mb-2">
+                        <textarea
+                            id="raw-key"
+                            class="input-expandable"
+                            placeholder="Enter Base64 encoded key"
+                            rows="1"
+                            .value=${this.rawKeyText}
+                            @input=${this.handleRawKeyChange}
+                        ></textarea>
+                        <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                            <button class="btn-icon" @click=${this.generateRandomKey}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs opacity-75 mb-4">
+                        ${this.selectedKeySize === '128' 
+                          ? 'Provide a 128-bit (16 byte) Base64 encoded key' 
+                          : 'Provide a 256-bit (32 byte) Base64 encoded key'}
+                    </p>
+                `}
 
                 <!-- Input Field -->
                 <div class="flex justify-between items-baseline mb-2 text-xs">
@@ -185,7 +227,7 @@ export class AesEncryption extends BaseTool {
                     ></tool-alert>
                 ` : ''}
 
-                <tool-expandable label="Advanced Settings">
+                <tool-expandable label="Advanced Settings" ?hidden=${this.keyInputMode === 'key'}>
                     <div class="content-to-expand">
                         <!-- Salt -->
                         <p class="mb-2 text-xs">Salt</p>
@@ -200,9 +242,10 @@ export class AesEncryption extends BaseTool {
                                 rows="1"
                                 .value=${this.saltText}
                                 @input=${this.handleSaltChange}
+                                ?disabled=${this.keyInputMode === 'key'}
                             ></textarea>
                             <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                                <button class="btn-icon" @click=${this.generateRandomSalt}>
+                                <button class="btn-icon" @click=${this.generateRandomSalt} ?disabled=${this.keyInputMode === 'key'}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
                                 </button>
                             </div>
@@ -240,6 +283,7 @@ export class AesEncryption extends BaseTool {
                             step="10000"
                             .value=${this.iterations.toString()}
                             @change=${this.handleIterationsChange}
+                            ?disabled=${this.keyInputMode === 'key'}
                         ></tool-slider>
                     </div>
                 </tool-expandable>
@@ -270,26 +314,32 @@ export class AesEncryption extends BaseTool {
                         </button>
                     </div>
                 </div>
-                <div class="mt-2">
-                    ${this.selectedOperation === 'encrypt' ? html`
-                        <tool-switch
-                            .checked=${this.encryptionOutputEncoding}
-                            leftLabel="Hex"
-                            rightLabel="Base64"
-                            ariaLabel="Encryption Output Encoding"
-                            data-charset="numbers"
-                            @change=${this.handleEncryptionOutputEncodingChange}
-                        ></tool-switch>
-                    ` : html`
-                        <tool-switch
-                            .checked=${this.decryptionOutputEncoding}
-                            leftLabel="UTF-8"
-                            rightLabel="Base64"
-                            ariaLabel="Decryption Output Encoding"
-                            data-charset="numbers"
-                            @change=${this.handleDecryptionOutputEncodingChange}
-                        ></tool-switch>
-                    `}
+                <div class="flex justify-between items-center mt-2">
+                    <div>
+                        ${this.selectedOperation === 'encrypt' ? html`
+                            <tool-switch
+                                .checked=${this.encryptionOutputEncoding}
+                                leftLabel="Hex"
+                                rightLabel="Base64"
+                                ariaLabel="Encryption Output Encoding"
+                                data-charset="numbers"
+                                @change=${this.handleEncryptionOutputEncodingChange}
+                            ></tool-switch>
+                        ` : html`
+                            <tool-switch
+                                .checked=${this.decryptionOutputEncoding}
+                                leftLabel="UTF-8"
+                                rightLabel="Base64"
+                                ariaLabel="Decryption Output Encoding"
+                                data-charset="numbers"
+                                @change=${this.handleDecryptionOutputEncodingChange}
+                            ></tool-switch>
+                        `}
+                    </div>
+                    <div class="flex ${this.selectedMode === 'GCM' && this.selectedOperation === 'decrypt' && this.outputText ? '' : 'hidden'}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a754" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check-icon lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                        <p class="mb-0 ml-1 text-xs text-[#58a754]">Verified</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -323,9 +373,35 @@ export class AesEncryption extends BaseTool {
         this.processInput();
     }
 
+    private handleKeyInputModeChange(e: CustomEvent) {
+        const newMode = e.detail.value as KeyInputMode;
+        
+        if (this.keyInputMode !== newMode) {
+            this.keyInputMode = newMode;
+            
+            this.outputText = '';
+            
+            if (newMode === 'key') {
+                this.saltText = '';
+            } else {
+                if (!this.saltText) {
+                    this.generateRandomSalt();
+                }
+            }
+            
+            this.processInput();
+        }
+    }
+
     private handlePasswordChange(e: Event) {
         const target = e.target as HTMLTextAreaElement;
         this.passwordText = target.value;
+        this.processInput();
+    }
+
+    private handleRawKeyChange(e: Event) {
+        const target = e.target as HTMLTextAreaElement;
+        this.rawKeyText = target.value;
         this.processInput();
     }
 
@@ -444,6 +520,16 @@ export class AesEncryption extends BaseTool {
         this.processInput();
     }
 
+    private generateRandomKey(): void {
+        // Generate a random key based on selected key size
+        const keyBytes = parseInt(this.selectedKeySize) / 8;
+        const keyData = new Uint8Array(keyBytes);
+        window.crypto.getRandomValues(keyData);
+        
+        this.rawKeyText = this.arrayBufferToBase64(keyData.buffer);
+        this.processInput();
+    }
+
     private generateRandomSalt(): void {
         // Salt should be at least 16 bytes (128 bits)
         const saltBytes = new Uint8Array(16);
@@ -463,14 +549,21 @@ export class AesEncryption extends BaseTool {
     private async processInput(): Promise<void> {
         this.alert = null;
 
-        if ((!this.inputText && !this.file) || !this.passwordText) {
-            this.outputText = '';
-            return;
+        if (this.keyInputMode === 'password') {
+            if ((!this.inputText && !this.file) || !this.passwordText) {
+                this.outputText = '';
+                return;
+            }
+        } else {
+            if ((!this.inputText && !this.file) || !this.rawKeyText) {
+                this.outputText = '';
+                return;
+            }
         }
 
         try {
             if (this.selectedOperation === 'encrypt') {
-                if (!this.saltText) {
+                if (this.keyInputMode === 'password' && !this.saltText) {
                     this.generateRandomSalt();
                     return;
                 }
@@ -482,13 +575,24 @@ export class AesEncryption extends BaseTool {
                 
                 this.outputText = await this.encrypt(this.inputText, this.passwordText, this.saltText, this.ivText); 
             } else {
-                if (!this.saltText || !this.ivText) {
-                    this.alert = {
-                        type: 'error',
-                        message: 'Both Salt and IV are required for decryption'
-                    };
-                    this.outputText = '';
-                    return;
+                if (this.keyInputMode === 'password') {
+                    if (!this.saltText || !this.ivText) {
+                        this.alert = {
+                            type: 'error',
+                            message: 'Both Salt and IV are required for decryption'
+                        };
+                        this.outputText = '';
+                        return;
+                    }
+                } else {
+                    if (!this.ivText) {
+                        this.alert = {
+                            type: 'error',
+                            message: 'IV is required for decryption'
+                        };
+                        this.outputText = '';
+                        return;
+                    }
                 }
                 
                 this.outputText = await this.decrypt(this.inputText, this.passwordText, this.saltText, this.ivText);
@@ -539,6 +643,34 @@ export class AesEncryption extends BaseTool {
         }
     }
 
+    private async importRawKey(base64Key: string, keySize: number): Promise<CryptoKey> {
+        try {
+            const keyData = this.base64ToArrayBuffer(base64Key);
+            const expectedKeyBytes = keySize / 8;
+            
+            if (keyData.byteLength !== expectedKeyBytes) {
+                throw new Error(`Invalid key size: expected ${expectedKeyBytes} bytes for ${keySize}-bit encryption, got ${keyData.byteLength} bytes`);
+            }
+            
+            return await window.crypto.subtle.importKey(
+                'raw',
+                keyData,
+                {
+                    name: this.getAlgorithmName(),
+                    length: keySize
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                throw error;
+            } else {
+                throw new Error('Failed to import raw key');
+            }
+        }
+    }
+
     private async encrypt(plaintext: string, password: string, salt: string, iv: string): Promise<string> {
         try {
             this.validateInputs();
@@ -563,7 +695,12 @@ export class AesEncryption extends BaseTool {
             const ivBuffer = this.hexToArrayBuffer(iv);
             const keySize = parseInt(this.selectedKeySize);
             
-            const cryptoKey = await this.deriveKey(password, salt, keySize);
+            let cryptoKey: CryptoKey;
+            if (this.keyInputMode === 'password') {
+                cryptoKey = await this.deriveKey(password, salt, keySize);
+            } else {
+                cryptoKey = await this.importRawKey(this.rawKeyText, keySize);
+            }
 
             const algorithmParams = this.createAlgorithmParams(ivBuffer);
             try {
@@ -608,7 +745,12 @@ export class AesEncryption extends BaseTool {
             const ivBuffer = this.hexToArrayBuffer(iv);
             const keySize = parseInt(this.selectedKeySize);
             
-            const cryptoKey = await this.deriveKey(password, salt, keySize);
+            let cryptoKey: CryptoKey;
+            if (this.keyInputMode === 'password') {
+                cryptoKey = await this.deriveKey(password, salt, keySize);
+            } else {
+                cryptoKey = await this.importRawKey(this.rawKeyText, keySize);
+            }
 
             const algorithmParams = this.createAlgorithmParams(ivBuffer);
             try {
@@ -636,8 +778,12 @@ export class AesEncryption extends BaseTool {
                         return this.arrayBufferToBase64(decryptedBuffer);
                     }
                 }
-            } catch (err) {
-                throw new Error('The ciphertext, key, or IV may be incorrect');
+            } catch (error) {
+                if (this.selectedMode === 'GCM') {
+                    throw new Error('Decryption failed: This could be due to incorrect key/IV or data tampering (GCM authentication failure)');
+                } else {
+                    throw new Error('Decryption failed: The ciphertext, key, or IV may be incorrect');
+                }
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -650,11 +796,33 @@ export class AesEncryption extends BaseTool {
     }
 
     private validateInputs(): void {
-        if (!this.passwordText) {
+        if (this.keyInputMode === 'password' && !this.passwordText) {
             throw new Error('Password is required');
         }
+        
+        if (this.keyInputMode === 'key' && !this.rawKeyText) {
+            throw new Error('Raw key is required');
+        }
+        
+        if (this.keyInputMode === 'key') {
+            try {
+                // Validate the base64 key
+                const keyData = this.base64ToArrayBuffer(this.rawKeyText);
+                const expectedKeyBytes = parseInt(this.selectedKeySize) / 8;
+                
+                if (keyData.byteLength !== expectedKeyBytes) {
+                    throw new Error(`The key must be exactly ${expectedKeyBytes} bytes (${this.selectedKeySize} bits) for AES-${this.selectedKeySize}`);
+                }
+            } catch (error) {
+                if (error instanceof Error) {
+                    throw error;
+                } else {
+                    throw new Error('Invalid Base64 key format');
+                }
+            }
+        }
 
-        if (this.saltText) {
+        if (this.keyInputMode === 'password' && this.saltText) {
             const hexRegex = /^[0-9a-fA-F]+$/;
             if (!hexRegex.test(this.saltText.replace(/\s/g, ''))) {
                 throw new Error('Salt must contain only hexadecimal characters (0-9, a-f, A-F)');
