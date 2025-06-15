@@ -67,5 +67,13 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<sha-hashing></sha-hashing>',
         icon: 'hash'
+    },
+    {
+        id: 'rsa-key-generator',
+        label: 'RSA Key Generator',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<rsa-key-generator></rsa-key-generator>',
+        icon: 'file-key-2'
     }
 ];
