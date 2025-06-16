@@ -75,5 +75,13 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<rsa-key-generator></rsa-key-generator>',
         icon: 'file-key-2'
+    },
+    {
+        id: 'signature-verifier',
+        label: 'Signature Signer / Verifier',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<signature-verifier></signature-verifier>',
+        icon: 'signature'
     }
 ];

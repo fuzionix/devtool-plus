@@ -7,6 +7,7 @@ import './components/json-minifier/JsonMinifierEditor';
 import './components/token-generator/TokenGenerator';
 import './components/rsa-key-generator/RsaKeyGenerator';
 import './components/sha-hashing/ShaHashing';
+import './components/signature-verifier/SignatureVerifier';
 import './components/url-encoder/UrlEncoder';
 import './components/uuid-generator/UuidGenerator';
 
