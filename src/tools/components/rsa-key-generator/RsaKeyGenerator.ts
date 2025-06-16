@@ -8,9 +8,10 @@ import '../../common/inline-menu/InlineMenu';
 import '../../common/slider/Slider';
 import '../../common/switch/Switch';
 import '../../common/tooltip/Tooltip';
+import '../../common/expandable/Expandable';
 
 type KeySize = '1024' | '2048' | '4096';
-type KeyFormat = 'PKCS#1' | 'PKCS#8';
+type KeyFormat = 'PKCS#8';
 type KeyOutputFormat = 'PEM' | 'DER' | 'JWK';
 
 @customElement('rsa-key-generator')
@@ -63,7 +64,6 @@ export class RsaKeyGenerator extends BaseTool {
                         <tool-dropdown-menu
                             .options=${[
                                 { label: 'PKCS#8', value: 'PKCS#8' },
-                                { label: 'PKCS#1', value: 'PKCS#1' }
                             ]}
                             .value=${this.keyFormat}
                             placeholder="Select Key Format"
@@ -124,7 +124,7 @@ export class RsaKeyGenerator extends BaseTool {
                 </tool-expandable>
 
                 <!-- Generate Button -->
-                <div class="flex justify-center my-4">
+                <div class="flex justify-center mt-4 mb-2">
                     <button 
                         class="btn-primary ${this.isGenerating ? 'opacity-50 cursor-not-allowed' : ''}"
                         @click=${this.generateKeyPair}
@@ -172,6 +172,17 @@ export class RsaKeyGenerator extends BaseTool {
                                 ${renderCopyButton(this.publicKeyCopied)}
                             </button>
                         </div>
+                        <div class="absolute right-6 top-0.5 pr-0.5 flex justify-items-center">
+                            <tool-tooltip text="Download">
+                                <button 
+                                    class="btn-icon" 
+                                    @click=${() => this.downloadKey('public')}
+                                    ?disabled=${!this.publicKey}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                </button>
+                            </tool-tooltip>
+                        </div>
                     </div>
                 </div>
 
@@ -198,6 +209,17 @@ export class RsaKeyGenerator extends BaseTool {
                                 ${renderCopyButton(this.privateKeyCopied)}
                             </button>
                         </div>
+                        <div class="absolute right-6 top-0.5 pr-0.5 flex justify-items-center">
+                            <tool-tooltip text="Download">
+                                <button 
+                                    class="btn-icon" 
+                                    @click=${() => this.downloadKey('private')}
+                                    ?disabled=${!this.privateKey}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                </button>
+                            </tool-tooltip>
+                        </div>
                     </div>
                 </div>
 
@@ -208,7 +230,7 @@ export class RsaKeyGenerator extends BaseTool {
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert-icon lucide-shield-alert"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
                         </div>
                         <span>
-                            Security note: Keep your private key secure and never share it. This key was generated in your browser and was not transmitted over the network.
+                            Keep your private key secure and never share it. This key was generated locally and was not transmitted over the network.
                         </span>
                     </div>
                 ` : ''}
@@ -258,7 +280,7 @@ export class RsaKeyGenerator extends BaseTool {
         this.publicKey = '';
         this.privateKey = '';
         this.alert = {
-            type: 'info',
+            type: 'warning',
             message: 'Please regenerate keys with the new settings'
         };
     }
@@ -359,7 +381,7 @@ export class RsaKeyGenerator extends BaseTool {
         );
         
         // Export private key in the selected format
-        const privateKeyFormat = this.keyFormat === 'PKCS#8' ? 'pkcs8' : 'pkcs8'; // WebCrypto only supports PKCS#8
+        const privateKeyFormat = this.keyFormat === 'PKCS#8' ? 'pkcs8' : 'pkcs8';
         const privateKeyBuffer = await window.crypto.subtle.exportKey(
             privateKeyFormat, 
             keyPair.privateKey
@@ -375,14 +397,6 @@ export class RsaKeyGenerator extends BaseTool {
         // Format private key PEM
         const privateKeyType = this.keyFormat === 'PKCS#8' ? 'PRIVATE KEY' : 'RSA PRIVATE KEY';
         this.privateKey = this.formatAsPEM(privateKeyBase64, privateKeyType);
-        
-        // Add note about PKCS#1 limitation if needed
-        if (this.keyFormat === 'PKCS#1') {
-            this.alert = {
-                type: 'info',
-                message: 'Note: Web Crypto API only natively supports PKCS#8. A client-side conversion to PKCS#1 would require additional libraries.'
-            };
-        }
     }
 
     private async exportKeysAsDER(keyPair: CryptoKeyPair) {
@@ -401,14 +415,6 @@ export class RsaKeyGenerator extends BaseTool {
         // Convert to Base64
         this.publicKey = this.arrayBufferToBase64(publicKeyBuffer);
         this.privateKey = this.arrayBufferToBase64(privateKeyBuffer);
-        
-        // Add note about PKCS#1 limitation if needed
-        if (this.keyFormat === 'PKCS#1') {
-            this.alert = {
-                type: 'info',
-                message: 'Note: Web Crypto API only natively supports PKCS#8. A client-side conversion to PKCS#1 would require additional libraries.'
-            };
-        }
     }
 
     private formatAsPEM(base64Data: string, label: string): string {
@@ -464,5 +470,56 @@ export class RsaKeyGenerator extends BaseTool {
                 message: 'Failed to copy private key to clipboard'
             };
         }
+    }
+
+    private downloadKey(keyType: 'public' | 'private'): void {
+        const keyText = keyType === 'public' ? this.publicKey : this.privateKey;
+        if (!keyText) return;
+        
+        let fileName = '';
+        let mimeType = 'text/plain';
+        let extension = '';
+        let base64Data = '';
+        
+        // Determine file name and mime type based on output format
+        switch (this.outputFormat) {
+            case 'PEM':
+                extension = '.pem';
+                mimeType = 'application/x-pem-file';
+                // Convert PEM to Base64 by removing headers, footers, and line breaks
+                base64Data = btoa(keyText);
+                break;
+                
+            case 'DER':
+                extension = '.der';
+                mimeType = 'application/octet-stream';
+                // DER is already Base64 encoded
+                base64Data = btoa(keyText);
+                break;
+                
+            case 'JWK':
+                extension = '.json';
+                mimeType = 'application/json';
+                // JSON string needs to be Base64 encoded
+                base64Data = btoa(keyText);
+                break;
+                
+            default:
+                extension = '.txt';
+                base64Data = btoa(keyText);
+                break;
+        }
+        
+        fileName = `rsa-${keyType}-key-${this.keySize}${extension}`;
+        (window as any).vscode.postMessage({
+            type: 'download',
+            payload: {
+                base64: base64Data,
+                mimeType: mimeType,
+                fileName: fileName,
+                extension: extension,
+                text: keyText  // Include the raw text for text-based formats
+            }
+        });
     }
 }
