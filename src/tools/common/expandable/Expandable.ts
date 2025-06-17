@@ -43,6 +43,7 @@ export class Expandable extends LitElement {
         .expandable-content.expanded {
             max-height: 1000px;
             margin: 8px 0;
+            overflow: visible;
         }
         
         .expandable-label {
