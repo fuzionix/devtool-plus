@@ -20,6 +20,8 @@ export class SignatureVerifier extends BaseTool {
     @state() private outputText = '';
     @state() private keyText = '';
     @state() private signatureText = '';
+    @state() private privateKeyText = '';
+    @state() private publicKeyText = '';
     @state() private selectedAlgorithm: SignatureAlgorithm = 'RSA-PSS';
     @state() private selectedHash: HashAlgorithm = 'SHA-256';
     @state() private selectedKeyFormat: KeyFormat = 'PEM';
@@ -36,7 +38,6 @@ export class SignatureVerifier extends BaseTool {
     @state() private keySizeBits = 2048;
     @state() private curve = 'P-256';
     @state() private isGeneratingKey = false;
-    @state() private showAdvancedOptions = false;
     @state() private saltLength = 32;
 
     @query('#input') private input!: HTMLTextAreaElement;
@@ -180,7 +181,7 @@ export class SignatureVerifier extends BaseTool {
                 <div class="relative flex items-center mb-4">
                     <textarea
                         id="key-input"
-                        class="input-expandable"
+                        class="input-expandable resize-y font-mono"
                         placeholder="${this.getKeyPlaceholder()}"
                         rows="3"
                         .value=${this.keyFileName || this.keyText}
@@ -408,8 +409,14 @@ export class SignatureVerifier extends BaseTool {
         // Automatically switch to appropriate key type
         if (operation === 'sign') {
             this.isPrivateKey = true;
+            if (this.privateKeyText) {
+                this.keyText = this.privateKeyText;
+            }
         } else if (operation === 'verify') {
             this.isPrivateKey = false;
+            if (this.publicKeyText) {
+                this.keyText = this.publicKeyText;
+            }
         }
         
         this.processInput();
@@ -421,11 +428,7 @@ export class SignatureVerifier extends BaseTool {
         
         this.selectedAlgorithm = newAlgorithm;
         this.outputText = '';
-        
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
-        
+        this.resetKey();
         this.processInput();
     }
 
@@ -455,11 +458,7 @@ export class SignatureVerifier extends BaseTool {
         if (this.selectedKeyFormat === newFormat) return;
         
         this.selectedKeyFormat = newFormat;
-        
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
-        
+        this.resetKey();
         this.processInput();
     }
 
@@ -467,11 +466,13 @@ export class SignatureVerifier extends BaseTool {
         if (this.isPrivateKey === isPrivate) return;
         
         this.isPrivateKey = isPrivate;
-        
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
-        
+        if (isPrivate && this.privateKeyText) {
+            this.keyText = this.privateKeyText;
+        } else if (!isPrivate && this.publicKeyText) {
+            this.keyText = this.publicKeyText;
+        } else {
+            this.keyText = '';
+        }
         this.processInput();
     }
 
@@ -502,10 +503,24 @@ export class SignatureVerifier extends BaseTool {
                     binaryData = new TextEncoder().encode(this.inputText).buffer;
                     break;
                 case 'hex':
-                    binaryData = this.hexToArrayBuffer(this.inputText);
+                    try {
+                        binaryData = this.hexToArrayBuffer(this.inputText);
+                    } catch (error) {
+                        this.inputEncoding = newEncoding;
+                        this.inputText = '';
+                        this.alert = null;
+                        return;
+                    }
                     break;
                 case 'base64':
-                    binaryData = this.base64ToArrayBuffer(this.inputText);
+                    try {
+                        binaryData = this.base64ToArrayBuffer(this.inputText);
+                    } catch (error) {
+                        this.inputEncoding = newEncoding;
+                        this.inputText = '';
+                        this.alert = null;
+                        return;
+                    }
                     break;
                 default:
                     throw new Error(`Unsupported input encoding: ${oldEncoding}`);
@@ -572,21 +587,13 @@ export class SignatureVerifier extends BaseTool {
 
     private handleCurveChange(e: CustomEvent) {
         this.curve = e.detail.value;
-        
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
-        
+        this.resetKey();
         this.processInput();
     }
 
     private handleKeySizeChange(e: CustomEvent) {
         this.keySizeBits = parseInt(e.detail.value);
-        
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
-        
+        this.resetKey();
         this.processInput();
     }
 
@@ -673,19 +680,12 @@ export class SignatureVerifier extends BaseTool {
                 }
             }
             
-            // Set the key text to the private key (for signing)
-            this.keyText = privateKeyOutput;
-            
-            // Display success message with public key
-            this.alert = {
-                type: 'success',
-                message: 'Key pair generated successfully. Public key: ' + 
-                         (publicKeyOutput.length > 100 ? 
-                          publicKeyOutput.substring(0, 50) + '...' + 
-                          publicKeyOutput.substring(publicKeyOutput.length - 50) : 
-                          publicKeyOutput)
-            };
-            
+            this.privateKeyText = privateKeyOutput;
+            this.publicKeyText = publicKeyOutput;
+
+            // Set the key text based on the current operation mode
+            this.keyText = this.isPrivateKey ? this.privateKeyText : this.publicKeyText;
+
             this.processInput();
         } catch (error) {
             this.alert = {
@@ -819,15 +819,25 @@ export class SignatureVerifier extends BaseTool {
             
             const algorithm = this.getAlgorithmName();
             const keyUsages: KeyUsage[] = isPrivate ? ['sign'] : ['verify'];
+
+            let params: any;
+            if (algorithm === 'ECDSA') {
+                params = {
+                    name: algorithm,
+                    namedCurve: this.curve
+                };
+            } else {
+                params = {
+                    name: algorithm,
+                    hash: this.selectedHash
+                };
+            }
             
             if (this.selectedKeyFormat === 'JWK') {
                 return await window.crypto.subtle.importKey(
                     'jwk',
                     key as JsonWebKey,
-                    {
-                        name: algorithm,
-                        hash: this.selectedHash
-                    },
+                    params,
                     false,
                     keyUsages
                 );
@@ -837,10 +847,7 @@ export class SignatureVerifier extends BaseTool {
                 return await window.crypto.subtle.importKey(
                     format,
                     key as ArrayBuffer,
-                    {
-                        name: algorithm,
-                        hash: this.selectedHash
-                    },
+                    params,
                     false,
                     keyUsages
                 );
@@ -901,10 +908,18 @@ export class SignatureVerifier extends BaseTool {
     }
 
     private hexToArrayBuffer(hexString: string): ArrayBuffer {
+        if (!/^[0-9a-fA-F\s]*$/.test(hexString)) {
+            throw new Error('Invalid hex input: contains non-hex characters');
+        }
+
         // Remove any spaces or non-hex characters
         const cleanHex = hexString.replace(/[^0-9a-fA-F]/g, '');
+
+        if (cleanHex.length % 2 !== 0) {
+            throw new Error('Invalid hex input: hex string must have an even number of digits');
+        }
+
         const bytes = new Uint8Array(cleanHex.length / 2);
-        
         for (let i = 0; i < cleanHex.length; i += 2) {
             bytes[i / 2] = parseInt(cleanHex.substring(i, i + 2), 16);
         }
@@ -989,13 +1004,19 @@ export class SignatureVerifier extends BaseTool {
     }
 
     private clearKey(): void {
-        this.keyText = '';
-        this.keyFileName = '';
-        this.keyFile = null;
+        this.resetKey();
         if (this.keyFileInput) {
             this.keyFileInput.value = '';
         }
         this.requestUpdate();
+    }
+
+    private resetKey(): void {
+        this.keyText = '';
+        this.keyFileName = '';
+        this.keyFile = null;
+        this.privateKeyText = '';
+        this.publicKeyText = '';
     }
     
     private triggerFileInput(): void {
