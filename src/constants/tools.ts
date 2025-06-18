@@ -74,6 +74,14 @@ export const TOOLS: Tool[] = [
         version: '1.0.0',
         category: ToolCategory.Cryptography,
         template: '<rsa-key-generator></rsa-key-generator>',
+        icon: 'key-round'
+    },
+    {
+        id: 'rsa-encryption',
+        label: 'RSA Encryption / Decryption',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<rsa-encryption></rsa-encryption>',
         icon: 'file-key-2'
     },
     {
