@@ -253,10 +253,10 @@ export class PasswordGenerator extends BaseTool {
 
     private generatePassword() {
         // Ensure at least one character set is selected
-        if (!this.includeNumbers && !this.includeSpecial && 
-            !this.includeLowercase && !this.includeUppercase) {
-            // Default to lowercase if nothing is selected
-            this.includeLowercase = true;
+        if (!this.includeNumbers && !this.includeSpecial && !this.includeLowercase && !this.includeUppercase) {
+            this.output = '';
+            this.calculatePasswordStrength('*');
+            return;
         }
 
         // Build character set based on selected options
@@ -335,7 +335,9 @@ export class PasswordGenerator extends BaseTool {
         
         // Fisher-Yates shuffle algorithm
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const randomBuffer = new Uint32Array(1);
+            window.crypto.getRandomValues(randomBuffer);
+            const j = randomBuffer[0] % (i + 1);
             [array[i], array[j]] = [array[j], array[i]];
         }
         
@@ -439,8 +441,11 @@ export class PasswordGenerator extends BaseTool {
         if (years < 1_000_000_000_000) {
             return `${Math.round(years / 1_000_000_000)} billion years`;
         }
-        
-        return "trillions of years";
+        if (years < 1_000_000_000_000_000) {
+            return `${Math.round(years / 1_000_000_000_000)} trillion years`;
+        }
+
+        return "until heat death of the universe";
     }
 
     private getStrengthClass() {
