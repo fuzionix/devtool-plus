@@ -53,6 +53,15 @@ export const TOOLS: Tool[] = [
         icon: 'tag'
     },
     {
+        id: 'password-generator',
+        label: 'Password Generator',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<password-generator></password-generator>',
+        icon: 'asterisk',
+        isNew: true
+    },
+    {
         id: 'aes-encryption',
         label: 'AES Encryption / Decryption',
         version: '1.0.0',

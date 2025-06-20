@@ -4,6 +4,7 @@ import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-minifier/JsonMinifier';
 import './components/json-minifier/JsonMinifierEditor';
+import './components/password-generator/PasswordGenerator';
 import './components/token-generator/TokenGenerator';
 import './components/rsa-encryption/RsaEncryption';
 import './components/rsa-key-generator/RsaKeyGenerator';
