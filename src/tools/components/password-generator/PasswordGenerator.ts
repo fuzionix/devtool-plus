@@ -58,7 +58,7 @@ export class PasswordGenerator extends BaseTool {
                 .strength-fill {
                     height: 100%;
                     border-radius: 2px;
-                    transition: width 0.3s ease-in-out;
+                    transition: width 0.25s ease-in-out, background-color 0.25s ease-in-out;
                 }
 
                 .strength-weak { background-color: #ff4545; }

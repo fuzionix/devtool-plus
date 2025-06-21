@@ -1,17 +1,20 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import {
-    renderCopyButton
-} from '../../../utils/util';
-import { CaseType } from './TextEditorTypes';
+import { renderCopyButton } from '../../../utils/util';
+import { CaseType, SortType, TrimType, DuplicateType, TextEditorState } from './TextEditorTypes';
 import '../../common/tooltip/Tooltip';
 
 @customElement('text-editor-editor')
 export class TextEditorEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
-    @state() private selectedCase: CaseType | '' = 'upper';
+    @state() private editorState: TextEditorState = {
+        caseType: '',
+        sortType: '',
+        trimType: '',
+        duplicateType: ''
+    };
     @state() private isCopied = false;
 
     @query('#original') private originalTextarea!: HTMLTextAreaElement;
@@ -19,15 +22,13 @@ export class TextEditorEditor extends BaseTool {
 
     static styles = css`
         ${BaseTool.styles}
-
     `;
 
     constructor() {
         super();
         this.addEventListener('updated', ((e: CustomEvent) => {
             if (e.detail.value) {
-                const caseType = e.detail.value;
-                this.selectedCase = caseType;
+                this.editorState = e.detail.value;
                 this.updateOutput();
             }
         }) as EventListener);
@@ -118,6 +119,78 @@ export class TextEditorEditor extends BaseTool {
         }
     }
 
+    private sortLines(text: string, sortType: SortType): string {
+        if (!text || !sortType) return text;
+
+        const lines = text.split('\n');
+        
+        switch (sortType) {
+            case 'asc':
+                return lines.sort((a, b) => a.localeCompare(b)).join('\n');
+            case 'desc':
+                return lines.sort((a, b) => b.localeCompare(a)).join('\n');
+            case 'length_asc':
+                return lines.sort((a, b) => a.length - b.length).join('\n');
+            case 'length_desc':
+                return lines.sort((a, b) => b.length - a.length).join('\n');
+            default:
+                return text;
+        }
+    }
+
+    private trimSpaces(text: string, trimType: TrimType): string {
+        if (!text || !trimType) return text;
+
+        switch (trimType) {
+            case 'all':
+                // Remove all spaces
+                return text.replace(/\s+/g, '');
+            case 'start_end':
+                // Trim spaces at the start and end of each line
+                return text.split('\n')
+                    .map(line => line.trim())
+                    .join('\n');
+            case 'duplicate':
+                // Replace multiple spaces with a single space
+                return text.replace(/\s+/g, ' ')
+                    .split('\n')
+                    .map(line => line.trim())
+                    .join('\n');
+            default:
+                return text;
+        }
+    }
+
+    private removeDuplicates(text: string, duplicateType: DuplicateType): string {
+        if (!text || !duplicateType) return text;
+
+        const lines = text.split('\n');
+        const uniqueLines: string[] = [];
+        const seen = new Set<string>();
+
+        if (duplicateType === 'start') {
+            // Keep the first occurrence, remove subsequent duplicates
+            for (const line of lines) {
+                if (!seen.has(line)) {
+                    seen.add(line);
+                    uniqueLines.push(line);
+                }
+            }
+        } else if (duplicateType === 'end') {
+            // Keep the last occurrence, remove previous duplicates
+            // Process lines in reverse order first
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i];
+                if (!seen.has(line)) {
+                    seen.add(line);
+                    uniqueLines.unshift(line); // Add to the beginning since we're processing backwards
+                }
+            }
+        }
+
+        return uniqueLines.join('\n');
+    }
+
     private handleInput(e: Event) {
         const target = e.target as HTMLTextAreaElement;
         this.inputText = target.value;
@@ -125,11 +198,30 @@ export class TextEditorEditor extends BaseTool {
     }
 
     private updateOutput() {
-        if (this.selectedCase && this.inputText) {
-            this.outputText = this.convertCase(this.inputText, this.selectedCase);
-        } else {
-            this.outputText = this.inputText;
+        if (!this.inputText) {
+            this.outputText = '';
+            return;
         }
+
+        let result = this.inputText;
+        
+        if (this.editorState.caseType) {
+            result = this.convertCase(result, this.editorState.caseType);
+        }
+        
+        if (this.editorState.trimType) {
+            result = this.trimSpaces(result, this.editorState.trimType);
+        }
+        
+        if (this.editorState.sortType) {
+            result = this.sortLines(result, this.editorState.sortType);
+        }
+        
+        if (this.editorState.duplicateType) {
+            result = this.removeDuplicates(result, this.editorState.duplicateType);
+        }
+        
+        this.outputText = result;
     }
 
     private async copyToClipboard() {

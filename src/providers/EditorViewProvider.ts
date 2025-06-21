@@ -112,23 +112,31 @@ export class EditorViewProvider {
 
                     function update(toolId, value) {
                         const editorComponent = document.querySelector(\`\${toolId}-editor\`);
-                        console.log(editorComponent)
                         if (!editorComponent) {
                             console.warn(\`Editor component not found for tool: \${toolId}\`);
                             return;
                         }
 
+                        // Handle different types of editor components
                         switch (toolId) {
-                            case 'case-converter':
-                                editorComponent.value = value;
+                            case 'text-editor':
+                                editorComponent.dispatchEvent(new CustomEvent('updated', {
+                                    detail: { value: value },
+                                    bubbles: true,
+                                    composed: true
+                                }));
                                 break;
+                            default:
+                                if (typeof value === 'object') {
+                                    editorComponent.dispatchEvent(new CustomEvent('updated', {
+                                        detail: { value: value },
+                                        bubbles: true,
+                                        composed: true
+                                    }));
+                                } else {
+                                    editorComponent.value = value;
+                                }
                         }
-
-                        editorComponent.dispatchEvent(new CustomEvent('updated', {
-                            detail: { value: value },
-                            bubbles: true,
-                            composed: true
-                        }));
                     }
 
                     vscode.postMessage({ type: 'ready' });
