@@ -1,20 +1,14 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import { EditorViewProvider } from '../providers/EditorViewProvider';
 import { Tool } from '../types/tool';
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
     private view?: vscode.WebviewView;
-    private editorViewProvider?: EditorViewProvider;
 
     constructor(
         private readonly extensionUri: vscode.Uri,
     ) { }
-
-    public setEditorViewProvider(provider: EditorViewProvider) {
-        this.editorViewProvider = provider;
-    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -70,9 +64,8 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                     break;
                 }
                 case 'update': {
-                    if (this.editorViewProvider) {
-                        this.editorViewProvider.updateFromSidePanel(message.toolId, message.value);
-                    }
+                    vscode.commands.executeCommand('devtool-plus.updateEditor', message.toolId, message.value);
+                    break;
                 }
             }
         });

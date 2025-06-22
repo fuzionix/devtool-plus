@@ -17,4 +17,5 @@ export interface Tool {
     icon: string;
     isNew?: boolean;
     editor?: boolean;
+    editorType?: 'simple' | 'code';
 }

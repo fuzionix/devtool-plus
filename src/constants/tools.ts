@@ -17,7 +17,8 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<json-editor></json-editor>',
         icon: 'file-json',
-        editor: true
+        editor: true,
+        editorType: 'code'
     },
     {
         id: 'base64-encoder',
@@ -42,7 +43,8 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<text-editor></text-editor>',
         icon: 'type',
-        editor: true
+        editor: true,
+        editorType: 'simple'
     },
     {
         id: 'token-generator',
