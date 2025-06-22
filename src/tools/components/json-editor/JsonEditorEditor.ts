@@ -2,8 +2,8 @@ import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 
-@customElement('json-minifier-editor')
-export class JsonMinifierEditor extends BaseTool {
+@customElement('json-editor-editor')
+export class JsonEditorEditor extends BaseTool {
     @state() private inputText = '';
     @state() private outputText = '';
 
@@ -11,6 +11,14 @@ export class JsonMinifierEditor extends BaseTool {
         ${BaseTool.styles}
 
     `;
+
+    constructor() {
+        super();
+        this.addEventListener('updated', ((e: CustomEvent) => {
+            if (e.detail.value) {
+            }
+        }) as EventListener);
+    }
 
     protected renderTool() {
         return html`

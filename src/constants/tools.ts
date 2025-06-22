@@ -11,11 +11,11 @@ export const TOOLS: Tool[] = [
         isNew: true
     },
     {
-        id: 'json-minifier',
-        label: 'JSON Minifier',
+        id: 'json-editor',
+        label: 'JSON Editor',
         version: '1.0.0',
         category: ToolCategory.Data,
-        template: '<json-minifier></json-minifier>',
+        template: '<json-editor></json-editor>',
         icon: 'file-json',
         editor: true
     },
