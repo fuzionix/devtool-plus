@@ -68,9 +68,9 @@ export class FileDropzone extends LitElement {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 6px 8px;
-            background-color: var(--vscode-list-hoverBackground);
-            border-radius: 4px;
+            padding: 4px 8px;
+            border: solid 1px var(--vscode-panel-border);
+            border-radius: 2px;
             margin-top: 4px;
         }
 
@@ -82,12 +82,15 @@ export class FileDropzone extends LitElement {
         }
 
         .remove-btn {
-            background: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2px;
             border: none;
+            background: none;
             color: var(--vscode-icon-foreground);
             cursor: pointer;
-            padding: 2px;
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
         .remove-btn:hover {
@@ -123,10 +126,7 @@ export class FileDropzone extends LitElement {
                             <div class="file-item">
                                 <span class="file-name">${file.name}</span>
                                 <button class="remove-btn" @click=${(e: Event) => this.removeFile(e, index)}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                 </button>
                             </div>
                         `)}
