@@ -45,6 +45,7 @@ export class CodeEditorProvider {
         this.panel.webview.onDidReceiveMessage(message => {
             switch (message.type) {
                 case 'ready':
+                    this.sendConfiguration(this.panel!.webview);
                     this.updateWebview();
                     break;
                 case 'error':
@@ -54,6 +55,25 @@ export class CodeEditorProvider {
         });
 
         this.panel.webview.html = this.getHtmlForWebview();
+    }
+
+    public updateEditorConfiguration() {
+        if (this.panel) {
+            this.sendConfiguration(this.panel.webview);
+        }
+    }
+
+    private sendConfiguration(webview: vscode.Webview) {
+        const editorConfig = vscode.workspace.getConfiguration('editor');
+        webview.postMessage({
+            type: 'updateConfiguration',
+            payload: {
+                fontFamily: editorConfig.get('fontFamily'),
+                fontSize: editorConfig.get('fontSize'),
+                fontWeight: editorConfig.get('fontWeight'),
+                fontLigatures: editorConfig.get('fontLigatures'),
+            }
+        });
     }
 
     private getHtmlForWebview(): string {
@@ -90,11 +110,6 @@ export class CodeEditorProvider {
                         width: 1px;
                         background-color: var(--vscode-editorGroup-border);
                     }
-                    .view-lines.monaco-mouse-cursor-text, .margin-view-overlays {
-                        font-family: var(--vscode-editor-font-family) !important;
-                        font-weight: var(--vscode-editor-font-weight) !important;
-                        font-size: var(--vscode-editor-font-size) !important;
-                    }
                 </style>
             </head>
             <body>
@@ -112,6 +127,7 @@ export class CodeEditorProvider {
                     let inputEditor;
                     let outputEditor;
                     let currentToolId;
+                    let initialFontSettings;
                     
                     require.config({ paths: { 'vs': '${monacoUri}' } });
                     require(['vs/editor/editor.main'], function() {
@@ -135,8 +151,46 @@ export class CodeEditorProvider {
                             value: '',
                         });
 
+                        if (initialFontSettings) {
+                            applyFontStyles(initialFontSettings);
+                        }
+
                         inputEditor.onDidChangeModelContent(() => {
-                            processContent();
+                            vscode.postMessage({
+                                type: 'update',
+                                value: {
+                                    inputText: inputEditor.getValue()
+                                }
+                            });
+                        });
+
+                        let isSyncingLeft = false;
+                        let isSyncingRight = false;
+
+                        inputEditor.onDidScrollChange((e) => {
+                            if (!e.scrollTopChanged) {
+                                return;
+                            }
+                            // If the right pane is not already being synced, proceed.
+                            if (!isSyncingLeft) {
+                                isSyncingRight = true;
+                                outputEditor.setScrollTop(e.scrollTop);
+                            }
+                            // Reset the flag for the left pane.
+                            isSyncingLeft = false;
+                        });
+
+                        outputEditor.onDidScrollChange((e) => {
+                            if (!e.scrollTopChanged) {
+                                return;
+                            }
+                            // If the left pane is not already being synced, proceed.
+                            if (!isSyncingRight) {
+                                isSyncingLeft = true;
+                                inputEditor.setScrollTop(e.scrollTop);
+                            }
+                            // Reset the flag for the right pane.
+                            isSyncingRight = false;
                         });
 
                         vscode.postMessage({ type: 'ready' });
@@ -148,7 +202,6 @@ export class CodeEditorProvider {
                             case 'updateTool':
                                 currentToolId = message.tool.id;
                                 document.title = \`DevTool+ - \${message.tool.label}\`;
-                                processContent(); // Re-process content when tool changes
                                 break;
                             case 'update':
                                 if (message.value && typeof message.value.inputText === 'string') {
@@ -157,25 +210,70 @@ export class CodeEditorProvider {
                                     }
                                 }
                                 break;
+                            case 'updateConfiguration':
+                                applyFontStyles(message.payload);
+                                break;
+                            case 'performAction':
+                                if (currentToolId === 'json-editor') {
+                                    if (message.action === 'minify') {
+                                        minifyJson();
+                                    } else if (message.action === 'format') {
+                                        formatJson();
+                                    }
+                                }
+                                break;
                         }
                     });
 
-                    function processContent() {
-                        if (!currentToolId || !inputEditor) {
+                    function applyFontStyles(settings) {
+                        if (!settings) return;
+
+                        // If editors aren't created yet, store the settings
+                        if (!inputEditor || !outputEditor) {
+                            initialFontSettings = settings;
                             return;
                         }
 
-                        const inputText = inputEditor.getValue();
+                        const monacoSettings = {
+                            fontFamily: settings.fontFamily,
+                            fontSize: settings.fontSize,
+                            fontWeight: settings.fontWeight,
+                            fontLigatures: settings.fontLigatures,
+                        };
 
-                        switch (currentToolId) {
-                            case 'json-editor':
-                                try {
-                                    outputEditor.setValue(inputText);
-                                } catch (e) {
-                                    outputEditor.setValue('Invalid JSON: ' + e.message);
-                                }
-                                break;
-                            // Add other code-based tools here in the future
+                        inputEditor.updateOptions(monacoSettings);
+                        outputEditor.updateOptions(monacoSettings);
+                    }
+
+                    function minifyJson() {
+                        if (!inputEditor || !outputEditor) return;
+                        try {
+                            const inputText = inputEditor.getValue();
+                            if (!inputText.trim()) {
+                                outputEditor.setValue('');
+                                return;
+                            }
+                            const jsonObj = JSON.parse(inputText);
+                            outputEditor.setValue(JSON.stringify(jsonObj));
+                        } catch (e) {
+                            outputEditor.setValue(e.message);
+                            vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });
+                        }
+                    }
+
+                    function formatJson() {
+                        if (!inputEditor || !outputEditor) return;
+                        try {
+                            const inputText = inputEditor.getValue();
+                            if (!inputText.trim()) {
+                                outputEditor.setValue('');
+                                return;
+                            }
+                            const jsonObj = JSON.parse(inputText);
+                            outputEditor.setValue(JSON.stringify(jsonObj, null, 4));
+                        } catch (e) {
+                            outputEditor.setValue(e.message);
+                            vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });
                         }
                     }
                 </script>
@@ -203,13 +301,23 @@ export class CodeEditorProvider {
     }
 
     public updateFromSidePanel(toolId: string, value: any) {
-        this.lastState = value;
+        if (value && !value.action) {
+            this.lastState = value;
+        }
+
         if (this.panel && this.currentTool && this.currentTool.id === toolId) {
-            this.panel.webview.postMessage({
-                type: 'update',
-                toolId: toolId,
-                value: value
-            });
+            if (value && value.action) {
+                this.panel.webview.postMessage({
+                    type: 'performAction',
+                    action: value.action
+                });
+            } else {
+                this.panel.webview.postMessage({
+                    type: 'update',
+                    toolId: toolId,
+                    value: value
+                });
+            }
         }
     }
 }

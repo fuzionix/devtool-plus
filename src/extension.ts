@@ -32,6 +32,16 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerFileDecorationProvider(
 			toolDecorationProvider
 		),
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (
+				e.affectsConfiguration('editor.fontFamily') ||
+				e.affectsConfiguration('editor.fontSize') ||
+				e.affectsConfiguration('editor.fontWeight') ||
+				e.affectsConfiguration('editor.fontLigatures')
+			) {
+				codeEditorProvider.updateEditorConfiguration();
+			}
+		})
 	);
 
 	context.subscriptions.push(
