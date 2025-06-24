@@ -1,7 +1,3 @@
-declare const inputEditor: any;
-declare const outputEditor: any;
-declare const vscode: any;
-
 function minifyJson() {
     if (!inputEditor || !outputEditor) return;
     try {
@@ -34,7 +30,7 @@ function formatJson() {
     }
 }
 
-(window as any).toolLogic = {
+window.toolLogic = {
     minify: minifyJson,
     format: formatJson,
 };

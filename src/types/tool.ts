@@ -18,6 +18,8 @@ export interface Tool {
     isNew?: boolean;
     editor?: {
         viewType: 'code' | 'simple';
+        language?: string;
+        initialValue?: string;
         editorLogicPath?: string;
     };
 }

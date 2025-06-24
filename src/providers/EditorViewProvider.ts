@@ -119,9 +119,6 @@ export class EditorViewProvider {
 
                         // Handle different types of editor components
                         switch (toolId) {
-                            case 'json-editor':
-                                
-                                break;
                             case 'text-editor':
                                 editorComponent.dispatchEvent(new CustomEvent('updated', {
                                     detail: { value: value },

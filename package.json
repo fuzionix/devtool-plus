@@ -73,6 +73,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/mime-db": "^1.43.5",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
@@ -93,6 +94,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "lit": "^3.2.1",
     "mime-db": "^1.53.0",
     "uuid": "^11.0.5"

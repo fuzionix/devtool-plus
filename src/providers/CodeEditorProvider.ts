@@ -99,6 +99,9 @@ export class CodeEditorProvider {
     private getHtmlForWebview(): string {
         const monacoUri = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs';
         const toolLogicScript = this.getToolLogicScript();
+        const toolLanguage = this.currentTool?.editor?.language || 'plaintext';
+        const toolInitialValue = this.currentTool?.editor?.initialValue || '';
+        const safeToolInitialValue = JSON.stringify(toolInitialValue);
 
         return `
             <!DOCTYPE html>
@@ -149,7 +152,9 @@ export class CodeEditorProvider {
                     let outputEditor;
                     let currentToolId;
                     let initialFontSettings;
-                    
+                    const toolLanguage = '${toolLanguage}';
+                    const initialContent = ${safeToolInitialValue};
+
                     require.config({ paths: { 'vs': '${monacoUri}' } });
                     require(['vs/editor/editor.main'], function() {
                         const editorOptions = {
@@ -161,13 +166,13 @@ export class CodeEditorProvider {
 
                         inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
                             ...editorOptions,
-                            language: 'json',
-                            value: '{\\n    "message": "Enter your JSON here"\\n}',
+                            language: toolLanguage,
+                            value: initialContent,
                         });
 
                         outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
                             ...editorOptions,
-                            language: 'json',
+                            language: toolLanguage,
                             readOnly: true,
                             value: '',
                         });

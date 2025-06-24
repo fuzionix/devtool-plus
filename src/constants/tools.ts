@@ -19,7 +19,23 @@ export const TOOLS: Tool[] = [
         icon: 'file-json',
         editor: {
             viewType: 'code',
+            language: 'json',
+            initialValue: '{\n    "message": "Paste or type your JSON here."\n}',
             editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
+        }
+    },
+    {
+        id: 'yaml-editor',
+        label: 'YAML Editor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<yaml-editor></yaml-editor>',
+        icon: 'file-warning',
+        editor: {
+            viewType: 'code',
+            language: 'yaml',
+            initialValue: 'message: Paste or type your YAML here.\n',
+            editorLogicPath: 'src/tools/components/yaml-editor/YamlEditorLogic.js'
         }
     },
     {
