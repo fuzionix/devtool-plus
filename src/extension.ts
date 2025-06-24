@@ -49,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('devtool-plus.selectTool', (tool: Tool) => {
 			sidePanelProvider.updateTool(tool);
 			if (tool.editor) {
-				if (tool.editorType === 'code') {
+				if (tool.editor.viewType === 'code') {
 					codeEditorProvider.showTool(tool);
 					activeEditorProviders.set(tool.id, codeEditorProvider);
 				} else {

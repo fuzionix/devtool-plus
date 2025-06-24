@@ -16,6 +16,8 @@ export interface Tool {
     template: string;
     icon: string;
     isNew?: boolean;
-    editor?: boolean;
-    editorType?: 'simple' | 'code';
+    editor?: {
+        viewType: 'code' | 'simple';
+        editorLogicPath?: string;
+    };
 }

@@ -17,8 +17,10 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<json-editor></json-editor>',
         icon: 'file-json',
-        editor: true,
-        editorType: 'code'
+        editor: {
+            viewType: 'code',
+            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
+        }
     },
     {
         id: 'base64-encoder',
@@ -43,8 +45,10 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<text-editor></text-editor>',
         icon: 'type',
-        editor: true,
-        editorType: 'simple'
+        editor: {
+            viewType: 'simple',
+            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
+        }
     },
     {
         id: 'token-generator',

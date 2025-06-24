@@ -2,6 +2,7 @@ const esbuild = require("esbuild");
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
+const { glob } = require('glob');
 const fs = require('fs/promises');
 
 const production = process.argv.includes('--production');
@@ -12,7 +13,6 @@ const watch = process.argv.includes('--watch');
  */
 const esbuildProblemMatcherPlugin = {
 	name: 'esbuild-problem-matcher',
-
 	setup(build) {
 		build.onStart(() => {
 			console.log('[watch] build started');
@@ -41,7 +41,6 @@ const postcssPlugin = {
 			]).process(css, {
 				from: args.path,
 			});
-
 			return {
 				contents: result.css,
 				loader: 'css',
@@ -50,9 +49,11 @@ const postcssPlugin = {
 	},
 };
 
-
 async function main() {
+	const logicFiles = await glob('src/tools/components/**/*Logic.ts');
+
 	const contexts = await Promise.all([
+		// Context 1: Main Extension Code (Node.js)
 		esbuild.context({
 			entryPoints: ['src/extension.ts'],
 			bundle: true,
@@ -64,10 +65,9 @@ async function main() {
 			outfile: 'dist/extension.js',
 			external: ['vscode'],
 			logLevel: 'silent',
-			plugins: [
-				esbuildProblemMatcherPlugin
-			],
+			plugins: [esbuildProblemMatcherPlugin],
 		}),
+		// Context 2: UI Components (Browser)
 		esbuild.context({
 			entryPoints: ['src/tools/toolComponents.ts', 'src/styles/tailwind.css'],
 			bundle: true,
@@ -78,13 +78,23 @@ async function main() {
 			platform: 'browser',
 			outdir: 'dist',
 			logLevel: 'silent',
-			plugins: [
-				esbuildProblemMatcherPlugin,
-				postcssPlugin
-			],
+			plugins: [esbuildProblemMatcherPlugin, postcssPlugin],
 			loader: {
 				'.js': 'jsx',
 			},
+		}),
+		// Context 3: Tool-Specific Logic (Browser)
+		esbuild.context({
+			entryPoints: logicFiles,
+			bundle: true,
+			format: 'iife',
+			minify: production,
+			sourcemap: !production,
+			platform: 'browser',
+			outbase: 'src',
+			outdir: 'dist',
+			logLevel: 'silent',
+			plugins: [esbuildProblemMatcherPlugin],
 		})
 	]);
 

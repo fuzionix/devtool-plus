@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Tool } from '../types/tool';
 
 export class CodeEditorProvider {
@@ -16,6 +18,7 @@ export class CodeEditorProvider {
 
         if (this.panel) {
             this.panel.reveal(vscode.ViewColumn.One);
+            this.panel.webview.html = this.getHtmlForWebview();
             this.updateWebview();
             return;
         }
@@ -76,8 +79,26 @@ export class CodeEditorProvider {
         });
     }
 
+    private getToolLogicScript(): string {
+        if (!this.currentTool?.editor?.editorLogicPath) {
+            return "No tool logic script provided.";
+        }
+
+        const relativePath = this.currentTool.editor.editorLogicPath.replace(/^src/, 'dist');
+        const scriptPath = path.join(this.extensionUri.fsPath, relativePath);
+
+        try {
+            return fs.readFileSync(scriptPath, 'utf-8');
+        } catch (e) {
+            console.error(e);
+            vscode.window.showErrorMessage(`Failed to load tool logic script: ${scriptPath}`);
+            return "Failed to load tool logic script.";
+        }
+    }
+
     private getHtmlForWebview(): string {
         const monacoUri = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs';
+        const toolLogicScript = this.getToolLogicScript();
 
         return `
             <!DOCTYPE html>
@@ -213,13 +234,11 @@ export class CodeEditorProvider {
                             case 'updateConfiguration':
                                 applyFontStyles(message.payload);
                                 break;
-                            case 'performAction':
-                                if (currentToolId === 'json-editor') {
-                                    if (message.action === 'minify') {
-                                        minifyJson();
-                                    } else if (message.action === 'format') {
-                                        formatJson();
-                                    }
+                            case 'action':
+                                if (window.toolLogic && typeof window.toolLogic[message.action] === 'function') {
+                                    window.toolLogic[message.action]();
+                                } else {
+                                    console.warn('No handler for action:', message.action);
                                 }
                                 break;
                         }
@@ -244,38 +263,9 @@ export class CodeEditorProvider {
                         inputEditor.updateOptions(monacoSettings);
                         outputEditor.updateOptions(monacoSettings);
                     }
-
-                    function minifyJson() {
-                        if (!inputEditor || !outputEditor) return;
-                        try {
-                            const inputText = inputEditor.getValue();
-                            if (!inputText.trim()) {
-                                outputEditor.setValue('');
-                                return;
-                            }
-                            const jsonObj = JSON.parse(inputText);
-                            outputEditor.setValue(JSON.stringify(jsonObj));
-                        } catch (e) {
-                            outputEditor.setValue(e.message);
-                            vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });
-                        }
-                    }
-
-                    function formatJson() {
-                        if (!inputEditor || !outputEditor) return;
-                        try {
-                            const inputText = inputEditor.getValue();
-                            if (!inputText.trim()) {
-                                outputEditor.setValue('');
-                                return;
-                            }
-                            const jsonObj = JSON.parse(inputText);
-                            outputEditor.setValue(JSON.stringify(jsonObj, null, 4));
-                        } catch (e) {
-                            outputEditor.setValue(e.message);
-                            vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });
-                        }
-                    }
+                </script>
+                <script>
+                    ${toolLogicScript}
                 </script>
             </body>
             </html>
@@ -308,7 +298,7 @@ export class CodeEditorProvider {
         if (this.panel && this.currentTool && this.currentTool.id === toolId) {
             if (value && value.action) {
                 this.panel.webview.postMessage({
-                    type: 'performAction',
+                    type: 'action',
                     action: value.action
                 });
             } else {
