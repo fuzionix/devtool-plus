@@ -67,6 +67,18 @@ export const TOOLS: Tool[] = [
         }
     },
     {
+        id: 'diff-checker',
+        label: 'Difference Checker',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<diff-checker></diff-checker>',
+        icon: 'file-diff',
+        editor: {
+            viewType: 'diff',
+            language: 'plaintext'
+        }
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',

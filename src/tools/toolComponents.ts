@@ -1,5 +1,6 @@
 import './components/aes-encryption/AesEncryption';
 import './components/base64-encoder/Base64Encoder';
+import './components/diff-checker/DiffChecker';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-editor/JsonEditor';

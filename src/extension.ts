@@ -4,9 +4,10 @@ import { ToolsViewProvider } from './providers/ToolsViewProvider';
 import { ToolDecorationProvider } from './providers/ToolDecorationProvider';
 import { EditorViewProvider } from './providers/EditorViewProvider';
 import { CodeEditorProvider } from './providers/CodeEditorProvider';
+import { DiffEditorProvider } from './providers/DiffEditorProvider';
 import { Tool } from './types/tool';
 
-const activeEditorProviders = new Map<string, EditorViewProvider | CodeEditorProvider>();
+const activeEditorProviders = new Map<string, EditorViewProvider | CodeEditorProvider | DiffEditorProvider>();
 
 export function activate(context: vscode.ExtensionContext) {
 	const sidePanelProvider = new SidePanelProvider(context.extensionUri);
@@ -14,6 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const toolDecorationProvider = new ToolDecorationProvider();
 	const editorViewProvider = new EditorViewProvider(context.extensionUri);
 	const codeEditorProvider = new CodeEditorProvider(context.extensionUri);
+	const diffEditorProvider = new DiffEditorProvider(context.extensionUri);
 
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
@@ -40,6 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 				e.affectsConfiguration('editor.fontLigatures')
 			) {
 				codeEditorProvider.updateEditorConfiguration();
+				diffEditorProvider.updateEditorConfiguration();
 			}
 		})
 	);
@@ -52,6 +55,9 @@ export function activate(context: vscode.ExtensionContext) {
 				if (tool.editor.viewType === 'code') {
 					codeEditorProvider.showTool(tool);
 					activeEditorProviders.set(tool.id, codeEditorProvider);
+				} else if (tool.editor.viewType === 'diff') {
+					diffEditorProvider.showTool(tool);
+					activeEditorProviders.set(tool.id, diffEditorProvider);
 				} else {
 					editorViewProvider.showTool(tool);
 					activeEditorProviders.set(tool.id, editorViewProvider);
