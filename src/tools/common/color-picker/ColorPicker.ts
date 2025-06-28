@@ -559,7 +559,6 @@ export class ColorPicker extends LitElement {
     private parseColor(color: string): boolean {
         // HEX
         const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
-        const hexRegexShort = /^#?([a-f\d])([a-f\d])([a-f\d])([a-f\d])?$/i;
         
         // RGB(A)
         const rgbRegex = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*(\d*\.?\d+))?\s*\)$/i;
@@ -584,28 +583,6 @@ export class ColorPicker extends LitElement {
             
             if (a) {
                 this.alpha = Math.round((parseInt(a, 16) / 255) * 100);
-            } else {
-                this.alpha = 100;
-            }
-            
-            return true;
-        }
-        
-        // Try parsing as short HEX
-        if ((match = hexRegexShort.exec(color))) {
-            const [, r, g, b, a] = match;
-            const { h, s, l } = this.rgbToHsl(
-                parseInt(r + r, 16),
-                parseInt(g + g, 16),
-                parseInt(b + b, 16)
-            );
-            
-            this.hue = Math.round(h);
-            this.saturation = Math.round(s);
-            this.lightness = Math.round(l);
-            
-            if (a) {
-                this.alpha = Math.round((parseInt(a + a, 16) / 255) * 100);
             } else {
                 this.alpha = 100;
             }
