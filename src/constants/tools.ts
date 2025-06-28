@@ -79,6 +79,14 @@ export const TOOLS: Tool[] = [
         }
     },
     {
+        id: 'color-convertor',
+        label: 'Color Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-convertor></color-convertor>',
+        icon: 'swatch-book',
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',
