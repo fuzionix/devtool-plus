@@ -16,6 +16,7 @@ export class ColorPicker extends LitElement {
     @state() private isDraggingHue = false;
     @state() private pointerX = 100;    // Visual pointer X position (0-100%)
     @state() private pointerY = 0;      // Visual pointer Y position (0-100%)
+    @state() private rgbCache = { r: 51, g: 153, b: 255 };
 
     // For positioning and mouse interactions
     private colorRect?: DOMRect;
@@ -456,6 +457,13 @@ export class ColorPicker extends LitElement {
             this.lightness = Math.round(topLightness * (1 - this.pointerY / 100));
         }
         
+        const rgb = this.hslToRgb(this.hue, this.saturation, this.lightness);
+        this.rgbCache = {
+            r: Math.round(rgb.r),
+            g: Math.round(rgb.g),
+            b: Math.round(rgb.b)
+        };
+        
         this.updateValue();
     }
 
@@ -467,18 +475,25 @@ export class ColorPicker extends LitElement {
         const x = Math.max(0, Math.min(clientX - this.hueRect.left, this.hueRect.width));
         this.hue = Math.round((x / this.hueRect.width) * 360);
         
+        const rgb = this.hslToRgb(this.hue, this.saturation, this.lightness);
+        this.rgbCache = {
+            r: Math.round(rgb.r),
+            g: Math.round(rgb.g),
+            b: Math.round(rgb.b)
+        };
+        
         this.updateValue();
     }
 
     private getColorStyle() {
         if (this.showAlpha && this.alpha < 100) {
-            return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.alpha / 100})`;
+            return `rgba(${this.rgbCache.r}, ${this.rgbCache.g}, ${this.rgbCache.b}, ${this.alpha / 100})`;
         }
-        return `hsl(${this.hue}, ${this.saturation}%, ${this.lightness}%)`;
+        return `rgb(${this.rgbCache.r}, ${this.rgbCache.g}, ${this.rgbCache.b})`;
     }
 
     private getColorWithoutAlpha() {
-        return `hsl(${this.hue}, ${this.saturation}%, ${this.lightness}%)`;
+        return `rgb(${this.rgbCache.r}, ${this.rgbCache.g}, ${this.rgbCache.b})`;
     }
 
     private getFormattedColor() {
@@ -495,10 +510,10 @@ export class ColorPicker extends LitElement {
     }
 
     private toHex() {
-        const { r, g, b } = this.hslToRgb(this.hue, this.saturation, this.lightness);
+        const { r, g, b } = this.rgbCache;
         
         const toHex = (c: number) => {
-            const hex = Math.round(c).toString(16);
+            const hex = c.toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         };
         
@@ -511,13 +526,13 @@ export class ColorPicker extends LitElement {
     }
 
     private toRGB() {
-        const { r, g, b } = this.hslToRgb(this.hue, this.saturation, this.lightness);
+        const { r, g, b } = this.rgbCache;
         
         if (this.showAlpha && this.alpha < 100) {
-            return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${this.alpha / 100})`;
+            return `rgba(${r}, ${g}, ${b}, ${this.alpha / 100})`;
         }
         
-        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     private toHSL() {
@@ -544,8 +559,85 @@ export class ColorPicker extends LitElement {
         const input = e.target as HTMLInputElement;
         const value = input.value.trim();
         
+        // Special case for hex colors - store exact value
+        if (value.startsWith('#') && this.isValidHexColor(value)) {
+            // Store the direct RGB values to avoid conversion errors
+            const { r, g, b, a } = this.hexToRgb(value);
+            this.rgbCache = { r, g, b };
+            
+            if (a !== undefined) {
+                this.alpha = Math.round((a / 255) * 100);
+            } else {
+                this.alpha = 100;
+            }
+            
+            // Still update HSL for UI interactions
+            const { h, s, l } = this.rgbToHsl(r, g, b);
+            this.hue = Math.round(h);
+            this.saturation = Math.round(s);
+            this.lightness = Math.round(l);
+            
+            this.updatePointerFromHsl();
+            
+            this.value = value;
+            this.format = 'hex';
+            
+            this.dispatchEvent(new CustomEvent('change', {
+                detail: { value: this.value },
+                bubbles: true,
+                composed: true
+            }));
+            
+            return;
+        }
+        
         if (this.parseColor(value)) {
             this.updateValue();
+        }
+    }
+    
+    private isValidHexColor(color: string): boolean {
+        return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.test(color);
+    }
+    
+    private hexToRgb(hex: string) {
+        hex = hex.replace(/^#/, '');
+        let r: number, g: number, b: number, a: number | undefined;
+        
+        if (hex.length === 6) {
+            // 6 digits: #RRGGBB
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        } else if (hex.length === 8) {
+            // 8 digits: #RRGGBBAA
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+            a = parseInt(hex.substring(6, 8), 16);
+        } else {
+            // Invalid hex
+            r = 0;
+            g = 0;
+            b = 0;
+        }
+        
+        return { r, g, b, a };
+    }
+    
+    private updatePointerFromHsl() {
+        this.pointerX = this.saturation;
+        
+        if (this.lightness <= 50) {
+            this.pointerY = 100 - (this.lightness * 2);
+        } else {
+            const factor = (this.lightness - 50) / 50;
+            this.pointerY = 0;
+            
+            // Adjust saturation based on lightness
+            if (this.saturation > 0) {
+                this.pointerX = this.saturation - (this.saturation * factor);
+            }
         }
     }
 
@@ -571,12 +663,13 @@ export class ColorPicker extends LitElement {
         // Try parsing as HEX
         if ((match = hexRegex.exec(color))) {
             const [, r, g, b, a] = match;
-            const { h, s, l } = this.rgbToHsl(
-                parseInt(r, 16),
-                parseInt(g, 16),
-                parseInt(b, 16)
-            );
+            const rVal = parseInt(r, 16);
+            const gVal = parseInt(g, 16);
+            const bVal = parseInt(b, 16);
             
+            this.rgbCache = { r: rVal, g: gVal, b: bVal };
+            
+            const { h, s, l } = this.rgbToHsl(rVal, gVal, bVal);
             this.hue = Math.round(h);
             this.saturation = Math.round(s);
             this.lightness = Math.round(l);
@@ -587,18 +680,20 @@ export class ColorPicker extends LitElement {
                 this.alpha = 100;
             }
             
+            this.updatePointerFromHsl();
             return true;
         }
         
         // Try parsing as RGB
         if ((match = rgbRegex.exec(color))) {
             const [, r, g, b, a] = match;
-            const { h, s, l } = this.rgbToHsl(
-                parseInt(r),
-                parseInt(g),
-                parseInt(b)
-            );
+            const rVal = parseInt(r);
+            const gVal = parseInt(g);
+            const bVal = parseInt(b);
             
+            this.rgbCache = { r: rVal, g: gVal, b: bVal };
+            
+            const { h, s, l } = this.rgbToHsl(rVal, gVal, bVal);
             this.hue = Math.round(h);
             this.saturation = Math.round(s);
             this.lightness = Math.round(l);
@@ -609,6 +704,7 @@ export class ColorPicker extends LitElement {
                 this.alpha = 100;
             }
             
+            this.updatePointerFromHsl();
             return true;
         }
         
@@ -620,12 +716,21 @@ export class ColorPicker extends LitElement {
             this.saturation = parseInt(s);
             this.lightness = parseInt(l);
             
+            // Update RGB cache for precise representation
+            const rgb = this.hslToRgb(this.hue, this.saturation, this.lightness);
+            this.rgbCache = {
+                r: Math.round(rgb.r),
+                g: Math.round(rgb.g),
+                b: Math.round(rgb.b)
+            };
+            
             if (a !== undefined) {
                 this.alpha = Math.round(parseFloat(a) * 100);
             } else {
                 this.alpha = 100;
             }
             
+            this.updatePointerFromHsl();
             return true;
         }
         
