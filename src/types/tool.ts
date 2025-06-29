@@ -2,8 +2,8 @@ export enum ToolCategory {
     Text = "📝 Text",
     Data = "💽 Data",
     Encode = "⌛ Encode / Decode",
-    Design = "🖼️ UI Design",
-    Util = "🛠️ Utility",
+    Design = "📱 UI Design",
+    Util = "🧰 Utility",
     Cryptography = "🔒 Cryptography",
     Productivity = "⚡ Productivity",
 }
