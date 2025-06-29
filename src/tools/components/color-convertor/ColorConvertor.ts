@@ -6,9 +6,11 @@ import '../../common/alert/Alert';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import hwbPlugin from 'colord/plugins/hwb';
+import cmykPlugin from 'colord/plugins/cmyk';
+import lchPlugin from 'colord/plugins/lch';
 import { ColorPicker } from '../../common/color-picker/ColorPicker';
 
-extend([namesPlugin, hwbPlugin]);
+extend([namesPlugin, hwbPlugin, cmykPlugin, lchPlugin]);
 
 @customElement('color-convertor')
 export class ColorConvertor extends BaseTool {
@@ -17,13 +19,20 @@ export class ColorConvertor extends BaseTool {
         hex: '#3399ff',
         rgb: 'rgb(51, 153, 255)',
         hsl: 'hsl(210, 100%, 60%)',
-        hwb: 'hwb(210 20% 0%)'
+        hwb: 'hwb(210 20% 0%)',
+        cmyk: 'device-cmyk(80% 40% 0% 0%)',
+        lch: 'lch(63.01% 54.38 262.33)',
+        name: ''
     };
+    @state() private exactName = false; // Track if the name is exact or approximate
     @state() private errors = {
         hex: '',
         rgb: '',
         hsl: '',
-        hwb: ''
+        hwb: '',
+        cmyk: '',
+        lch: '',
+        name: ''
     };
     @state() private copiedFormat: string | null = null;
     @state() private editingFormat: string | null = null;
@@ -31,7 +40,10 @@ export class ColorConvertor extends BaseTool {
         hex: '',
         rgb: '',
         hsl: '',
-        hwb: ''
+        hwb: '',
+        cmyk: '',
+        lch: '',
+        name: ''
     };
 
     @query('tool-color-picker') private colorPicker!: ColorPicker;
@@ -81,9 +93,29 @@ export class ColorConvertor extends BaseTool {
             .format-group.has-error .format-input {
                 border-color: var(--vscode-editorError-foreground);
             }
+
+            .name-format-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                min-height: 22px;
+            }
+
+            .approximate-badge {
+                position: absolute;
+                right: 48px;
+                font-size: 10px;
+                background: var(--vscode-badge-background);
+                color: var(--vscode-badge-foreground);
+                margin-left: 6px;
+                padding: 2px 4px;
+                border-radius: 2px;
+                text-transform: uppercase;
+            }
             </style>
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, and HWB. Edit any format directly or use the color picker.</p>
+                <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, LCH, and named colors. Edit any format directly or use the color picker.</p>
                 <hr />
                                 
                 <div class="color-picker-container flex flex-col items-center">
@@ -106,12 +138,17 @@ export class ColorConvertor extends BaseTool {
                     ${this.renderFormatRow('rgb', 'RGB')}
                     ${this.renderFormatRow('hsl', 'HSL')}
                     ${this.renderFormatRow('hwb', 'HWB')}
+                    ${this.renderFormatRow('cmyk', 'CMYK')}
+                    ${this.renderFormatRow('lch', 'LCH')}
+                    ${this.renderNameRow()}
                 </div>
             </div>
         `;
     }
 
     private renderFormatRow(format: keyof typeof this.formats, label: string) {
+        if (format === 'name') return html``; // Name has a special renderer
+        
         const isCopied = this.copiedFormat === format;
         const hasError = !!this.errors[format];
         
@@ -143,6 +180,47 @@ export class ColorConvertor extends BaseTool {
         `;
     }
 
+    private renderNameRow() {
+        const format = 'name';
+        const isCopied = this.copiedFormat === format;
+        const colorName = this.formats.name;
+        const hasName = !!colorName;
+        
+        return html`
+            <div class="format-group">
+                <div class="format-row">
+                    <div class="format-label">NAME</div>
+                    ${hasName 
+                        ? html`
+                            <div class="font-mono flex-1 flex items-center">
+                                <input 
+                                    type="text" 
+                                    class="format-input !bg-transparent w-full" 
+                                    .value="${colorName}"
+                                    @focus="${() => this.handleFormatFocus(format)}"
+                                    @blur="${() => this.handleFormatBlur(format)}"
+                                    @input="${(e: InputEvent) => this.handleFormatInput(e, format)}"
+                                />
+                                ${!this.exactName ? html`<span class="approximate-badge">approx</span>` : ''}
+                            </div>
+                            <button 
+                                class="copy-button ${isCopied ? 'copied' : ''}" 
+                                @click="${() => this.copyToClipboard(format)}"
+                                title="Copy to clipboard"
+                            >
+                                ${isCopied 
+                                    ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check" > <path d="M18 6 7 17l-5-5"></path> <path d="m22 10-7.5 7.5L13 16"></path> </svg>` 
+                                    : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" > <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path> </svg>`
+                                }
+                            </button>
+                        `
+                        : html`<span class="flex-1 opacity-50 italic">No color name available</span>`
+                    }
+                </div>
+            </div>
+        `;
+    }
+
     private handleFormatFocus(format: keyof typeof this.formats) {
         this.editingFormat = format;
         this.originalValues[format] = this.formats[format];
@@ -167,6 +245,12 @@ export class ColorConvertor extends BaseTool {
         
         this.formats = { ...this.formats, [format]: value };
         
+        // Special case for name format
+        if (format === 'name') {
+            this.handleNameInput(value);
+            return;
+        }
+        
         const validationResult = this.validateColor(value, format);
         if (validationResult.isValid) {
             this.errors = { ...this.errors, [format]: '' };
@@ -175,6 +259,9 @@ export class ColorConvertor extends BaseTool {
             if (format === 'hsl') {
                 // Special handling for HSL to preserve the exact values
                 this.updateOtherFormatsFromHsl(value);
+            } else if (format === 'lch') {
+                // Special handling for LCH
+                this.updateOtherFormatsFromLch(value);
             } else {
                 this.colorValue = validationResult.color as string;
                 this.updateOtherFormats(this.colorValue, format);
@@ -184,6 +271,24 @@ export class ColorConvertor extends BaseTool {
             this.updateColorPicker();
         } else {
             this.errors = { ...this.errors, [format]: validationResult.error as string };
+        }
+    }
+
+    private handleNameInput(value: string) {
+        try {
+            const parsedColor = colord(value);
+            
+            if (parsedColor.isValid()) {
+                this.colorValue = parsedColor.toHex();
+                this.updateAllFormats(this.colorValue);
+                this.updateColorPicker();
+                this.errors = { ...this.errors, name: '' };
+                this.exactName = true;
+            } else {
+                this.errors = { ...this.errors, name: 'Invalid color name' };
+            }
+        } catch (error) {
+            this.errors = { ...this.errors, name: 'Invalid color name' };
         }
     }
 
@@ -244,6 +349,24 @@ export class ColorConvertor extends BaseTool {
                         };
                     }
                     break;
+                    
+                case 'cmyk':
+                    if (!value.startsWith('device-cmyk')) {
+                        return {
+                            isValid: false,
+                            error: 'Invalid CMYK format. Use device-cmyk(c% m% y% k%) or device-cmyk(c% m% y% k% / a)'
+                        };
+                    }
+                    break;
+                    
+                case 'lch':
+                    if (!value.startsWith('lch')) {
+                        return {
+                            isValid: false,
+                            error: 'Invalid LCH format. Use lch(l% c h) or lch(l% c h / a)'
+                        };
+                    }
+                    break;
             }
             
             // Return the parsed color in the original format for consistency
@@ -265,7 +388,10 @@ export class ColorConvertor extends BaseTool {
             hex: '',
             rgb: '',
             hsl: '',
-            hwb: ''
+            hwb: '',
+            cmyk: '',
+            lch: '',
+            name: ''
         };
     }
 
@@ -277,12 +403,33 @@ export class ColorConvertor extends BaseTool {
                 throw new Error('Invalid color');
             }
             
-            this.formats = {
-                hex: parsedColor.toHex(),
-                rgb: parsedColor.toRgbString(),
-                hsl: parsedColor.toHslString(),
-                hwb: parsedColor.toHwbString()
-            };
+            const exactName = parsedColor.toName();
+            
+            if (exactName) {
+                this.formats = {
+                    hex: parsedColor.toHex(),
+                    rgb: parsedColor.toRgbString(),
+                    hsl: parsedColor.toHslString(),
+                    hwb: parsedColor.toHwbString(),
+                    cmyk: parsedColor.toCmykString(),
+                    lch: parsedColor.toLchString(),
+                    name: exactName
+                };
+                this.exactName = true;
+            } else {
+                const closestName = parsedColor.toName({ closest: true });
+                
+                this.formats = {
+                    hex: parsedColor.toHex(),
+                    rgb: parsedColor.toRgbString(),
+                    hsl: parsedColor.toHslString(),
+                    hwb: parsedColor.toHwbString(),
+                    cmyk: parsedColor.toCmykString(),
+                    lch: parsedColor.toLchString(),
+                    name: closestName || ''
+                };
+                this.exactName = false;
+            }
             
         } catch (error) {
             console.error('Failed to update color formats:', error);
@@ -297,6 +444,17 @@ export class ColorConvertor extends BaseTool {
                 throw new Error('Invalid color');
             }
             
+            const exactName = parsedColor.toName();
+            let colorName = '';
+            
+            if (exactName) {
+                colorName = exactName;
+                this.exactName = true;
+            } else {
+                colorName = parsedColor.toName({ closest: true }) || '';
+                this.exactName = false;
+            }
+            
             // Update all formats except the one being edited
             const updatedFormats = { ...this.formats };
             
@@ -304,9 +462,12 @@ export class ColorConvertor extends BaseTool {
             if (currentFormat !== 'rgb') updatedFormats.rgb = parsedColor.toRgbString();
             if (currentFormat !== 'hsl') updatedFormats.hsl = parsedColor.toHslString();
             if (currentFormat !== 'hwb') updatedFormats.hwb = parsedColor.toHwbString();
+            if (currentFormat !== 'cmyk') updatedFormats.cmyk = parsedColor.toCmykString();
+            if (currentFormat !== 'lch') updatedFormats.lch = parsedColor.toLchString();
+            
+            updatedFormats.name = colorName;
             
             this.formats = updatedFormats;
-            
         } catch (error) {
             console.error('Failed to update other color formats:', error);
         }
@@ -329,12 +490,26 @@ export class ColorConvertor extends BaseTool {
             
             const parsedColor = colord({ h, s, l, a });
             
+            const exactName = parsedColor.toName();
+            let colorName = '';
+            
+            if (exactName) {
+                colorName = exactName;
+                this.exactName = true;
+            } else {
+                colorName = parsedColor.toName({ closest: true }) || '';
+                this.exactName = false;
+            }
+            
             // Update all formats except HSL
             this.formats = {
                 ...this.formats,
                 hex: parsedColor.toHex(),
                 rgb: parsedColor.toRgbString(),
-                hwb: parsedColor.toHwbString()
+                hwb: parsedColor.toHwbString(),
+                cmyk: parsedColor.toCmykString(),
+                lch: parsedColor.toLchString(),
+                name: colorName
             };
             
             this.colorValue = parsedColor.toHex();
@@ -344,7 +519,53 @@ export class ColorConvertor extends BaseTool {
         }
     }
 
+    private updateOtherFormatsFromLch(lchValue: string) {
+        try {
+            const lchRegex = /lch\(\s*(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?\s*\)/i;
+            const matches = lchValue.match(lchRegex);
+            
+            if (!matches) {
+                throw new Error('Invalid LCH format');
+            }
+            
+            const parsedColor = colord(lchValue);
+            
+            if (!parsedColor.isValid()) {
+                throw new Error('Invalid LCH color');
+            }
+            
+            const exactName = parsedColor.toName();
+            let colorName = '';
+            
+            if (exactName) {
+                colorName = exactName;
+                this.exactName = true;
+            } else {
+                colorName = parsedColor.toName({ closest: true }) || '';
+                this.exactName = false;
+            }
+            
+            // Update all formats except LCH
+            this.formats = {
+                ...this.formats,
+                hex: parsedColor.toHex(),
+                rgb: parsedColor.toRgbString(),
+                hsl: parsedColor.toHslString(),
+                hwb: parsedColor.toHwbString(),
+                cmyk: parsedColor.toCmykString(),
+                name: colorName
+            };
+            
+            this.colorValue = parsedColor.toHex();
+            
+        } catch (error) {
+            console.error('Failed to update from LCH:', error);
+        }
+    }
+
     private async copyToClipboard(format: keyof typeof this.formats) {
+        if (!this.formats[format]) return; // Don't copy empty values
+        
         try {
             await navigator.clipboard.writeText(this.formats[format]);
             this.copiedFormat = format;
