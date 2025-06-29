@@ -1,11 +1,12 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import '../../common/color-picker/ColorPicker';
 import '../../common/alert/Alert';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import hwbPlugin from 'colord/plugins/hwb';
+import { ColorPicker } from '../../common/color-picker/ColorPicker';
 
 extend([namesPlugin, hwbPlugin]);
 
@@ -25,6 +26,15 @@ export class ColorConvertor extends BaseTool {
         hwb: ''
     };
     @state() private copiedFormat: string | null = null;
+    @state() private editingFormat: string | null = null;
+    @state() private originalValues = {
+        hex: '',
+        rgb: '',
+        hsl: '',
+        hwb: ''
+    };
+
+    @query('tool-color-picker') private colorPicker!: ColorPicker;
 
     static styles = css`
         ${BaseTool.styles}
@@ -76,12 +86,13 @@ export class ColorConvertor extends BaseTool {
                 <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, and HWB. Edit any format directly or use the color picker.</p>
                 <hr />
                                 
-                <div class="color-picker-container">
+                <div class="color-picker-container flex flex-col items-center">
                     <tool-color-picker
                         class="w-full"
                         .value="${this.colorValue}"
                         @change="${this.handleColorChange}"
                     ></tool-color-picker>
+                    <p class="mt-1 mb-0 text-xs opacity-75 select-none">Pick your color here</p>
                 </div>
                 
                 <!-- Arrow Divider -->
@@ -112,6 +123,8 @@ export class ColorConvertor extends BaseTool {
                         type="text" 
                         class="format-input font-mono flex-1 !bg-transparent" 
                         .value="${this.formats[format]}"
+                        @focus="${() => this.handleFormatFocus(format)}"
+                        @blur="${() => this.handleFormatBlur(format)}"
                         @input="${(e: InputEvent) => this.handleFormatInput(e, format)}"
                     />
                     <button 
@@ -130,6 +143,17 @@ export class ColorConvertor extends BaseTool {
         `;
     }
 
+    private handleFormatFocus(format: keyof typeof this.formats) {
+        this.editingFormat = format;
+        this.originalValues[format] = this.formats[format];
+    }
+
+    private handleFormatBlur(format: keyof typeof this.formats) {
+        if (this.editingFormat === format) {
+            this.editingFormat = null;
+        }
+    }
+
     private handleColorChange(e: CustomEvent) {
         const value = e.detail.value;
         this.colorValue = value;
@@ -146,10 +170,30 @@ export class ColorConvertor extends BaseTool {
         const validationResult = this.validateColor(value, format);
         if (validationResult.isValid) {
             this.errors = { ...this.errors, [format]: '' };
-            this.colorValue = validationResult.color as string;
-            this.updateAllFormats(this.colorValue);
+            
+            // Only update other formats when the input is valid
+            if (format === 'hsl') {
+                // Special handling for HSL to preserve the exact values
+                this.updateOtherFormatsFromHsl(value);
+            } else {
+                this.colorValue = validationResult.color as string;
+                this.updateOtherFormats(this.colorValue, format);
+            }
+            
+            // Update the color picker value to match
+            this.updateColorPicker();
         } else {
             this.errors = { ...this.errors, [format]: validationResult.error as string };
+        }
+    }
+
+    private updateColorPicker() {
+        if (this.colorPicker) {
+            // Update the color picker's value property directly
+            this.colorPicker.value = this.colorValue;
+            
+            // Force the color picker to update its internal state
+            this.colorPicker.requestUpdate();
         }
     }
 
@@ -242,6 +286,61 @@ export class ColorConvertor extends BaseTool {
             
         } catch (error) {
             console.error('Failed to update color formats:', error);
+        }
+    }
+
+    private updateOtherFormats(color: string, currentFormat: keyof typeof this.formats) {
+        try {
+            const parsedColor = colord(color);
+            
+            if (!parsedColor.isValid()) {
+                throw new Error('Invalid color');
+            }
+            
+            // Update all formats except the one being edited
+            const updatedFormats = { ...this.formats };
+            
+            if (currentFormat !== 'hex') updatedFormats.hex = parsedColor.toHex();
+            if (currentFormat !== 'rgb') updatedFormats.rgb = parsedColor.toRgbString();
+            if (currentFormat !== 'hsl') updatedFormats.hsl = parsedColor.toHslString();
+            if (currentFormat !== 'hwb') updatedFormats.hwb = parsedColor.toHwbString();
+            
+            this.formats = updatedFormats;
+            
+        } catch (error) {
+            console.error('Failed to update other color formats:', error);
+        }
+    }
+
+    private updateOtherFormatsFromHsl(hslValue: string) {
+        try {
+            // Parse the HSL values manually to prevent precision issues
+            const hslRegex = /hsla?\(\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%(?:\s*,\s*(\d+(?:\.\d+)?))?\s*\)/i;
+            const matches = hslValue.match(hslRegex);
+            
+            if (!matches) {
+                throw new Error('Invalid HSL format');
+            }
+            
+            const h = parseInt(matches[1], 10);
+            const s = parseFloat(matches[2]);
+            const l = parseFloat(matches[3]);
+            const a = matches[4] ? parseFloat(matches[4]) : 1;
+            
+            const parsedColor = colord({ h, s, l, a });
+            
+            // Update all formats except HSL
+            this.formats = {
+                ...this.formats,
+                hex: parsedColor.toHex(),
+                rgb: parsedColor.toRgbString(),
+                hwb: parsedColor.toHwbString()
+            };
+            
+            this.colorValue = parsedColor.toHex();
+            
+        } catch (error) {
+            console.error('Failed to update from HSL:', error);
         }
     }
 

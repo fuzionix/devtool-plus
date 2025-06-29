@@ -18,6 +18,9 @@ export class ColorPicker extends LitElement {
     @state() private pointerY = 0;      // Visual pointer Y position (0-100%)
     @state() private rgbCache = { r: 51, g: 153, b: 255 };
 
+    // Keep track of the last processed value to avoid redundant processing
+    private lastProcessedValue = '';
+
     // For positioning and mouse interactions
     private colorRect?: DOMRect;
     private hueRect?: DOMRect;
@@ -72,7 +75,7 @@ export class ColorPicker extends LitElement {
         .picker-panel {
             position: absolute;
             top: calc(100% + 5px);
-            left: 0;
+            right: 0;
             width: 200px;
             background: var(--vscode-panel-background);
             border: 1px solid var(--vscode-panel-border);
@@ -218,7 +221,20 @@ export class ColorPicker extends LitElement {
     constructor() {
         super();
         this.parseColor(this.value);
+        this.lastProcessedValue = this.value;
 
+        this.updatePointerPositions();
+    }
+
+    updated(changedProperties: Map<string, any>) {
+        if (changedProperties.has('value') && this.value !== this.lastProcessedValue) {
+            this.parseColor(this.value);
+            this.lastProcessedValue = this.value;
+            this.updatePointerPositions();
+        }
+    }
+
+    private updatePointerPositions() {
         this.pointerX = this.saturation;
         if (this.lightness <= 50) {
             this.pointerY = 100 - (this.lightness * 2);
@@ -546,6 +562,7 @@ export class ColorPicker extends LitElement {
     private updateValue() {
         const newValue = this.getFormattedColor();
         if (this.value !== newValue) {
+            this.lastProcessedValue = newValue;
             this.value = newValue;
             this.dispatchEvent(new CustomEvent('change', {
                 detail: { value: this.value },
@@ -579,6 +596,7 @@ export class ColorPicker extends LitElement {
             
             this.updatePointerFromHsl();
             
+            this.lastProcessedValue = value;
             this.value = value;
             this.format = 'hex';
             
