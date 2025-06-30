@@ -1,6 +1,11 @@
 import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import { colord, extend } from 'colord';
+import mixPlugin from 'colord/plugins/mix';
+import namesPlugin from 'colord/plugins/names';
+
+extend([mixPlugin, namesPlugin]);
 
 @customElement('color-palette')
 export class ColorPalette extends BaseTool {
@@ -49,10 +54,10 @@ export class ColorPalette extends BaseTool {
                 width: 100%;
                 height: 100%;
                 background-image: 
-                    linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%),
-                    linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.05) 75%),
-                    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.05) 75%);
+                    linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                    linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.1) 75%),
+                    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.1) 75%);
                 background-size: 10px 10px;
                 background-position: 0 0, 0 5px, 5px -5px, -5px 0;
                 z-index: -1;
@@ -128,6 +133,38 @@ export class ColorPalette extends BaseTool {
                         ${this.generateShades().map((color) => this.renderColorSwatch(color))}
                     </div>
                 </div>
+
+                <!-- Hues (Different Hues, Same Saturation/Lightness) -->
+                <div class="flex flex-col mb-4">
+                    <div class="text-xs">Hues</div>
+                    <div class="color-grid">
+                        ${this.generateHues().map((color) => this.renderColorSwatch(color))}
+                    </div>
+                </div>
+
+                <!-- Transparent (Different Opacity Levels) -->
+                <div class="flex flex-col mb-4">
+                    <div class="text-xs">Transparent</div>
+                    <div class="color-grid">
+                        ${this.generateTransparent().map((color) => this.renderColorSwatch(color))}
+                    </div>
+                </div>
+
+                <!-- Complementary Colors -->
+                <div class="flex flex-col mb-4">
+                    <div class="text-xs">Complementary Colors</div>
+                    <div class="color-grid">
+                        ${this.generateComplementaryColors().map((color) => this.renderColorSwatch(color))}
+                    </div>
+                </div>
+
+                <!-- Triangle Colors -->
+                <div class="flex flex-col mb-4">
+                    <div class="text-xs">Triangle Colors</div>
+                    <div class="color-grid">
+                        ${this.generateTriangleColors().map((color) => this.renderColorSwatch(color))}
+                    </div>
+                </div>
             </div>
         `;
     }
@@ -170,72 +207,115 @@ export class ColorPalette extends BaseTool {
     }
 
     private getContrastColor(hexColor: string): string {
-        hexColor = hexColor.replace('#', '');
-        
-        // Parse HEX color
-        const r = parseInt(hexColor.substr(0, 2), 16);
-        const g = parseInt(hexColor.substr(2, 2), 16);
-        const b = parseInt(hexColor.substr(4, 2), 16);
-        
-        // Calculate perceived brightness (YIQ formula)
-        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        
-        // Return black or white based on contrast
-        return (yiq >= 128) ? '#000000' : '#ffffff';
+        return colord(hexColor).isLight() ? '#000000' : '#ffffff';
     }
 
-    private hexToRgb(hex: string): {r: number, g: number, b: number} {
-        hex = hex.replace('#', '');
+    private generateComplementaryColors(): string[] {
+        const base = colord(this.baseColor);
+        const baseHsl = base.toHsl();
         
-        // Parse HEX color
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
+        // Complementary color is opposite on the color wheel (180 degrees apart)
+        const complementaryHue = (baseHsl.h + 180) % 360;
+        const complementary = colord({ 
+            h: complementaryHue, 
+            s: baseHsl.s, 
+            l: baseHsl.l 
+        }).toHex();
         
-        return {r, g, b};
+        return [this.baseColor, complementary];
     }
 
-    private rgbToHex(r: number, g: number, b: number): string {
-        // Ensure values are in valid range
-        r = Math.max(0, Math.min(255, Math.round(r)));
-        g = Math.max(0, Math.min(255, Math.round(g)));
-        b = Math.max(0, Math.min(255, Math.round(b)));
+    private generateTriangleColors(): string[] {
+        const base = colord(this.baseColor);
+        const baseHsl = base.toHsl();
         
-        return '#' + 
-            r.toString(16).padStart(2, '0') + 
-            g.toString(16).padStart(2, '0') + 
-            b.toString(16).padStart(2, '0');
+        // Triangle colors are 120 degrees apart on the color wheel
+        const color1Hue = (baseHsl.h + 120) % 360;
+        const color2Hue = (baseHsl.h + 240) % 360;
+        
+        const color1 = colord({ 
+            h: color1Hue, 
+            s: baseHsl.s, 
+            l: baseHsl.l 
+        }).toHex();
+        
+        const color2 = colord({ 
+            h: color2Hue, 
+            s: baseHsl.s, 
+            l: baseHsl.l 
+        }).toHex();
+        
+        return [this.baseColor, color1, color2];
     }
 
     private generateTints(): string[] {
-        const {r, g, b} = this.hexToRgb(this.baseColor);
-        const tints: string[] = [this.baseColor];
+        const base = colord(this.baseColor);
+        const tints = [this.baseColor];
         
         for (let i = 1; i < this.colorSteps; i++) {
             const amount = i / (this.colorSteps + 1);
-            const newR = r + (255 - r) * amount;
-            const newG = g + (255 - g) * amount;
-            const newB = b + (255 - b) * amount;
-            
-            tints.push(this.rgbToHex(newR, newG, newB));
+            const tint = base.mix('white', amount).toHex();
+            tints.push(tint);
         }
         
         return tints;
     }
 
     private generateShades(): string[] {
-        const {r, g, b} = this.hexToRgb(this.baseColor);
-        const shades: string[] = [this.baseColor];
+        const base = colord(this.baseColor);
+        const shades = [this.baseColor];
         
         for (let i = 1; i < this.colorSteps; i++) {
             const amount = i / (this.colorSteps + 1);
-            const newR = r * (1 - amount);
-            const newG = g * (1 - amount);
-            const newB = b * (1 - amount);
-            
-            shades.push(this.rgbToHex(newR, newG, newB));
+            const shade = base.mix('black', amount).toHex();
+            shades.push(shade);
         }
         
         return shades;
+    }
+
+    private generateHues(): string[] {
+        const base = colord(this.baseColor);
+        const baseHsl = base.toHsl();
+        const hues: string[] = [];
+        
+        const colorsPerSide = Math.floor(this.colorSteps / 2);
+        const hasExtraColor = this.colorSteps % 2 === 0;
+        
+        // Generate left side colors (negative hue offsets)
+        for (let i = colorsPerSide; i > 0; i--) {
+            const hueOffset = (60 / this.colorSteps) * i;
+            const newHue = ((baseHsl.h - hueOffset) + 360) % 360;
+            
+            const color = colord({ h: newHue, s: baseHsl.s, l: baseHsl.l });
+            hues.push(color.toHex());
+        }
+        
+        // Add the original color in the middle
+        hues.push(this.baseColor);
+        
+        // Generate right side colors (positive hue offsets)
+        for (let i = 1; i < colorsPerSide + (hasExtraColor ? 0 : 1); i++) {
+            const hueOffset = (60 / this.colorSteps) * i;
+            const newHue = (baseHsl.h + hueOffset) % 360;
+            
+            const color = colord({ h: newHue, s: baseHsl.s, l: baseHsl.l });
+            hues.push(color.toHex());
+        }
+        
+        return hues;
+    }
+
+    private generateTransparent(): string[] {
+        const base = colord(this.baseColor);
+        const transparentColors: string[] = [];
+        
+        for (let i = 0; i < this.colorSteps; i++) {
+            const opacity = 1 - (i / (this.colorSteps + 1));
+            const rgba = base.alpha(opacity).toHex();
+            transparentColors.push(rgba);
+        }
+        
+        return transparentColors;
     }
 }
