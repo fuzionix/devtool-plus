@@ -2,7 +2,6 @@ import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { TextEditorState } from './TextEditorTypes';
-import '../../common/dropdown-menu/DropdownMenu';
 
 @customElement('text-editor')
 export class TextEditor extends BaseTool {

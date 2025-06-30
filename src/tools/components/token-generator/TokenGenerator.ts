@@ -5,9 +5,6 @@ import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
-import '../../common/slider/Slider';
-import '../../common/switch/Switch';
-import '../../common/expandable/Expandable';
 
 @customElement('token-generator')
 export class TokenGenerator extends BaseTool {

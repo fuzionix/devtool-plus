@@ -84,7 +84,16 @@ export const TOOLS: Tool[] = [
         version: '1.0.0',
         category: ToolCategory.Design,
         template: '<color-convertor></color-convertor>',
+        icon: 'paintbrush-vertical',
+    },
+    {
+        id: 'color-palette',
+        label: 'Color Palette Generator',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-palette></color-palette>',
         icon: 'swatch-book',
+        isNew: true
     },
     {
         id: 'token-generator',

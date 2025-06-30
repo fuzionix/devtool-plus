@@ -1,7 +1,6 @@
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import '../../common/file-dropzone/FileDropzone';
 
 @customElement('yaml-editor')
 export class YamlEditor extends BaseTool {

@@ -2,11 +2,6 @@ import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { adjustTextareaHeight, renderCopyButton } from '../../../utils/util';
-import '../../common/alert/Alert';
-import '../../common/dropdown-menu/DropdownMenu';
-import '../../common/inline-menu/InlineMenu';
-import '../../common/switch/Switch';
-import '../../common/tooltip/Tooltip';
 
 type KeyFormat = 'PEM' | 'DER' | 'JWK';
 type Operation = 'encrypt' | 'decrypt';

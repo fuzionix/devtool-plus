@@ -1,7 +1,6 @@
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import '../../../tools/common/file-dropzone/FileDropzone';
 
 @customElement('json-editor')
 export class JsonEditor extends BaseTool {

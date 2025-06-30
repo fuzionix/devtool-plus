@@ -1,6 +1,17 @@
+import './common/alert/Alert';
+import './common/color-picker/ColorPicker';
+import './common/dropdown-menu/DropdownMenu';
+import './common/expandable/Expandable';
+import './common/file-dropzone/FileDropzone';
+import './common/inline-menu/InlineMenu';
+import './common/slider/Slider';
+import './common/switch/Switch';
+import './common/tooltip/Tooltip';
+
 import './components/aes-encryption/AesEncryption';
 import './components/base64-encoder/Base64Encoder';
 import './components/color-convertor/ColorConvertor';
+import './components/color-palette/ColorPalette';
 import './components/diff-checker/DiffChecker';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';

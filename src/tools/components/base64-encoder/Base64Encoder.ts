@@ -5,9 +5,6 @@ import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
-import '../../common/alert/Alert';
-import '../../common/switch/Switch';
-import '../../common/tooltip/Tooltip';
 import mimeDb from 'mime-db';
 
 @customElement('base64-encoder')

@@ -1,27 +1,25 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
-import '../../common/color-picker/ColorPicker';
-import '../../common/alert/Alert';
+import { ColorPicker } from '../../common/color-picker/ColorPicker';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import hwbPlugin from 'colord/plugins/hwb';
 import cmykPlugin from 'colord/plugins/cmyk';
 import lchPlugin from 'colord/plugins/lch';
-import { ColorPicker } from '../../common/color-picker/ColorPicker';
 
 extend([namesPlugin, hwbPlugin, cmykPlugin, lchPlugin]);
 
 @customElement('color-convertor')
 export class ColorConvertor extends BaseTool {
-    @state() private colorValue = '#3399ff';
+    @state() private colorValue = '#0f85fa';
     @state() private formats = {
-        hex: '#3399ff',
-        rgb: 'rgb(51, 153, 255)',
-        hsl: 'hsl(210, 100%, 60%)',
-        hwb: 'hwb(210 20% 0%)',
-        cmyk: 'device-cmyk(80% 40% 0% 0%)',
-        lch: 'lch(63.01% 54.38 262.33)',
+        hex: '#0f85fa',
+        rgb: 'rgb(15, 133, 250)',
+        hsl: 'hsl(210, 96%, 52%)',
+        hwb: 'hwb(210 6% 2%)',
+        cmyk: 'device-cmyk(94% 47% 0% 2%)',
+        lch: 'lch(54.78% 67.95 273.92)',
         name: ''
     };
     @state() private exactName = false; // Track if the name is exact or approximate

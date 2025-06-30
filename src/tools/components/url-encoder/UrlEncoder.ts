@@ -5,8 +5,6 @@ import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
-import '../../common/alert/Alert';
-import '../../common/switch/Switch';
 
 @customElement('url-encoder')
 export class UrlEncoder extends BaseTool {

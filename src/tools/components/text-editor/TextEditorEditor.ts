@@ -3,7 +3,6 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { renderCopyButton } from '../../../utils/util';
 import { CaseType, SortType, TrimType, DuplicateType, TextEditorState } from './TextEditorTypes';
-import '../../common/tooltip/Tooltip';
 
 @customElement('text-editor-editor')
 export class TextEditorEditor extends BaseTool {
