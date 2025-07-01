@@ -104,6 +104,14 @@ export const TOOLS: Tool[] = [
         icon: 'blend',
     },
     {
+        id: 'contrast-checker',
+        label: 'Contrast Checker',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<contrast-checker></contrast-checker>',
+        icon: 'contrast'
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',

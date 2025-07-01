@@ -8,8 +8,8 @@ extend([mixPlugin]);
 
 @customElement('color-mixer')
 export class ColorMixer extends BaseTool {
-    @state() private colors = ['#1b0ffa', '#0fd7fa'];
-    @state() private resultColor = '#0f6dfa';
+    @state() private colors = ['#0f2efa', '#0fdbfa'];
+    @state() private resultColor = '#0f85fa';
     @state() private isResultHovered = false;
     @state() private showCopiedMessage = false;
 

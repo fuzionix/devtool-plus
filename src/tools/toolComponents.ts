@@ -13,6 +13,7 @@ import './components/base64-encoder/Base64Encoder';
 import './components/color-convertor/ColorConvertor';
 import './components/color-mixer/ColorMixer';
 import './components/color-palette/ColorPalette';
+import './components/contrast-checker/ContrastChecker';
 import './components/diff-checker/DiffChecker';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
