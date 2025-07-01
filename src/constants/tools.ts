@@ -96,6 +96,14 @@ export const TOOLS: Tool[] = [
         isNew: true
     },
     {
+        id: 'color-mixer',
+        label: 'Color Mixer',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-mixer></color-mixer>',
+        icon: 'blend',
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',
