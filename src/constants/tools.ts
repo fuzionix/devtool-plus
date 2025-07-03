@@ -55,6 +55,48 @@ export const TOOLS: Tool[] = [
         icon: 'link-2'
     },
     {
+        id: 'color-convertor',
+        label: 'Color Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-convertor></color-convertor>',
+        icon: 'paintbrush-vertical',
+    },
+    {
+        id: 'color-palette',
+        label: 'Color Palette Generator',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-palette></color-palette>',
+        icon: 'swatch-book',
+        isNew: true
+    },
+    {
+        id: 'gradient-maker',
+        label: 'Gradient Maker',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<gradient-maker></gradient-maker>',
+        icon: 'rainbow',
+        isNew: true
+    },
+    {
+        id: 'contrast-checker',
+        label: 'Contrast Checker',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<contrast-checker></contrast-checker>',
+        icon: 'contrast'
+    },
+    {
+        id: 'color-mixer',
+        label: 'Color Mixer',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<color-mixer></color-mixer>',
+        icon: 'blend',
+    },
+    {
         id: 'text-editor',
         label: 'Text Editor',
         version: '1.0.0',
@@ -77,39 +119,6 @@ export const TOOLS: Tool[] = [
             viewType: 'diff',
             language: 'plaintext'
         }
-    },
-    {
-        id: 'color-convertor',
-        label: 'Color Convertor',
-        version: '1.0.0',
-        category: ToolCategory.Design,
-        template: '<color-convertor></color-convertor>',
-        icon: 'paintbrush-vertical',
-    },
-    {
-        id: 'color-palette',
-        label: 'Color Palette Generator',
-        version: '1.0.0',
-        category: ToolCategory.Design,
-        template: '<color-palette></color-palette>',
-        icon: 'swatch-book',
-        isNew: true
-    },
-    {
-        id: 'color-mixer',
-        label: 'Color Mixer',
-        version: '1.0.0',
-        category: ToolCategory.Design,
-        template: '<color-mixer></color-mixer>',
-        icon: 'blend',
-    },
-    {
-        id: 'contrast-checker',
-        label: 'Contrast Checker',
-        version: '1.0.0',
-        category: ToolCategory.Design,
-        template: '<contrast-checker></contrast-checker>',
-        icon: 'contrast'
     },
     {
         id: 'token-generator',

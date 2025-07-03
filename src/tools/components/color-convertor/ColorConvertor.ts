@@ -57,66 +57,11 @@ export class ColorConvertor extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>
-            .format-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
-            }
-            
-            .format-label {
-                width: 40px;
-                text-transform: uppercase;
-            }
-            
-            .copy-button {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                opacity: 0.75;
-            }
-            
-            .copy-button:hover {
-                opacity: 1;
-            }
-
-            .format-group {
-                margin-bottom: 8px;
-            }
-
-            .format-group.has-error .format-input {
-                border-color: var(--vscode-editorError-foreground);
-            }
-
-            .name-format-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
-                min-height: 22px;
-            }
-
-            .approximate-badge {
-                position: absolute;
-                right: 48px;
-                font-size: 10px;
-                background: var(--vscode-badge-background);
-                color: var(--vscode-badge-foreground);
-                margin-left: 6px;
-                padding: 2px 4px;
-                border-radius: 2px;
-                text-transform: uppercase;
-            }
-            </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, LCH, and named colors. Edit any format directly or use the color picker.</p>
                 <hr />
                                 
-                <div class="color-picker-container flex flex-col items-center">
+                <div class="flex flex-col items-center">
                     <tool-color-picker
                         class="w-full"
                         .value="${this.colorValue}"
@@ -131,7 +76,7 @@ export class ColorConvertor extends BaseTool {
                 </div>
                 
                 <!-- Format outputs -->
-                <div class="formats-container">
+                <div>
                     ${this.renderFormatRow('hex', 'HEX')}
                     ${this.renderFormatRow('rgb', 'RGB')}
                     ${this.renderFormatRow('hsl', 'HSL')}
@@ -151,19 +96,19 @@ export class ColorConvertor extends BaseTool {
         const hasError = !!this.errors[format];
         
         return html`
-            <div class="format-group ${hasError ? 'has-error' : ''}">
-                <div class="format-row">
-                    <div class="format-label">${label}</div>
+            <div class="mb-2 ${hasError ? 'has-error' : ''}">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 uppercase">${label}</div>
                     <input 
                         type="text" 
-                        class="format-input font-mono flex-1 !bg-transparent" 
+                        class="font-mono flex-1 !bg-transparent ${hasError ? 'border-[var(--vscode-editorError-foreground)]' : ''}" 
                         .value="${this.formats[format]}"
                         @focus="${() => this.handleFormatFocus(format)}"
                         @blur="${() => this.handleFormatBlur(format)}"
                         @input="${(e: InputEvent) => this.handleFormatInput(e, format)}"
                     />
                     <button 
-                        class="copy-button ${isCopied ? 'copied' : ''}" 
+                        class="flex items-center justify-center bg-transparent border-none cursor-pointer opacity-75 hover:opacity-100" 
                         @click="${() => this.copyToClipboard(format)}"
                         title="Copy to clipboard"
                     >
@@ -185,24 +130,24 @@ export class ColorConvertor extends BaseTool {
         const hasName = !!colorName;
         
         return html`
-            <div class="format-group">
-                <div class="format-row">
-                    <div class="format-label">NAME</div>
+            <div class="mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 uppercase">NAME</div>
                     ${hasName 
                         ? html`
                             <div class="font-mono flex-1 flex items-center">
                                 <input 
                                     type="text" 
-                                    class="format-input !bg-transparent w-full" 
+                                    class="!bg-transparent w-full" 
                                     .value="${colorName}"
                                     @focus="${() => this.handleFormatFocus(format)}"
                                     @blur="${() => this.handleFormatBlur(format)}"
                                     @input="${(e: InputEvent) => this.handleFormatInput(e, format)}"
                                 />
-                                ${!this.exactName ? html`<span class="approximate-badge">approx</span>` : ''}
+                                ${!this.exactName ? html`<span class="absolute right-12 text-[10px] bg-[var(--vscode-badge-background)] text-[var(--vscode-badge-foreground)] ml-1.5 px-1 py-0.5 rounded-sm uppercase">approx</span>` : ''}
                             </div>
                             <button 
-                                class="copy-button ${isCopied ? 'copied' : ''}" 
+                                class="flex items-center justify-center bg-transparent border-none cursor-pointer opacity-75 hover:opacity-100" 
                                 @click="${() => this.copyToClipboard(format)}"
                                 title="Copy to clipboard"
                             >

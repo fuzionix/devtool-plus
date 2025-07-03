@@ -15,6 +15,7 @@ import './components/color-mixer/ColorMixer';
 import './components/color-palette/ColorPalette';
 import './components/contrast-checker/ContrastChecker';
 import './components/diff-checker/DiffChecker';
+import './components/gradient-maker/GradientMaker';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-editor/JsonEditor';
