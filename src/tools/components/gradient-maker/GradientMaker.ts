@@ -1,6 +1,11 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import { colord, extend } from 'colord';
+import mixPlugin from 'colord/plugins/mix';
+import namesPlugin from 'colord/plugins/names';
+
+extend([mixPlugin, namesPlugin]);
 
 interface ColorStop {
     position: number;  // 0-100 percentage
@@ -13,7 +18,8 @@ type GradientType = 'linear' | 'radial' | 'conic';
 @customElement('gradient-maker')
 export class GradientMaker extends BaseTool {
     @state() private colorStops: ColorStop[] = [
-        { position: 0, color: '#0f23fa', selected: true },
+        { position: 0, color: '#0f23fa', selected: false },
+        { position: 50, color: '#0f85fa', selected: true },
         { position: 100, color: '#0fe7fa', selected: false }
     ];
 
@@ -31,16 +37,11 @@ export class GradientMaker extends BaseTool {
 
     constructor() {
         super();
-        this.addEventListener('mouseup', this.handleMouseUp);
-        this.addEventListener('mouseleave', this.handleMouseUp);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.removeEventListener('mouseup', this.handleMouseUp);
-        this.removeEventListener('mouseleave', this.handleMouseUp);
-        window.removeEventListener('mousemove', this.handleMouseMove);
-        window.removeEventListener('mouseup', this.handleMouseUp);
+        this.endDrag();
     }
 
     protected renderTool() {
@@ -80,7 +81,7 @@ export class GradientMaker extends BaseTool {
                 border: 1px solid var(--vscode-widget-border);
                 border-radius: 2px;
                 margin: 8px 0;
-                cursor: crosshair;
+                cursor: copy;
             }
             
             .gradient-bar-background {
@@ -137,10 +138,10 @@ export class GradientMaker extends BaseTool {
                 height: 30px;
                 border-radius: 6px;
                 border: 2px solid white;
-                box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
                 transform: translate(-50%, -50%);
                 top: 50%;
-                cursor: grab;
+                cursor: ew-resize;
                 pointer-events: auto;
             }
             
@@ -152,10 +153,6 @@ export class GradientMaker extends BaseTool {
             
             .color-handle:hover {
                 transform: translate(-50%, -50%) scale(1.1);
-            }
-            
-            .color-handle:active {
-                cursor: grabbing;
             }
             </style>
             <div class="tool-inner-container">
@@ -210,28 +207,28 @@ export class GradientMaker extends BaseTool {
 
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const position = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-        
+
         // For simplicity, we'll interpolate between existing colors
         const newColor = this.interpolateColorAtPosition(position);
-        
+
         // Deselect all existing stops
         const updatedStops = this.colorStops.map(stop => ({
             ...stop,
             selected: false
         }));
-        
+
         updatedStops.push({
             position,
             color: newColor,
             selected: true
         });
-        
+
         this.colorStops = updatedStops;
     }
 
     private handleColorHandleClick(e: MouseEvent, index: number) {
         e.stopPropagation();
-        
+
         // Update selection state
         this.colorStops = this.colorStops.map((stop, i) => ({
             ...stop,
@@ -241,19 +238,15 @@ export class GradientMaker extends BaseTool {
 
     private handleColorHandleMouseDown(e: MouseEvent, index: number) {
         e.stopPropagation();
-        console.log(`Dragging handle at index: ${index}`);
-        
-        this.isDragging = true;
-        this.activeDragHandle = index;
-        
+        e.preventDefault();
+
+        this.startDrag(index);
+
         // Update selection
         this.colorStops = this.colorStops.map((stop, i) => ({
             ...stop,
             selected: i === index
         }));
-        
-        window.addEventListener('mousemove', this.handleMouseMove);
-        window.addEventListener('mouseup', this.handleMouseUp);
     }
 
     private handleBarMouseDown(e: MouseEvent) {
@@ -263,16 +256,36 @@ export class GradientMaker extends BaseTool {
         }
     }
 
+    private startDrag(handleIndex: number) {
+        this.isDragging = true;
+        this.activeDragHandle = handleIndex;
+        window.addEventListener('mousemove', this.handleMouseMove);
+        window.addEventListener('mouseup', this.handleMouseUp);
+        document.body.style.userSelect = 'none';
+    }
+
+    private endDrag() {
+        this.isDragging = false;
+        this.activeDragHandle = null;
+        window.removeEventListener('mousemove', this.handleMouseMove);
+        window.removeEventListener('mouseup', this.handleMouseUp);
+        document.body.style.userSelect = '';
+    }
+
     private handleMouseMove = (e: MouseEvent) => {
-        if (!this.isDragging || this.activeDragHandle === null) {
+        if (!this.isDragging || this.activeDragHandle === null || !this.gradientBar) {
             return;
         }
-        
-        if (!this.gradientBar) return;
-        
+
         const rect = this.gradientBar.getBoundingClientRect();
-        const position = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-        
+
+        // Clamp the x position to the bar width, but allow the calculation to work outside
+        let clientX = e.clientX;
+        let position = ((clientX - rect.left) / rect.width) * 100;
+
+        // Clamp position to 0 - 100 range
+        position = Math.min(100, Math.max(0, position));
+
         this.colorStops = this.colorStops.map((stop, index) => {
             if (index === this.activeDragHandle) {
                 return {
@@ -285,19 +298,15 @@ export class GradientMaker extends BaseTool {
     };
 
     private handleMouseUp = () => {
-        this.isDragging = false;
-        this.activeDragHandle = null;
-        
-        window.removeEventListener('mousemove', this.handleMouseMove);
-        window.removeEventListener('mouseup', this.handleMouseUp);
+        this.endDrag();
     };
 
     private interpolateColorAtPosition(position: number): string {
         const sortedStops = [...this.colorStops].sort((a, b) => a.position - b.position);
-        
+
         let leftStop = sortedStops[0];
         let rightStop = sortedStops[sortedStops.length - 1];
-        
+
         for (let i = 0; i < sortedStops.length - 1; i++) {
             if (position >= sortedStops[i].position && position <= sortedStops[i + 1].position) {
                 leftStop = sortedStops[i];
@@ -305,53 +314,32 @@ export class GradientMaker extends BaseTool {
                 break;
             }
         }
-        
-        const leftColor = this.parseColor(leftStop.color);
-        const rightColor = this.parseColor(rightStop.color);
-        
+
+        const leftColor = colord(leftStop.color).toRgb();
+        const rightColor = colord(rightStop.color).toRgb();
+
         if (!leftColor || !rightColor) {
             return '#ff0000'; // Fallback color
         }
-        
+
         // Calculate the percentage between the two stops
         const range = rightStop.position - leftStop.position;
         const factor = range === 0 ? 0 : (position - leftStop.position) / range;
-        
+
         // Interpolate RGB values
         const r = Math.round(leftColor.r + factor * (rightColor.r - leftColor.r));
         const g = Math.round(leftColor.g + factor * (rightColor.g - leftColor.g));
         const b = Math.round(leftColor.b + factor * (rightColor.b - leftColor.b));
-        
-        return `rgb(${r}, ${g}, ${b})`;
-    }
 
-    private parseColor(color: string): { r: number, g: number, b: number } | null {
-        if (color.startsWith('#')) {
-            const hex = color.substring(1);
-            const bigint = parseInt(hex, 16);
-            
-            return {
-                r: (bigint >> 16) & 255,
-                g: (bigint >> 8) & 255,
-                b: bigint & 255
-            };
-        }
-        
-        const rgbMatch = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
-        if (rgbMatch) {
-            return {
-                r: parseInt(rgbMatch[1]),
-                g: parseInt(rgbMatch[2]),
-                b: parseInt(rgbMatch[3])
-            };
-        }
-        
-        return null;
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     private generateGradientCSS(): string {
         const sortedStops = [...this.colorStops].sort((a, b) => a.position - b.position);
-        const stopsCSS = sortedStops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+        const stopsCSS = sortedStops.map(stop => {
+            const normalizedColor = colord(stop.color).toRgbString();
+            return `${normalizedColor} ${stop.position}%`;
+        }).join(', ');
 
         if (this.gradientType === 'linear') {
             return `linear-gradient(${this.angle}deg, ${stopsCSS})`;
