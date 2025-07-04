@@ -4,6 +4,7 @@ import './common/dropdown-menu/DropdownMenu';
 import './common/expandable/Expandable';
 import './common/file-dropzone/FileDropzone';
 import './common/inline-menu/InlineMenu';
+import './common/rotary-knob/RotaryKnob';
 import './common/slider/Slider';
 import './common/switch/Switch';
 import './common/tooltip/Tooltip';

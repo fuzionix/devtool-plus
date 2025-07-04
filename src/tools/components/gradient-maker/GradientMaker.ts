@@ -78,7 +78,7 @@ export class GradientMaker extends BaseTool {
             .gradient-bar-container {
                 position: relative;
                 height: 24px;
-                border: 1px solid var(--vscode-widget-border);
+                border: 1px solid var(--vscode-panel-border);
                 border-radius: 2px;
                 margin: 8px 0;
                 cursor: copy;
@@ -181,7 +181,19 @@ export class GradientMaker extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Options will go here -->
+                <div class="options-container">
+                    ${this.gradientType !== 'radial' ? html`
+                        <tool-rotary-knob
+                            .value="${this.angle}"
+                            min="0"
+                            max="360"
+                            step="1"
+                            size="40"
+                            @change="${(e: CustomEvent) => this.handleAngleChange(e)}"
+                        >
+                        </tool-rotary-knob>
+                    ` : ''}
+                </div>
 
                 <!-- Color list will go here -->
             </div>
@@ -254,6 +266,10 @@ export class GradientMaker extends BaseTool {
         if (!(e.target as Element).classList.contains('color-handle')) {
             // Intentionally empty - we'll add color stops on click not mousedown
         }
+    }
+
+    private handleAngleChange(e: CustomEvent) {
+        this.angle = e.detail.value;
     }
 
     private startDrag(handleIndex: number) {
