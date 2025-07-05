@@ -79,7 +79,7 @@ export class ColorMixer extends BaseTool {
                 justify-content: center;
                 background-color: rgba(0, 0, 0, 0.6);
                 color: white;
-                font-family: monospace;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 font-size: 14px;
                 z-index: 2;
                 opacity: 0;

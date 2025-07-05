@@ -8,7 +8,8 @@ import namesPlugin from 'colord/plugins/names';
 extend([mixPlugin, namesPlugin]);
 
 interface ColorStop {
-    position: number;  // 0-100 percentage
+    id: string;
+    position: number;  // 0 - 100 percentage
     color: string;
     selected: boolean;
 }
@@ -18,15 +19,16 @@ type GradientType = 'linear' | 'radial' | 'conic';
 @customElement('gradient-maker')
 export class GradientMaker extends BaseTool {
     @state() private colorStops: ColorStop[] = [
-        { position: 0, color: '#0f23fa', selected: false },
-        { position: 50, color: '#0f85fa', selected: true },
-        { position: 100, color: '#0fe7fa', selected: false }
+        { id: crypto.randomUUID(), position: 0, color: '#0f23fa', selected: false },
+        { id: crypto.randomUUID(), position: 50, color: '#0f85fa', selected: true },
+        { id: crypto.randomUUID(), position: 100, color: '#0fe7fa', selected: false }
     ];
 
     @state() private gradientType: GradientType = 'linear';
     @state() private angle: number = 90;
     @state() private isDragging: boolean = false;
-    @state() private activeDragHandle: number | null = null;
+    @state() private activeDragHandleId: string | null = null;
+    @state() private lastDragEndTime: number = 0;
 
     @query('.gradient-bar-container') private gradientBar!: HTMLElement;
 
@@ -147,9 +149,20 @@ export class GradientMaker extends BaseTool {
             }
             
             .color-handle.selected {
-                width: 12px;
-                height: 30px;
                 z-index: 3;
+            }
+
+            .color-handle.selected::before {
+                content: '';
+                position: absolute;
+                top: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 3px;
+                height: 3px;
+                border-radius: 50%;
+                background-color: white;
+                box-shadow: 0 0 0 2px black;
             }
             
             .color-handle:hover {
@@ -187,7 +200,7 @@ export class GradientMaker extends BaseTool {
                 border: none;
                 outline: none;
                 box-shadow: none !important;
-                font-family: monospace;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 font-size: 14px;
             }
             
@@ -199,7 +212,7 @@ export class GradientMaker extends BaseTool {
                 border: none;
                 outline: none;
                 box-shadow: none !important;
-                font-family: monospace;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 font-size: 14px;
             }
 
@@ -251,7 +264,9 @@ export class GradientMaker extends BaseTool {
                         <div class="gradient-bar" style="background: ${linearGradientCSS}"></div>
                     </div>
                     <div class="color-stop-handles">
-                        ${this.colorStops.map((stop, index) => this.renderColorHandle(stop, index))}
+                        ${this.colorStops
+                            .sort((a, b) => a.position - b.position)
+                            .map(stop => this.renderColorHandle(stop))}
                     </div>
                 </div>
 
@@ -286,9 +301,10 @@ export class GradientMaker extends BaseTool {
                             >
                             </tool-rotary-knob>
                             <input 
+                                .value="${this.angle}°"
                                 type="text" 
                                 class="flex-1 h-[32px] ml-2 !py-[6px] text-center !bg-transparent" 
-                                .value="${this.angle}°"
+                                @input="${(e: InputEvent) => this.handleInputAngleChange(e)}"
                             />
                         </div>
                     </div>
@@ -298,35 +314,35 @@ export class GradientMaker extends BaseTool {
                 <div class="color-list">
                     ${this.colorStops
                         .sort((a, b) => a.position - b.position)
-                        .map((stop, index) => this.renderColorListItem(stop, index))}
+                        .map(stop => this.renderColorListItem(stop))}
                 </div>
             </div>
         `;
     }
 
-    private renderColorHandle(stop: ColorStop, index: number) {
+    private renderColorHandle(stop: ColorStop) {
         return html`
             <div 
                 class="color-handle ${stop.selected ? 'selected' : ''}"
                 style="left: ${stop.position}%; background-color: ${stop.color};"
-                @mousedown="${(e: MouseEvent) => this.handleColorHandleMouseDown(e, index)}"
-                @click="${(e: MouseEvent) => this.handleColorHandleClick(e, index)}">
+                @mousedown="${(e: MouseEvent) => this.handleColorHandleMouseDown(e, stop.id)}"
+                @click="${(e: MouseEvent) => this.handleColorHandleClick(e, stop.id)}">
             </div>
         `;
     }
 
-    private renderColorListItem(stop: ColorStop, index: number) {
+    private renderColorListItem(stop: ColorStop) {
         return html`
             <div 
                 class="color-item ${stop.selected ? 'selected' : ''}" 
-                @click="${() => this.selectColorStop(index)}"
+                @click="${() => this.selectColorStop(stop.id)}"
             >
                 <input 
                     type="text"
                     class="color-hex-input"
                     .value="${stop.color}"
-                    @input="${(e: InputEvent) => this.handleHexInput(e, index)}"
-                    @blur="${(e: FocusEvent) => this.validateHexInput(e, index)}"
+                    @input="${(e: InputEvent) => this.handleHexInput(e, stop.id)}"
+                    @blur="${(e: FocusEvent) => this.validateHexInput(e, stop.id)}"
                 />
 
                 <div class="w-[1px] h-5 bg-[var(--vscode-panel-border)]"></div>
@@ -338,7 +354,7 @@ export class GradientMaker extends BaseTool {
                         min="0"
                         max="100"
                         .value="${Math.round(stop.position)}"
-                        @input="${(e: InputEvent) => this.handlePositionInput(e, index)}"
+                        @input="${(e: InputEvent) => this.handlePositionInput(e, stop.id)}"
                     />
                 </div>
 
@@ -349,14 +365,14 @@ export class GradientMaker extends BaseTool {
                         class="mt-1 w-6 h-6"
                         .value="${stop.color}"
                         .format="${'hex' as const}"
-                        @change="${(e: CustomEvent) => this.handleColorChange(e, index)}"
+                        @change="${(e: CustomEvent) => this.handleColorChange(e, stop.id)}"
                     ></tool-color-picker>
                 </div>
                 
                 <button 
                     class="remove-button"
                     ?disabled="${this.colorStops.length <= 2}"
-                    @click="${(e: MouseEvent) => this.handleRemoveColor(e, index)}"
+                    @click="${(e: MouseEvent) => this.handleRemoveColor(e, stop.id)}"
                     title="Remove color stop"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -368,14 +384,14 @@ export class GradientMaker extends BaseTool {
         `;
     }
 
-    private selectColorStop(index: number) {
-        this.colorStops = this.colorStops.map((stop, i) => ({
+    private selectColorStop(id: string) {
+        this.colorStops = this.colorStops.map(stop => ({
             ...stop,
-            selected: i === index
+            selected: stop.id === id
         }));
     }
 
-    private handleHexInput(e: InputEvent, index: number) {
+    private handleHexInput(e: InputEvent, id: string) {
         const input = e.target as HTMLInputElement;
         let value = input.value;
         
@@ -385,57 +401,61 @@ export class GradientMaker extends BaseTool {
         }
         
         if (/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
-            this.updateColorStop(index, { color: value });
+            this.updateColorStop(id, { color: value });
         }
     }
 
-    private validateHexInput(e: FocusEvent, index: number) {
+    private validateHexInput(e: FocusEvent, id: string) {
         const input = e.target as HTMLInputElement;
         const value = input.value;
         
+        const stop = this.colorStops.find(s => s.id === id);
+        if (!stop) { return; }
+        
         // If not a valid hex color, revert to the original value
         if (!/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
-            input.value = this.colorStops[index].color;
+            input.value = stop.color;
         } else {
             // Normalize to the full 6-digit hex if it's a 3-digit shorthand
             const normalizedHex = colord(value).toHex();
             input.value = normalizedHex;
-            this.updateColorStop(index, { color: normalizedHex });
+            this.updateColorStop(id, { color: normalizedHex });
         }
     }
 
-    private handlePositionInput(e: InputEvent, index: number) {
+    private handlePositionInput(e: InputEvent, id: string) {
         const input = e.target as HTMLInputElement;
         const position = Math.min(100, Math.max(0, parseInt(input.value) || 0));
         
-        this.updateColorStop(index, { position });
+        this.updateColorStop(id, { position });
     }
 
-    private handleColorChange(e: CustomEvent, index: number) {
+    private handleColorChange(e: CustomEvent, id: string) {
         const value = e.detail.value;
-        this.updateColorStop(index, { color: value });
+        this.updateColorStop(id, { color: value });
     }
 
-    private handleRemoveColor(e: MouseEvent, index: number) {
+    private handleRemoveColor(e: MouseEvent, id: string) {
         e.stopPropagation();
         
         if (this.colorStops.length <= 2) {
             return;
         }
         
-        const newStops = this.colorStops.filter((_, i) => i !== index);
+        const newStops = this.colorStops.filter(stop => stop.id !== id);
         
         // If we removed the selected stop, select the first one
-        if (this.colorStops[index].selected && newStops.length > 0) {
+        const wasSelected = this.colorStops.find(stop => stop.id === id)?.selected || false;
+        if (wasSelected && newStops.length > 0) {
             newStops[0].selected = true;
         }
         
         this.colorStops = newStops;
     }
 
-    private updateColorStop(index: number, updates: Partial<ColorStop>) {
-        this.colorStops = this.colorStops.map((stop, i) => {
-            if (i === index) {
+    private updateColorStop(id: string, updates: Partial<ColorStop>) {
+        this.colorStops = this.colorStops.map(stop => {
+            if (stop.id === id) {
                 return {
                     ...stop,
                     ...updates
@@ -450,12 +470,16 @@ export class GradientMaker extends BaseTool {
         if ((e.target as Element).classList.contains('color-handle') || this.isDragging) {
             return;
         }
+        
+        // Prevent adding a new stop if we just finished dragging (within 200ms)
+        const now = Date.now();
+        if (now - this.lastDragEndTime < 200) {
+            return;
+        }
 
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const position = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-
-        // For simplicity, we'll interpolate between existing colors
-        const newColor = this.interpolateColorAtPosition(position);
+        const newColor = colord(this.interpolateColorAtPosition(position)).toHex();
 
         // Deselect all existing stops
         const updatedStops = this.colorStops.map(stop => ({
@@ -463,35 +487,38 @@ export class GradientMaker extends BaseTool {
             selected: false
         }));
 
-        updatedStops.push({
+        const newStop = {
+            id: crypto.randomUUID(),
             position,
             color: newColor,
             selected: true
-        });
+        };
+
+        updatedStops.push(newStop);
 
         this.colorStops = updatedStops;
     }
 
-    private handleColorHandleClick(e: MouseEvent, index: number) {
+    private handleColorHandleClick(e: MouseEvent, id: string) {
         e.stopPropagation();
 
         // Update selection state
-        this.colorStops = this.colorStops.map((stop, i) => ({
+        this.colorStops = this.colorStops.map(stop => ({
             ...stop,
-            selected: i === index
+            selected: stop.id === id
         }));
     }
 
-    private handleColorHandleMouseDown(e: MouseEvent, index: number) {
+    private handleColorHandleMouseDown(e: MouseEvent, id: string) {
         e.stopPropagation();
         e.preventDefault();
 
-        this.startDrag(index);
+        this.startDrag(id);
 
         // Update selection
-        this.colorStops = this.colorStops.map((stop, i) => ({
+        this.colorStops = this.colorStops.map(stop => ({
             ...stop,
-            selected: i === index
+            selected: stop.id === id
         }));
     }
 
@@ -510,9 +537,17 @@ export class GradientMaker extends BaseTool {
         this.angle = e.detail.value;
     }
 
-    private startDrag(handleIndex: number) {
+    private handleInputAngleChange(e: InputEvent) {
+        const input = e.target as HTMLInputElement;
+        let value = parseInt(input.value.replace('°', '')) || 0;
+        value = Math.min(360, Math.max(0, value));
+        this.angle = value;
+        input.value = `${value}°`;
+    }
+
+    private startDrag(id: string) {
         this.isDragging = true;
-        this.activeDragHandle = handleIndex;
+        this.activeDragHandleId = id;
         window.addEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('mouseup', this.handleMouseUp);
         document.body.style.userSelect = 'none';
@@ -520,14 +555,15 @@ export class GradientMaker extends BaseTool {
 
     private endDrag() {
         this.isDragging = false;
-        this.activeDragHandle = null;
+        this.activeDragHandleId = null;
+        this.lastDragEndTime = Date.now();
         window.removeEventListener('mousemove', this.handleMouseMove);
         window.removeEventListener('mouseup', this.handleMouseUp);
         document.body.style.userSelect = '';
     }
 
     private handleMouseMove = (e: MouseEvent) => {
-        if (!this.isDragging || this.activeDragHandle === null || !this.gradientBar) {
+        if (!this.isDragging || !this.activeDragHandleId || !this.gradientBar) {
             return;
         }
 
@@ -540,8 +576,9 @@ export class GradientMaker extends BaseTool {
         // Clamp position to 0 - 100 range
         position = Math.min(100, Math.max(0, position));
 
-        this.colorStops = this.colorStops.map((stop, index) => {
-            if (index === this.activeDragHandle) {
+        // Update the position of the active handle by ID
+        this.colorStops = this.colorStops.map(stop => {
+            if (stop.id === this.activeDragHandleId) {
                 return {
                     ...stop,
                     position
@@ -551,7 +588,8 @@ export class GradientMaker extends BaseTool {
         });
     };
 
-    private handleMouseUp = () => {
+    private handleMouseUp = (e: MouseEvent) => {
+        e.stopPropagation();
         this.endDrag();
     };
 
@@ -611,7 +649,6 @@ export class GradientMaker extends BaseTool {
             return `${normalizedColor} ${stop.position}%`;
         }).join(', ');
 
-        // Always use 90deg (left to right) for the gradient bar
         return `linear-gradient(90deg, ${stopsCSS})`;
     }
 }
