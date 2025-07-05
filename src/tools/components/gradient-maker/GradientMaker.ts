@@ -170,12 +170,12 @@ export class GradientMaker extends BaseTool {
                 gap: 8px;
                 padding: 0 4px;
                 border-radius: 2px;
-                background-color: transparent;
-                border: 1px solid var(--vscode-input-border);
+                background-color: var(--vscode-panel-background);
+                box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
             }
 
             .color-item.selected {
-                border-color: var(--vscode-focusBorder);
+                box-shadow: inset 0 0 0 1px var(--vscode-focusBorder);
             }
             
             .color-hex-input {
@@ -201,6 +201,11 @@ export class GradientMaker extends BaseTool {
                 box-shadow: none !important;
                 font-family: monospace;
                 font-size: 14px;
+            }
+
+            .color-hex-input:focus,
+            .color-position-input:focus {
+                outline: none;
             }
             
             .remove-button {
@@ -236,7 +241,7 @@ export class GradientMaker extends BaseTool {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
 
-                <!-- Gradient Bar (always linear) -->
+                <!-- Gradient Bar -->
                 <div 
                     class="gradient-bar-container" 
                     @click="${this.handleBarClick}" 
@@ -323,6 +328,8 @@ export class GradientMaker extends BaseTool {
                     @input="${(e: InputEvent) => this.handleHexInput(e, index)}"
                     @blur="${(e: FocusEvent) => this.validateHexInput(e, index)}"
                 />
+
+                <div class="w-[1px] h-5 bg-[var(--vscode-panel-border)]"></div>
                 
                 <div class="flex items-center gap-1">
                     <input 
@@ -335,9 +342,11 @@ export class GradientMaker extends BaseTool {
                     />
                 </div>
 
+                <div class="w-[1px] h-5 bg-[var(--vscode-panel-border)]"></div>
+
                 <div class="">
                     <tool-color-picker
-                        class="mt-1 w-7"
+                        class="mt-1 w-6 h-6"
                         .value="${stop.color}"
                         .format="${'hex' as const}"
                         @change="${(e: CustomEvent) => this.handleColorChange(e, index)}"

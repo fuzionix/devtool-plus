@@ -33,7 +33,7 @@ export class ColorPicker extends LitElement {
 
         .color-button {
             width: 100%;
-            height: 28px;
+            height: 100%;
             border: 1px solid var(--vscode-panel-border);
             border-radius: 2px;
             cursor: pointer;

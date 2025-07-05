@@ -106,7 +106,7 @@ export class ContrastChecker extends BaseTool {
                     <div class="flex-1">
                         <p class="mb-2 text-xs select-none">Background Color</p>
                         <tool-color-picker
-                            class="w-full"
+                            class="w-full h-7"
                             .value="${this.backgroundColor}"
                             @change="${(e: CustomEvent) => this.handleColorChange(e, 'background')}"
                         ></tool-color-picker>
@@ -116,7 +116,7 @@ export class ContrastChecker extends BaseTool {
                     <div class="flex-1">
                         <p class="mb-2 text-xs select-none">Text Color</p>
                         <tool-color-picker
-                            class="w-full"
+                            class="w-full h-7"
                             .value="${this.foregroundColor}"
                             @change="${(e: CustomEvent) => this.handleColorChange(e, 'foreground')}"
                         ></tool-color-picker>

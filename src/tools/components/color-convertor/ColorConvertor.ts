@@ -63,7 +63,7 @@ export class ColorConvertor extends BaseTool {
                                 
                 <div class="flex flex-col items-center">
                     <tool-color-picker
-                        class="w-full"
+                        class="w-full h-7"
                         .value="${this.colorValue}"
                         @change="${this.handleColorChange}"
                     ></tool-color-picker>

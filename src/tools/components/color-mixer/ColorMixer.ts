@@ -142,7 +142,7 @@ export class ColorMixer extends BaseTool {
         return html`
             <div class="color-item">
                 <tool-color-picker
-                    class="flex-1"
+                    class="flex-1 h-7"
                     .value="${color}"
                     .format="${'hex' as const}"
                     @change="${(e: CustomEvent) => this.handleColorChange(e, index)}"

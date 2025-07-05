@@ -106,7 +106,7 @@ export class ColorPalette extends BaseTool {
 
                 <div class="flex flex-col items-center">
                     <tool-color-picker
-                        class="w-full"
+                        class="w-full h-7"
                         .value="${this.baseColor}"
                         @change="${this.handleColorChange}"
                     ></tool-color-picker>
