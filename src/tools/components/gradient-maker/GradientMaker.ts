@@ -155,6 +155,72 @@ export class GradientMaker extends BaseTool {
             .color-handle:hover {
                 transform: translate(-50%, -50%) scale(1.1);
             }
+
+            .color-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 16px;
+                width: 100%;
+            }
+            
+            .color-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 0 4px;
+                border-radius: 2px;
+                background-color: transparent;
+                border: 1px solid var(--vscode-input-border);
+            }
+
+            .color-item.selected {
+                border-color: var(--vscode-focusBorder);
+            }
+            
+            .color-hex-input {
+                flex: 1;
+                min-width: 80px;
+                background-color: transparent !important;
+                color: var(--vscode-input-foreground);
+                padding: 2px 8px;
+                border: none;
+                outline: none;
+                box-shadow: none !important;
+                font-family: monospace;
+                font-size: 14px;
+            }
+            
+            .color-position-input {
+                width: 60px;
+                background-color: transparent !important;
+                color: var(--vscode-input-foreground);
+                padding: 2px 8px;
+                border: none;
+                outline: none;
+                box-shadow: none !important;
+                font-family: monospace;
+                font-size: 14px;
+            }
+            
+            .remove-button {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 24px;
+                height: 24px;
+                background: transparent;
+                border: none;
+                color: var(--vscode-editor-foreground);
+                opacity: 0.7;
+                cursor: pointer;
+                border-radius: 2px;
+            }
+            
+            .remove-button:hover {
+                opacity: 1;
+                background-color: var(--vscode-list-hoverBackground);
+            }
             </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Create and customize CSS gradients with multiple color stops.</p>
@@ -223,7 +289,12 @@ export class GradientMaker extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Color list will go here -->
+                <!-- Color List -->
+                <div class="color-list">
+                    ${this.colorStops
+                        .sort((a, b) => a.position - b.position)
+                        .map((stop, index) => this.renderColorListItem(stop, index))}
+                </div>
             </div>
         `;
     }
@@ -237,6 +308,132 @@ export class GradientMaker extends BaseTool {
                 @click="${(e: MouseEvent) => this.handleColorHandleClick(e, index)}">
             </div>
         `;
+    }
+
+    private renderColorListItem(stop: ColorStop, index: number) {
+        return html`
+            <div 
+                class="color-item ${stop.selected ? 'selected' : ''}" 
+                @click="${() => this.selectColorStop(index)}"
+            >
+                <input 
+                    type="text"
+                    class="color-hex-input"
+                    .value="${stop.color}"
+                    @input="${(e: InputEvent) => this.handleHexInput(e, index)}"
+                    @blur="${(e: FocusEvent) => this.validateHexInput(e, index)}"
+                />
+                
+                <div class="flex items-center gap-1">
+                    <input 
+                        type="number"
+                        class="color-position-input"
+                        min="0"
+                        max="100"
+                        .value="${Math.round(stop.position)}"
+                        @input="${(e: InputEvent) => this.handlePositionInput(e, index)}"
+                    />
+                </div>
+
+                <div class="">
+                    <tool-color-picker
+                        class="mt-1 w-7"
+                        .value="${stop.color}"
+                        .format="${'hex' as const}"
+                        @change="${(e: CustomEvent) => this.handleColorChange(e, index)}"
+                    ></tool-color-picker>
+                </div>
+                
+                <button 
+                    class="remove-button"
+                    ?disabled="${this.colorStops.length <= 2}"
+                    @click="${(e: MouseEvent) => this.handleRemoveColor(e, index)}"
+                    title="Remove color stop"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        `;
+    }
+
+    private selectColorStop(index: number) {
+        this.colorStops = this.colorStops.map((stop, i) => ({
+            ...stop,
+            selected: i === index
+        }));
+    }
+
+    private handleHexInput(e: InputEvent, index: number) {
+        const input = e.target as HTMLInputElement;
+        let value = input.value;
+        
+        if (value.length > 0 && !value.startsWith('#')) {
+            value = '#' + value;
+            input.value = value;
+        }
+        
+        if (/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
+            this.updateColorStop(index, { color: value });
+        }
+    }
+
+    private validateHexInput(e: FocusEvent, index: number) {
+        const input = e.target as HTMLInputElement;
+        const value = input.value;
+        
+        // If not a valid hex color, revert to the original value
+        if (!/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
+            input.value = this.colorStops[index].color;
+        } else {
+            // Normalize to the full 6-digit hex if it's a 3-digit shorthand
+            const normalizedHex = colord(value).toHex();
+            input.value = normalizedHex;
+            this.updateColorStop(index, { color: normalizedHex });
+        }
+    }
+
+    private handlePositionInput(e: InputEvent, index: number) {
+        const input = e.target as HTMLInputElement;
+        const position = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+        
+        this.updateColorStop(index, { position });
+    }
+
+    private handleColorChange(e: CustomEvent, index: number) {
+        const value = e.detail.value;
+        this.updateColorStop(index, { color: value });
+    }
+
+    private handleRemoveColor(e: MouseEvent, index: number) {
+        e.stopPropagation();
+        
+        if (this.colorStops.length <= 2) {
+            return;
+        }
+        
+        const newStops = this.colorStops.filter((_, i) => i !== index);
+        
+        // If we removed the selected stop, select the first one
+        if (this.colorStops[index].selected && newStops.length > 0) {
+            newStops[0].selected = true;
+        }
+        
+        this.colorStops = newStops;
+    }
+
+    private updateColorStop(index: number, updates: Partial<ColorStop>) {
+        this.colorStops = this.colorStops.map((stop, i) => {
+            if (i === index) {
+                return {
+                    ...stop,
+                    ...updates
+                };
+            }
+            return stop;
+        });
     }
 
     private handleBarClick(e: MouseEvent) {
@@ -405,6 +602,7 @@ export class GradientMaker extends BaseTool {
             return `${normalizedColor} ${stop.position}%`;
         }).join(', ');
 
+        // Always use 90deg (left to right) for the gradient bar
         return `linear-gradient(90deg, ${stopsCSS})`;
     }
 }
