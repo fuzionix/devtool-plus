@@ -9,16 +9,17 @@ export class RotaryKnob extends LitElement {
     @property({ type: Number }) step = 1;
     @property({ type: Number }) size = 30;
     @property({ type: String }) color = 'var(--vscode-button-background)';
-    
+
     @state() private isDragging = false;
+    @state() private lastDragging = false;
     @state() private knobRotation = 0;
     @state() private previousAngle = 0;
-    
+
     @query('.knob') private knobElement!: HTMLElement;
-    
+
     private knobCenterX = 0;
     private knobCenterY = 0;
-    
+
     static styles = css`
         :host {
             display: inline-block;
@@ -36,7 +37,7 @@ export class RotaryKnob extends LitElement {
             border-radius: 50%;
             background: var(--vscode-input-background);
             border: 1px solid var(--vscode-panel-border);
-            cursor: grab;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -45,10 +46,6 @@ export class RotaryKnob extends LitElement {
         
         .knob:hover {
             border-color: var(--vscode-focusBorder);
-        }
-        
-        .knob:active {
-            cursor: grabbing;
         }
 
         .knob-dot {
@@ -86,7 +83,7 @@ export class RotaryKnob extends LitElement {
 
     render() {
         const size = `${this.size}px`;
-        
+
         return html`
             <div class="knob-container">
                 <div 
@@ -94,7 +91,7 @@ export class RotaryKnob extends LitElement {
                     style="width: ${size}; height: ${size};"
                     @mousedown="${this.handleMouseDown}"
                     @touchstart="${this.handleTouchStart}"
-                    @dblclick="${this.resetToDefault}"
+                    @click="${this.handleClick}"
                 >
                     <div 
                         class="knob-dot" 
@@ -123,6 +120,7 @@ export class RotaryKnob extends LitElement {
     private handleMouseDown(e: MouseEvent) {
         e.preventDefault();
         this.updateKnobCenter();
+        this.lastDragging = false;
         this.startDrag(e.clientX, e.clientY);
         window.addEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('mouseup', this.handleMouseUp);
@@ -137,30 +135,51 @@ export class RotaryKnob extends LitElement {
         window.addEventListener('touchend', this.handleTouchEnd);
     }
 
-    private startDrag(clientX: number, clientY: number) {
-        this.isDragging = true;
-        this.previousAngle = this.calculateAngle(clientX, clientY);
+    private handleClick(e: MouseEvent) {
+        if (this.lastDragging) {
+            this.lastDragging = false;
+            return;
+        }
+
+        this.updateKnobCenter();
+
+        const angle = this.calculateAngle(e.clientX, e.clientY) + 90;
+        const valueRange = this.max - this.min;
+        let newValue = (this.min + (angle / 360) * valueRange) % valueRange + this.min;
+
+        if (this.step > 0) {
+            newValue = Math.round(newValue / this.step) * this.step;
+        }
+
+        this.value = newValue;
+        this.updateKnobRotation();
+        this.dispatchEvent(new CustomEvent('change', {
+            detail: { value: this.value },
+            bubbles: true,
+            composed: true
+        }));
     }
 
     private calculateAngle(x: number, y: number): number {
         const deltaX = x - this.knobCenterX;
         const deltaY = y - this.knobCenterY;
-        
+
         let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
         if (angle < 0) {
             angle += 360;
         }
-        
+
         return angle;
     }
 
     private handleMouseMove = (e: MouseEvent) => {
-        if (!this.isDragging) return;
+        if (!this.isDragging) { return; }
+        this.lastDragging = true;
         this.updateRotationFromMousePosition(e.clientX, e.clientY);
     };
 
     private handleTouchMove = (e: TouchEvent) => {
-        if (!this.isDragging) return;
+        if (!this.isDragging) { return; }
         e.preventDefault();
         const touch = e.touches[0];
         this.updateRotationFromMousePosition(touch.clientX, touch.clientY);
@@ -174,6 +193,11 @@ export class RotaryKnob extends LitElement {
         this.endDrag();
     };
 
+    private startDrag(clientX: number, clientY: number) {
+        this.isDragging = true;
+        this.previousAngle = this.calculateAngle(clientX, clientY);
+    }
+
     private endDrag() {
         this.isDragging = false;
         window.removeEventListener('mousemove', this.handleMouseMove);
@@ -185,50 +209,41 @@ export class RotaryKnob extends LitElement {
     private updateRotationFromMousePosition(clientX: number, clientY: number) {
         // Calculate the current angle relative to knob center
         const currentAngle = this.calculateAngle(clientX, clientY);
-        
+
         let deltaAngle = currentAngle - this.previousAngle;
         if (deltaAngle > 180) {
             deltaAngle -= 360;
         } else if (deltaAngle < -180) {
             deltaAngle += 360;
         }
-        
+
         this.previousAngle = currentAngle;
-        
+
         const valueRange = this.max - this.min;
         const deltaValue = (deltaAngle / 360) * valueRange;
-        
+
         let newValue = this.value + deltaValue;
-        
-        newValue = Math.max(this.min, Math.min(this.max, newValue));
-        
+
+        if (newValue > this.max) {
+            newValue = this.min + ((newValue - this.min) % valueRange);
+        } else if (newValue < this.min) {
+            newValue = this.max - ((this.min - newValue) % valueRange);
+        }
+
         if (this.step > 0) {
             newValue = Math.round(newValue / this.step) * this.step;
         }
-        
+
         if (newValue !== this.value) {
             this.value = newValue;
             this.updateKnobRotation();
-            
+
             this.dispatchEvent(new CustomEvent('change', {
                 detail: { value: this.value },
                 bubbles: true,
                 composed: true
             }));
         }
-    }
-    
-    private resetToDefault(e: MouseEvent) {
-        e.preventDefault();
-        const defaultValue = (this.min + this.max) / 2;
-        this.value = defaultValue;
-        this.updateKnobRotation();
-        
-        this.dispatchEvent(new CustomEvent('change', {
-            detail: { value: this.value },
-            bubbles: true,
-            composed: true
-        }));
     }
 
     disconnectedCallback() {

@@ -45,7 +45,8 @@ export class GradientMaker extends BaseTool {
     }
 
     protected renderTool() {
-        const gradientCSS = this.generateGradientCSS();
+        const resultGradientCSS = this.generateGradientCSS();
+        const linearGradientCSS = this.generateLinearGradientCSS();
 
         return html`
             <style>
@@ -54,7 +55,7 @@ export class GradientMaker extends BaseTool {
                 height: 60px;
                 border-radius: 2px;
                 overflow: hidden;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
             }
             
             .result-container::before {
@@ -136,9 +137,9 @@ export class GradientMaker extends BaseTool {
                 position: absolute;
                 width: 12px;
                 height: 30px;
-                border-radius: 6px;
                 border: 2px solid white;
-                box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
+                border-radius: 6px;
+                outline: 2px solid black;
                 transform: translate(-50%, -50%);
                 top: 50%;
                 cursor: ew-resize;
@@ -161,7 +162,7 @@ export class GradientMaker extends BaseTool {
 
                 <!-- Result Container -->
                 <div class="result-container">
-                    <div style="position: absolute; inset: 0; background: ${gradientCSS}"></div>
+                    <div style="position: absolute; inset: 0; background: ${resultGradientCSS}"></div>
                 </div>
 
                 <!-- Arrow Divider -->
@@ -169,30 +170,57 @@ export class GradientMaker extends BaseTool {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
 
-                <!-- Gradient Bar -->
-                <div class="gradient-bar-container" 
-                     @click="${this.handleBarClick}" 
-                     @mousedown="${this.handleBarMouseDown}">
+                <!-- Gradient Bar (always linear) -->
+                <div 
+                    class="gradient-bar-container" 
+                    @click="${this.handleBarClick}" 
+                    @mousedown="${this.handleBarMouseDown}"
+                >
                     <div class="gradient-bar-background">
-                        <div class="gradient-bar" style="background: ${gradientCSS}"></div>
+                        <div class="gradient-bar" style="background: ${linearGradientCSS}"></div>
                     </div>
                     <div class="color-stop-handles">
                         ${this.colorStops.map((stop, index) => this.renderColorHandle(stop, index))}
                     </div>
                 </div>
 
-                <div class="options-container">
-                    ${this.gradientType !== 'radial' ? html`
-                        <tool-rotary-knob
-                            .value="${this.angle}"
-                            min="0"
-                            max="360"
-                            step="1"
-                            size="40"
-                            @change="${(e: CustomEvent) => this.handleAngleChange(e)}"
-                        >
-                        </tool-rotary-knob>
-                    ` : ''}
+                <div class="flex justify-between gap-4 my-4">
+                    <div class="flex-1">
+                        <div class="mb-2 text-xs">
+                            Gradient Type
+                        </div>
+                        <tool-dropdown-menu
+                            .options=${[
+                                { label: 'Linear', value: 'linear' },
+                                { label: 'Radial', value: 'radial' },
+                                { label: 'Conic', value: 'conic' }
+                            ]}
+                            .value="${this.gradientType}"
+                            placeholder="Select Gradient Type"
+                            @change=${this.handleGradientTypeChange}
+                        ></tool-dropdown-menu>
+                    </div>
+                    <div class="flex-1">
+                        <div class="mb-2 text-xs">
+                            Rotation Angle
+                        </div>
+                        <div class="flex">
+                            <tool-rotary-knob
+                                .value="${this.angle}"
+                                min="0"
+                                max="360"
+                                step="1"
+                                size="32"
+                                @change="${(e: CustomEvent) => this.handleAngleChange(e)}"
+                            >
+                            </tool-rotary-knob>
+                            <input 
+                                type="text" 
+                                class="flex-1 h-[32px] ml-2 !py-[6px] text-center !bg-transparent" 
+                                .value="${this.angle}°"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Color list will go here -->
@@ -266,6 +294,10 @@ export class GradientMaker extends BaseTool {
         if (!(e.target as Element).classList.contains('color-handle')) {
             // Intentionally empty - we'll add color stops on click not mousedown
         }
+    }
+
+    private handleGradientTypeChange(e: CustomEvent) {
+        this.gradientType = e.detail.value;
     }
 
     private handleAngleChange(e: CustomEvent) {
@@ -364,5 +396,15 @@ export class GradientMaker extends BaseTool {
         } else {
             return `conic-gradient(from ${this.angle}deg, ${stopsCSS})`;
         }
+    }
+
+    private generateLinearGradientCSS(): string {
+        const sortedStops = [...this.colorStops].sort((a, b) => a.position - b.position);
+        const stopsCSS = sortedStops.map(stop => {
+            const normalizedColor = colord(stop.color).toRgbString();
+            return `${normalizedColor} ${stop.position}%`;
+        }).join(', ');
+
+        return `linear-gradient(90deg, ${stopsCSS})`;
     }
 }
