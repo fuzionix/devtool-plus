@@ -263,6 +263,19 @@
     .editor-divider {
         @apply w-[1px] mx-4 bg-[var(--vscode-editor-lineHighlightBorder)];
     }
+
+    /* Code Block */
+    .code-block {
+        @apply block w-full min-h-[28px] pt-1 pb-0.5 pr-8 rounded-sm font-mono;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
+    }
+    
+    .code-block pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
 }
 
 @tailwind utilities;

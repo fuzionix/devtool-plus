@@ -1,6 +1,7 @@
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
+import { renderCopyButton } from '../../../utils/util';
 import { colord, extend } from 'colord';
 import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
@@ -18,23 +19,39 @@ type GradientType = 'linear' | 'radial' | 'conic';
 
 @customElement('gradient-maker')
 export class GradientMaker extends BaseTool {
-    @state() private colorStops: ColorStop[] = [
-        { id: crypto.randomUUID(), position: 0, color: '#0f23fa', selected: false },
-        { id: crypto.randomUUID(), position: 50, color: '#0f85fa', selected: true },
-        { id: crypto.randomUUID(), position: 100, color: '#0fe7fa', selected: false }
-    ];
-
     @state() private gradientType: GradientType = 'linear';
     @state() private angle: number = 90;
     @state() private isDragging: boolean = false;
     @state() private activeDragHandleId: string | null = null;
     @state() private lastDragEndTime: number = 0;
+    @state() private outputFormat: boolean = true; // true = 'hex', false = 'rgb'
+    @state() private isCopied: boolean = false;
+
+    @state() private colorStops: ColorStop[] = [
+        { 
+            id: crypto.randomUUID(), 
+            position: 0, 
+            color: this.outputFormat ? '#0f23fa' : 'rgb(15, 35, 250)', 
+            selected: false 
+        },
+        { 
+            id: crypto.randomUUID(), 
+            position: 50, 
+            color: this.outputFormat ? '#0f85fa' : 'rgb(15, 133, 250)', 
+            selected: true 
+        },
+        { 
+            id: crypto.randomUUID(), 
+            position: 100, 
+            color: this.outputFormat ? '#0fe7fa' : 'rgb(15, 231, 250)', 
+            selected: false 
+        }
+    ];
 
     @query('.gradient-bar-container') private gradientBar!: HTMLElement;
 
     static styles = css`
         ${BaseTool.styles}
-        
     `;
 
     constructor() {
@@ -49,6 +66,7 @@ export class GradientMaker extends BaseTool {
     protected renderTool() {
         const resultGradientCSS = this.generateGradientCSS();
         const linearGradientCSS = this.generateLinearGradientCSS();
+        const cssOutput = `background: ${resultGradientCSS};`;
 
         return html`
             <style>
@@ -83,7 +101,7 @@ export class GradientMaker extends BaseTool {
                 height: 24px;
                 border: 1px solid var(--vscode-panel-border);
                 border-radius: 2px;
-                margin: 8px 0;
+                margin: 16px 0 8px;
                 cursor: copy;
             }
             
@@ -239,6 +257,14 @@ export class GradientMaker extends BaseTool {
                 opacity: 1;
                 background-color: var(--vscode-list-hoverBackground);
             }
+            
+            .code-keyword {
+                color: var(--vscode-symbolIcon-variableForeground, #5bbec3);
+            }
+            
+            .code-function {
+                color: var(--vscode-symbolIcon-functionForeground, #c586c0);
+            }
             </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Create and customize CSS gradients with multiple color stops.</p>
@@ -247,11 +273,6 @@ export class GradientMaker extends BaseTool {
                 <!-- Result Container -->
                 <div class="result-container">
                     <div style="position: absolute; inset: 0; background: ${resultGradientCSS}"></div>
-                </div>
-
-                <!-- Arrow Divider -->
-                <div class="flex justify-center my-4 opacity-75 rotate-180">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
 
                 <!-- Gradient Bar -->
@@ -316,8 +337,75 @@ export class GradientMaker extends BaseTool {
                         .sort((a, b) => a.position - b.position)
                         .map(stop => this.renderColorListItem(stop))}
                 </div>
+
+                <!-- Arrow Divider -->
+                <div class="flex justify-center mt-2 opacity-75">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                </div>
+                
+                <!-- CSS Output Section -->
+                <div class="mt-2 mb-2">
+                    <div class="relative">
+                        <div class="input-expandable code-block">
+                            ${this.renderHighlightedCode(cssOutput)}
+                        </div>
+                        <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                            <button 
+                                id="copy" 
+                                class="btn-icon"
+                                @click=${this.copyToClipboard}
+                            >
+                                ${renderCopyButton(this.isCopied)}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <tool-switch
+                            .checked="${this.outputFormat}"
+                            leftLabel="RGB"
+                            rightLabel="HEX"
+                            ariaLabel="Color Format"
+                            @change=${this.handleOutputFormatChange}
+                        ></tool-switch>
+                    </div>
+                </div>
             </div>
         `;
+    }
+
+    private renderHighlightedCode(code: string) {
+        const parts = [];
+        
+        // Highlight 'background' property
+        const bgSplit = code.split('background:');
+        
+        if (bgSplit.length > 1) {
+            parts.push(html`<span class="code-keyword">background</span>:`);
+            const remainingCode = bgSplit[1];
+            
+            const gradientTypes = ['linear-gradient', 'radial-gradient', 'conic-gradient'];
+            let highlighted = false;
+            
+            for (const gradType of gradientTypes) {
+                if (remainingCode.includes(gradType)) {
+                    const funcSplit = remainingCode.split(gradType);
+                    parts.push(funcSplit[0]);
+                    parts.push(html`<span class="code-function">${gradType}</span>`);
+                    parts.push(funcSplit[1]);
+                    highlighted = true;
+                    break;
+                }
+            }
+            
+            if (!highlighted) {
+                parts.push(remainingCode);
+            }
+        } else {
+            parts.push(code);
+        }
+        
+        return parts;
     }
 
     private renderColorHandle(stop: ColorStop) {
@@ -364,7 +452,7 @@ export class GradientMaker extends BaseTool {
                     <tool-color-picker
                         class="mt-1 w-6 h-6"
                         .value="${stop.color}"
-                        .format="${'hex' as const}"
+                        .format="${this.outputFormat ? 'hex' : 'rgb'}"
                         @change="${(e: CustomEvent) => this.handleColorChange(e, stop.id)}"
                     ></tool-color-picker>
                 </div>
@@ -479,7 +567,12 @@ export class GradientMaker extends BaseTool {
 
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const position = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-        const newColor = colord(this.interpolateColorAtPosition(position)).toHex();
+        let newColor;
+        if (this.outputFormat) {
+            newColor = colord(this.interpolateColorAtPosition(position)).toHex();
+        } else {
+            newColor = colord(this.interpolateColorAtPosition(position)).toRgbString();
+        }
 
         // Deselect all existing stops
         const updatedStops = this.colorStops.map(stop => ({
@@ -593,6 +686,23 @@ export class GradientMaker extends BaseTool {
         this.endDrag();
     };
 
+    private handleOutputFormatChange(e: CustomEvent) {
+        const newFormat = e.detail.checked;
+        this.outputFormat = newFormat;
+
+        this.colorStops = this.colorStops.map(stop => {
+            return {
+                ...stop,
+                color: this.formatColor(stop.color, newFormat)
+            };
+        });
+    }
+
+    private formatColor(color: string, format: boolean): string {
+        const colorObj = colord(color);
+        return format ? colorObj.toHex() : colorObj.toRgbString();
+    }
+
     private interpolateColorAtPosition(position: number): string {
         const sortedStops = [...this.colorStops].sort((a, b) => a.position - b.position);
 
@@ -629,8 +739,8 @@ export class GradientMaker extends BaseTool {
     private generateGradientCSS(): string {
         const sortedStops = [...this.colorStops].sort((a, b) => a.position - b.position);
         const stopsCSS = sortedStops.map(stop => {
-            const normalizedColor = colord(stop.color).toRgbString();
-            return `${normalizedColor} ${stop.position}%`;
+            const formattedColor = this.formatColor(stop.color, this.outputFormat);
+            return `${formattedColor} ${Math.round(stop.position)}%`;
         }).join(', ');
 
         if (this.gradientType === 'linear') {
@@ -650,5 +760,20 @@ export class GradientMaker extends BaseTool {
         }).join(', ');
 
         return `linear-gradient(90deg, ${stopsCSS})`;
+    }
+
+    private async copyToClipboard() {
+        const cssOutput = `background: ${this.generateGradientCSS()};`;
+        if (!cssOutput) { return; }
+        
+        try {
+            await navigator.clipboard.writeText(cssOutput);
+            this.isCopied = true;
+            setTimeout(() => {
+                this.isCopied = false;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text:', err);
+        }
     }
 }
