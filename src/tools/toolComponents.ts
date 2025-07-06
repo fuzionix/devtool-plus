@@ -15,6 +15,7 @@ import './components/color-convertor/ColorConvertor';
 import './components/color-mixer/ColorMixer';
 import './components/color-palette/ColorPalette';
 import './components/contrast-checker/ContrastChecker';
+import './components/cubic-bezier/CubicBezier';
 import './components/diff-checker/DiffChecker';
 import './components/gradient-maker/GradientMaker';
 import './components/text-editor/TextEditor';

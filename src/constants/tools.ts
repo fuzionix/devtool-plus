@@ -78,7 +78,14 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<gradient-maker></gradient-maker>',
         icon: 'rainbow',
-        isNew: true
+    },
+    {
+        id: 'cubic-bezier',
+        label: 'Cubic Bezier',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<cubic-bezier></cubic-bezier>',
+        icon: 'tangent',
     },
     {
         id: 'contrast-checker',
