@@ -273,6 +273,7 @@
     }
     
     .code-block pre {
+        background-color: transparent;
         white-space: pre-wrap;
         word-break: break-all;
     }

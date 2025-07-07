@@ -94,6 +94,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "bezier-easing": "^2.1.0",
     "colord": "^2.9.3",
     "js-yaml": "^4.1.0",
     "lit": "^3.2.1",
