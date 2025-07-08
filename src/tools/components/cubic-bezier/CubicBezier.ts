@@ -12,23 +12,29 @@ export class CubicBezier extends BaseTool {
     @state() private y2 = 1;
     @state() private isCopied = false;
     @state() private animationId: number | null = null;
+    @state() private linearAnimationId: number | null = null;
     @state() private easing: any = null;
+    @state() private linearEasing = BezierEasing(0, 0, 1, 1);
 
     @query('.bezier-line') private bezierLine!: HTMLElement;
-    @query('.bezier-block') private animationBlock!: HTMLElement;
+    @query('.bezier-block') private bezierBlock!: HTMLElement;
+    @query('.linear-block') private linearBlock!: HTMLElement;
     @query('.p1') private p1Element!: HTMLElement;
     @query('.p2') private p2Element!: HTMLElement;
 
     connectedCallback() {
         super.connectedCallback();
         this.updateEasing();
-        this.startAnimation();
     }
 
     disconnectedCallback() {
         if (this.animationId !== null) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
+        }
+        if (this.linearAnimationId !== null) {
+            cancelAnimationFrame(this.linearAnimationId);
+            this.linearAnimationId = null;
         }
         super.disconnectedCallback();
     }
@@ -43,7 +49,7 @@ export class CubicBezier extends BaseTool {
             this.updateEasing();
             this.drawCurve();
             
-            if (this.animationBlock) {
+            if (this.bezierBlock) {
                 this.restartAnimation();
             }
         }
@@ -71,6 +77,8 @@ export class CubicBezier extends BaseTool {
             this.x2 = Math.max(0, Math.min(1, x));
             this.y2 = Math.max(-1, Math.min(2, y)); // Allow extending beyond the control panel
         });
+
+        this.startAnimations();
     }
 
     protected renderTool() {
@@ -83,6 +91,7 @@ export class CubicBezier extends BaseTool {
                 border: 1px solid var(--vscode-panel-border);
                 border-radius: 2px;
                 background-color: var(--vscode-editor-background);
+                margin-bottom: 8px;
             }
             
             .bezier-block {
@@ -90,7 +99,16 @@ export class CubicBezier extends BaseTool {
                 height: 20px;
                 background-color: var(--vscode-button-background);
                 position: absolute;
-                top: 30px;
+                top: 15px;
+                border-radius: 2px;
+            }
+            
+            .linear-block {
+                width: 20px;
+                height: 20px;
+                background-color: #777;
+                position: absolute;
+                top: 45px;
                 border-radius: 2px;
             }
             
@@ -120,11 +138,18 @@ export class CubicBezier extends BaseTool {
                 position: absolute;
                 width: 12px;
                 height: 12px;
-                background-color: var(--vscode-button-background);
                 border-radius: 50%;
                 transform: translate(-50%, -50%);
                 cursor: move;
                 z-index: 2;
+            }
+            
+            .bezier-point.p1 {
+                background-color: var(--vscode-terminal-ansiCyan);
+            }
+            
+            .bezier-point.p2 {
+                background-color: var(--vscode-terminal-ansiYellow);
             }
             
             .bezier-point.fixed {
@@ -147,6 +172,7 @@ export class CubicBezier extends BaseTool {
                 <!-- Preview Panel -->
                 <div class="bezier-preview">
                     <div class="bezier-block"></div>
+                    <div class="linear-block"></div>
                 </div>
 
                 <!-- Cubic Bezier Curve Control Panel -->
@@ -154,7 +180,7 @@ export class CubicBezier extends BaseTool {
                     <div class="bezier-grid"></div>
                     <svg class="bezier-line" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <path d="" fill="none" stroke="var(--vscode-button-background)" stroke-width="1.5"></path>
-                        <path d="M 0,100 C 0,100 0,100 100,0" fill="none" stroke="#7774" stroke-width="1.5"></path>
+                        <path d="M 0,100 L 100,0" fill="none" stroke="#7774" stroke-width="1.5"></path>
                         <path class="control-line control-line-1" d="" fill="none" stroke="var(--vscode-descriptionForeground)" stroke-width="0.5"></path>
                         <path class="control-line control-line-2" d="" fill="none" stroke="var(--vscode-descriptionForeground)" stroke-width="0.5"></path>
                     </svg>
@@ -231,12 +257,17 @@ export class CubicBezier extends BaseTool {
         controlLine2.setAttribute('d', `M 100,0 L ${this.x2 * 100},${(1 - this.y2) * 100}`);
     }
 
-    private startAnimation() {
-        if (!this.animationBlock) { return; }
+    private startAnimations() {
+        this.startBezierAnimation();
+        this.startLinearAnimation();
+    }
+
+    private startBezierAnimation() {
+        if (!this.bezierBlock) { return; }
         
         let startTime: number | null = null;
         const duration = 2000;
-        const containerWidth = () => this.animationBlock.parentElement?.clientWidth || 200;
+        const containerWidth = () => this.bezierBlock.parentElement?.clientWidth || 200;
         const blockWidth = 20;
         
         const animate = (timestamp: number) => {
@@ -249,12 +280,36 @@ export class CubicBezier extends BaseTool {
             
             // Apply position (account for the block width)
             const maxX = containerWidth() - blockWidth;
-            this.animationBlock.style.left = `${y * maxX}px`;
-            
+            this.bezierBlock.style.left = `${y * maxX}px`;
             this.animationId = requestAnimationFrame(animate);
         };
         
         this.animationId = requestAnimationFrame(animate);
+    }
+    
+    private startLinearAnimation() {
+        if (!this.linearBlock) { return; }
+        
+        let startTime: number | null = null;
+        const duration = 2000;
+        const containerWidth = () => this.linearBlock.parentElement?.clientWidth || 200;
+        const blockWidth = 20;
+        
+        const animate = (timestamp: number) => {
+            if (!startTime) { startTime = timestamp; }
+            const elapsed = (timestamp - startTime) % duration;
+            const progress = elapsed / duration;
+            
+            // Standard linear easing
+            const y = this.linearEasing(progress);
+            
+            // Apply position (account for the block width)
+            const maxX = containerWidth() - blockWidth;
+            this.linearBlock.style.left = `${y * maxX}px`;
+            this.linearAnimationId = requestAnimationFrame(animate);
+        };
+        
+        this.linearAnimationId = requestAnimationFrame(animate);
     }
     
     private restartAnimation() {
@@ -262,7 +317,7 @@ export class CubicBezier extends BaseTool {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
         }
-        this.startAnimation();
+        this.startBezierAnimation();
     }
 
     private async copyToClipboard() {
