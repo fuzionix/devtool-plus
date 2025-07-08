@@ -15,12 +15,14 @@ export class CubicBezier extends BaseTool {
     @state() private linearAnimationId: number | null = null;
     @state() private easing: any = null;
     @state() private linearEasing = BezierEasing(0, 0, 1, 1);
+    @state() private isDragging = false;
 
     @query('.bezier-line') private bezierLine!: HTMLElement;
     @query('.bezier-block') private bezierBlock!: HTMLElement;
     @query('.linear-block') private linearBlock!: HTMLElement;
     @query('.p1') private p1Element!: HTMLElement;
     @query('.p2') private p2Element!: HTMLElement;
+    @query('.bezier-preview') private previewContainer!: HTMLElement;
 
     connectedCallback() {
         super.connectedCallback();
@@ -28,6 +30,11 @@ export class CubicBezier extends BaseTool {
     }
 
     disconnectedCallback() {
+        this.stopAllAnimations();
+        super.disconnectedCallback();
+    }
+
+    private stopAllAnimations() {
         if (this.animationId !== null) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
@@ -36,7 +43,6 @@ export class CubicBezier extends BaseTool {
             cancelAnimationFrame(this.linearAnimationId);
             this.linearAnimationId = null;
         }
-        super.disconnectedCallback();
     }
 
     updated(changedProperties: Map<string, any>) {
@@ -49,7 +55,13 @@ export class CubicBezier extends BaseTool {
             this.updateEasing();
             this.drawCurve();
             
-            if (this.bezierBlock) {
+            if (this.bezierBlock && !this.isDragging) {
+                this.restartAnimation();
+            }
+        }
+        
+        if (changedProperties.has('isDragging')) {
+            if (!this.isDragging) {
                 this.restartAnimation();
             }
         }
@@ -92,6 +104,7 @@ export class CubicBezier extends BaseTool {
                 border-radius: 2px;
                 background-color: var(--vscode-editor-background);
                 margin-bottom: 8px;
+                padding: 0 20px;
             }
             
             .bezier-block {
@@ -164,6 +177,15 @@ export class CubicBezier extends BaseTool {
                 pointer-events: none;
                 z-index: 1;
             }
+
+            .preview-track {
+                position: absolute;
+                bottom: 8px;
+                left: 20px;
+                right: 20px;
+                height: 1px;
+                background-color: var(--vscode-panel-border);
+            }
             </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Create and visualize CSS cubic-bezier timing functions</p>
@@ -171,6 +193,7 @@ export class CubicBezier extends BaseTool {
 
                 <!-- Preview Panel -->
                 <div class="bezier-preview">
+                    <div class="preview-track"></div>
                     <div class="bezier-block"></div>
                     <div class="linear-block"></div>
                 </div>
@@ -217,6 +240,11 @@ export class CubicBezier extends BaseTool {
         
         const onMouseDown = (e: MouseEvent) => {
             isDragging = true;
+            this.isDragging = true; // Set component-level dragging state
+            
+            // Pause animations while dragging
+            this.stopAllAnimations();
+            
             e.preventDefault();
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
@@ -234,6 +262,7 @@ export class CubicBezier extends BaseTool {
         
         const onMouseUp = () => {
             isDragging = false;
+            this.isDragging = false; // Reset component-level dragging state
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
@@ -263,12 +292,16 @@ export class CubicBezier extends BaseTool {
     }
 
     private startBezierAnimation() {
-        if (!this.bezierBlock) { return; }
+        if (!this.bezierBlock || !this.previewContainer) { return; }
         
         let startTime: number | null = null;
         const duration = 2000;
-        const containerWidth = () => this.bezierBlock.parentElement?.clientWidth || 200;
-        const blockWidth = 20;
+        const getMaxX = () => {
+            const containerWidth = this.previewContainer.clientWidth;
+            const blockWidth = 20;
+            const bufferSize = 40;
+            return containerWidth - blockWidth - bufferSize;
+        };
         
         const animate = (timestamp: number) => {
             if (!startTime) { startTime = timestamp; }
@@ -278,9 +311,10 @@ export class CubicBezier extends BaseTool {
             // Use bezier-easing library to calculate the y value
             const y = this.easing ? this.easing(progress) : progress;
             
-            // Apply position (account for the block width)
-            const maxX = containerWidth() - blockWidth;
-            this.bezierBlock.style.left = `${y * maxX}px`;
+            // This allows negative values to still be visible
+            const maxX = getMaxX();
+            const initialPos = 20; // Left buffer
+            this.bezierBlock.style.left = `${initialPos + y * maxX}px`;
             this.animationId = requestAnimationFrame(animate);
         };
         
@@ -288,12 +322,16 @@ export class CubicBezier extends BaseTool {
     }
     
     private startLinearAnimation() {
-        if (!this.linearBlock) { return; }
+        if (!this.linearBlock || !this.previewContainer) { return; }
         
         let startTime: number | null = null;
         const duration = 2000;
-        const containerWidth = () => this.linearBlock.parentElement?.clientWidth || 200;
-        const blockWidth = 20;
+        const getMaxX = () => {
+            const containerWidth = this.previewContainer.clientWidth;
+            const blockWidth = 20;
+            const bufferSize = 40;
+            return containerWidth - blockWidth - bufferSize;
+        };
         
         const animate = (timestamp: number) => {
             if (!startTime) { startTime = timestamp; }
@@ -303,9 +341,10 @@ export class CubicBezier extends BaseTool {
             // Standard linear easing
             const y = this.linearEasing(progress);
             
-            // Apply position (account for the block width)
-            const maxX = containerWidth() - blockWidth;
-            this.linearBlock.style.left = `${y * maxX}px`;
+            // This allows negative values to still be visible
+            const maxX = getMaxX();
+            const initialPos = 20; // Left buffer
+            this.linearBlock.style.left = `${initialPos + y * maxX}px`;
             this.linearAnimationId = requestAnimationFrame(animate);
         };
         
@@ -313,11 +352,8 @@ export class CubicBezier extends BaseTool {
     }
     
     private restartAnimation() {
-        if (this.animationId !== null) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-        }
-        this.startBezierAnimation();
+        this.stopAllAnimations();
+        this.startAnimations();
     }
 
     private async copyToClipboard() {
