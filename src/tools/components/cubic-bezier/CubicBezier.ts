@@ -24,6 +24,13 @@ export class CubicBezier extends BaseTool {
     @query('.p2') private p2Element!: HTMLElement;
     @query('.bezier-preview') private previewContainer!: HTMLElement;
 
+    private presets = {
+        linear: { x1: 0, y1: 0, x2: 1, y2: 1 },
+        easeIn: { x1: 0.42, y1: 0, x2: 1, y2: 1 },
+        easeOut: { x1: 0, y1: 0, x2: 0.58, y2: 1 },
+        easeInOut: { x1: 0.42, y1: 0, x2: 0.58, y2: 1 }
+    };
+
     connectedCallback() {
         super.connectedCallback();
         this.updateEasing();
@@ -91,6 +98,14 @@ export class CubicBezier extends BaseTool {
         });
 
         this.startAnimations();
+    }
+
+    private applyPreset(preset: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut') {
+        const values = this.presets[preset];
+        this.x1 = values.x1;
+        this.y1 = values.y1;
+        this.x2 = values.x2;
+        this.y2 = values.y2;
     }
 
     protected renderTool() {
@@ -186,9 +201,44 @@ export class CubicBezier extends BaseTool {
                 height: 1px;
                 background-color: var(--vscode-panel-border);
             }
+            
+            .bezier-output {
+                font-family: var(--vscode-editor-font-family);
+                word-spacing: -3px;
+            }
+            
+            .p1-value {
+                color: var(--vscode-terminal-ansiCyan);
+            }
+            
+            .p2-value {
+                color: var(--vscode-terminal-ansiYellow);
+            }
+            
+            .coordinate-display {
+                font-size: 11px;
+                color: var(--vscode-descriptionForeground);
+                position: absolute;
+                background: var(--vscode-editor-background);
+                padding: 2px 5px;
+                border-radius: 3px;
+                border: 1px solid var(--vscode-panel-border);
+                opacity: 0.9;
+                pointer-events: none;
+            }
+            
+            .p1-coords {
+                left: ${this.x1 * 100}%;
+                top: ${(1 - this.y1) * 100 + 15}%;
+            }
+            
+            .p2-coords {
+                left: ${this.x2 * 100}%;
+                top: ${(1 - this.y2) * 100 + 15}%;
+            }
             </style>
             <div class="tool-inner-container">
-                <p class="opacity-75">Create and visualize CSS cubic-bezier timing functions</p>
+                <p class="opacity-75">Create and visualize CSS cubic-bezier timing functions.</p>
                 <hr />
 
                 <!-- Preview Panel -->
@@ -213,11 +263,29 @@ export class CubicBezier extends BaseTool {
                     <div class="bezier-point p2" style="left: ${this.x2 * 100}%; top: ${(1 - this.y2) * 100}%;"></div>
                 </div>
 
-                <!-- CSS Output Field -->
+                <div class="flex justify-between my-2 gap-2">
+                    <button @click=${() => this.applyPreset('linear')} class="btn-outline preset-button">
+                        <span>Linear</span>
+                    </button>
+                    <button @click=${() => this.applyPreset('easeIn')} class="btn-outline preset-button">
+                        <span>Ease In</span>
+                    </button>
+                </div>
+
+                <div class="flex justify-between mt-2 mb-4 gap-2">
+                    <button @click=${() => this.applyPreset('easeOut')} class="btn-outline preset-button">
+                        <span>Ease Out</span>
+                    </button>
+                    <button @click=${() => this.applyPreset('easeInOut')} class="btn-outline preset-button">
+                        <span>Ease In Out</span>
+                    </button>
+                </div>
+
+                <!-- CSS Output Field with Colored Values -->
                 <div class="mt-2 mb-2">
                     <div class="relative">
                         <div class="input-expandable code-block">
-                            <pre>cubic-bezier(${this.x1.toFixed(2)}, ${this.y1.toFixed(2)}, ${this.x2.toFixed(2)}, ${this.y2.toFixed(2)})</pre>
+                            <pre class="bezier-output">cubic-bezier(<span class="p1-value">${this.x1.toFixed(2)}, ${this.y1.toFixed(2)}</span>, <span class="p2-value">${this.x2.toFixed(2)}, ${this.y2.toFixed(2)}</span>)</pre>
                         </div>
                         <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
                             <button 
