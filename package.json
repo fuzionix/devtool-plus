@@ -56,7 +56,42 @@
         }
       ]
     },
-    "commands": []
+    "commands": [
+      {
+        "command": "devtool-plus.homeButton",
+        "title": "Home",
+        "icon": "$(home)"
+      },
+      {
+        "command": "devtool-plus.refreshButton",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "devtool-plus.aboutButton",
+        "title": "About",
+        "icon": "$(info)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "devtool-plus.homeButton",
+          "when": "view == devtool-plus.toolsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "devtool-plus.refreshButton",
+          "when": "view == devtool-plus.toolsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "devtool-plus.aboutButton",
+          "when": "view == devtool-plus.toolsView",
+          "group": "navigation@3"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
