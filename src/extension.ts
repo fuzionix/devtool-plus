@@ -64,13 +64,17 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 		}),
-		
+
 		vscode.commands.registerCommand('devtool-plus.homeButton', () => {
 			sidePanelProvider.reset();
 		}),
-		
+
 		vscode.commands.registerCommand('devtool-plus.refreshButton', () => {
 			sidePanelProvider.refresh();
+		}),
+
+		vscode.commands.registerCommand('devtool-plus.aboutButton', () => {
+			sidePanelProvider.about();
 		}),
 	);
 
