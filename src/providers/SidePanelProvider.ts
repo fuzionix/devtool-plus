@@ -5,6 +5,7 @@ import { Tool } from '../types/tool';
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
     private view?: vscode.WebviewView;
+    private currentTool?: Tool;
 
     constructor(
         private readonly extensionUri: vscode.Uri,
@@ -85,7 +86,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                 <div id="empty-state" class="pt-2 px-4">
                     <p class="opacity-70">Select a tool from the Tools Explorer below</p>
                 </div>
-                <div id="tool-container" class="pt-2 px-4">
+                <div id="tool-container" class="pt-2 px-4" style="display: none;">
                     <div class="tool-header flex align-middle">
                         <img class="tool-icon mr-2" src="//:0" width="16" alt="" />
                         <h4 class="tool-title"></h4>
@@ -102,10 +103,21 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                             case 'updateTool':
                                 updateTool(message.tool);
                                 break;
+                            case 'reset':
+                                resetView();
+                                break;
+                            case 'refresh':
+                                if (currentTool) {
+                                    updateTool(currentTool);
+                                }
+                                break;
                         }
                     });
 
+                    let currentTool = null;
+
                     function updateTool(tool) {
+                        currentTool = tool;
                         const emptyState = document.getElementById('empty-state');
                         const toolContainer = document.getElementById('tool-container');
 
@@ -126,6 +138,21 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                         toolContent.innerHTML = tool.template;
                     }
 
+                    function resetView() {
+                        currentTool = null;
+                        const emptyState = document.getElementById('empty-state');
+                        const toolContainer = document.getElementById('tool-container');
+                        emptyState.style.display = 'block';
+                        toolContainer.style.display = 'none';
+                    }
+
+                    function showAbout() {
+                        const emptyState = document.getElementById('empty-state');
+                        const toolContainer = document.getElementById('tool-container');
+                        emptyState.style.display = 'none';
+                        toolContainer.style.display = 'none';
+                    }
+
                     vscode.postMessage({ type: 'ready' });
                 </script>
                 <script src="${toolComponentsUri}"></script>
@@ -135,11 +162,32 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
     }
 
     public updateTool(tool: Tool) {
+        this.currentTool = tool;
         if (this.view) {
             this.view.webview.postMessage({
                 type: 'updateTool',
                 tool: tool
             });
+        }
+    }
+
+    public reset() {
+        this.currentTool = undefined;
+        if (this.view) {
+            this.view.webview.postMessage({
+                type: 'reset'
+            });
+        }
+    }
+
+    public refresh() {
+        if (this.view && this.currentTool) {
+            this.view.webview.postMessage({
+                type: 'updateTool',
+                tool: this.currentTool
+            });
+        } else {
+            this.reset();
         }
     }
 }

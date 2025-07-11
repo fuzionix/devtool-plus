@@ -63,7 +63,15 @@ export function activate(context: vscode.ExtensionContext) {
 					activeEditorProviders.set(tool.id, editorViewProvider);
 				}
 			}
-		})
+		}),
+		
+		vscode.commands.registerCommand('devtool-plus.homeButton', () => {
+			sidePanelProvider.reset();
+		}),
+		
+		vscode.commands.registerCommand('devtool-plus.refreshButton', () => {
+			sidePanelProvider.refresh();
+		}),
 	);
 
 	vscode.commands.registerCommand('devtool-plus.updateEditor', (toolId: string, value: any) => {

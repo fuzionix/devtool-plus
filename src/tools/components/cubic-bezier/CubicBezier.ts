@@ -241,6 +241,24 @@ export class CubicBezier extends BaseTool {
                 <p class="opacity-75">Create and visualize CSS cubic-bezier timing functions.</p>
                 <hr />
 
+                <!-- CSS Output Field with Colored Values -->
+                <div class="my-4">
+                    <div class="relative">
+                        <div class="input-expandable code-block">
+                            <pre class="bezier-output">cubic-bezier(<span class="p1-value">${this.x1.toFixed(2)}, ${this.y1.toFixed(2)}</span>, <span class="p2-value">${this.x2.toFixed(2)}, ${this.y2.toFixed(2)}</span>)</pre>
+                        </div>
+                        <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                            <button 
+                                id="copy" 
+                                class="btn-icon"
+                                @click=${this.copyToClipboard}
+                            >
+                                ${renderCopyButton(this.isCopied)}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Preview Panel -->
                 <div class="bezier-preview">
                     <div class="preview-track"></div>
@@ -279,24 +297,6 @@ export class CubicBezier extends BaseTool {
                     <button @click=${() => this.applyPreset('easeInOut')} class="btn-outline preset-button">
                         <span>Ease In Out</span>
                     </button>
-                </div>
-
-                <!-- CSS Output Field with Colored Values -->
-                <div class="mt-2 mb-2">
-                    <div class="relative">
-                        <div class="input-expandable code-block">
-                            <pre class="bezier-output">cubic-bezier(<span class="p1-value">${this.x1.toFixed(2)}, ${this.y1.toFixed(2)}</span>, <span class="p2-value">${this.x2.toFixed(2)}, ${this.y2.toFixed(2)}</span>)</pre>
-                        </div>
-                        <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                            <button 
-                                id="copy" 
-                                class="btn-icon"
-                                @click=${this.copyToClipboard}
-                            >
-                                ${renderCopyButton(this.isCopied)}
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         `;
