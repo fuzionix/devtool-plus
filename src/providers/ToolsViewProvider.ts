@@ -6,11 +6,18 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
     public static readonly viewType = 'devtool-plus.toolsExplorer';
     private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+    
+    private searchTerm: string = '';
 
     constructor(readonly context: vscode.ExtensionContext) { }
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
+    }
+
+    searchTools(term: string): void {
+        this.searchTerm = term.toLowerCase();
+        this.refresh();
     }
 
     getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
@@ -19,12 +26,29 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
 
     getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
         if (!element) {
-            const categories = [...new Set(TOOLS.map(tool => tool.category))];
-            return Promise.resolve(
-                categories.map(category =>
-                    new CategoryTreeItem(category, vscode.TreeItemCollapsibleState.Expanded)
-                )
-            );
+            let filteredTools = TOOLS;
+            if (this.searchTerm) {
+                filteredTools = TOOLS.filter(tool => 
+                    tool.label.toLowerCase().includes(this.searchTerm) || 
+                    tool.category.toLowerCase().includes(this.searchTerm) ||
+                    (tool.tags && tool.tags.some(tag => tag.toLowerCase().startsWith(this.searchTerm)))
+                );
+            }
+
+            if (this.searchTerm) {
+                return Promise.resolve(
+                    filteredTools.map(tool =>
+                        new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None, this.context)
+                    )
+                );
+            } else {
+                const categories = [...new Set(TOOLS.map(tool => tool.category))];
+                return Promise.resolve(
+                    categories.map(category =>
+                        new CategoryTreeItem(category, vscode.TreeItemCollapsibleState.Expanded)
+                    )
+                );
+            }
         } else if (element instanceof CategoryTreeItem) {
             const toolsInCategory = TOOLS.filter(tool => tool.category === element.category);
             return Promise.resolve(

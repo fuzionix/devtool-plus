@@ -47,12 +47,14 @@
           "type": "webview",
           "id": "devtool-plus.toolsView",
           "name": "Input / Output",
-          "icon": "media/activity-bar-icon.svg"
+          "icon": "media/activity-bar-icon.svg",
+          "visibility": "visible"
         },
         {
           "type": "tree",
           "id": "devtool-plus.toolsExplorer",
-          "name": "Explorer"
+          "name": "Explorer",
+          "visibility": "visible"
         }
       ]
     },

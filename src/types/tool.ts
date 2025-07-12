@@ -16,6 +16,7 @@ export interface Tool {
     template: string;
     icon: string;
     isNew?: boolean;
+    tags?: string[];
     editor?: {
         viewType: 'code' | 'diff' | 'simple';
         language?: string;

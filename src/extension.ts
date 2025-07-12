@@ -63,6 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 					activeEditorProviders.set(tool.id, editorViewProvider);
 				}
 			}
+			toolsViewProvider.searchTools('');
 		}),
 
 		vscode.commands.registerCommand('devtool-plus.homeButton', () => {
@@ -75,6 +76,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.commands.registerCommand('devtool-plus.aboutButton', () => {
 			sidePanelProvider.about();
+		}),
+
+		vscode.commands.registerCommand('devtool-plus.searchTools', (searchTerm: string) => {
+			toolsViewProvider.searchTools(searchTerm);
 		}),
 	);
 
