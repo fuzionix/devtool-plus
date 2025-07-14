@@ -22,6 +22,7 @@ import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-editor/JsonEditor';
 import './components/password-generator/PasswordGenerator';
+import './components/qr-code-generator/QrCodeGenerator';
 import './components/token-generator/TokenGenerator';
 import './components/rsa-encryption/RsaEncryption';
 import './components/rsa-key-generator/RsaKeyGenerator';

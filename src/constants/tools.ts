@@ -140,6 +140,15 @@ export const TOOLS: Tool[] = [
         }
     },
     {
+        id: 'qr-code-generator',
+        label: 'QR Code Generator',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<qr-code-generator></qr-code-generator>',
+        icon: 'qr-code',
+        tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',
