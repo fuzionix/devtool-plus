@@ -17,17 +17,21 @@ export class RadioGroup extends LitElement {
             border-radius: 2px;
             border: 1px solid var(--vscode-panel-border);
         }
+
+        ::slotted(tool-radio-item) {
+            border-radius: 2px;
+        }
     `;
 
     render() {
         return html`
             <div class="radio-group" role="radiogroup" aria-label="${this.ariaLabel}">
-                <slot @slotchange=${this._handleSlotChange}></slot>
+                <slot @slotchange=${this.handleSlotChange}></slot>
             </div>
         `;
     }
 
-    private _handleSlotChange(e: Event) {
+    private handleSlotChange(e: Event) {
         const slot = e.target as HTMLSlotElement;
         const elements = slot.assignedElements();
         
