@@ -52,6 +52,12 @@ export class FileDropzone extends LitElement {
             opacity: 0.7;
         }
 
+        ::slotted(svg), ::slotted(.icon) {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
         .dropzone-text {
             margin: 0;
             text-align: center;
@@ -118,7 +124,9 @@ export class FileDropzone extends LitElement {
                 @drop=${this.handleDrop}
                 @click=${this.handleClick}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="dropzone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-up-icon lucide-file-up"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
+                <slot name="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="dropzone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-up-icon lucide-file-up"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
+                </slot>
                 <p class="dropzone-text">${this.placeholder}</p>
                 ${this.files.length > 0 ? html`
                     <div class="file-list">
@@ -167,7 +175,7 @@ export class FileDropzone extends LitElement {
         e.stopPropagation();
         this.isDragging = false;
         
-        if (!e.dataTransfer) return;
+        if (!e.dataTransfer) { return; }
         
         const files = Array.from(e.dataTransfer.files);
         this.processFiles(files);
