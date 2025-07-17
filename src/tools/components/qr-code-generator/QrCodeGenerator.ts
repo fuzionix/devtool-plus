@@ -14,6 +14,8 @@ export class QrCodeGenerator extends BaseTool {
     @state() private alert: { type: 'error' | 'warning' | 'success'; message: string } | null = null;
     @state() private errorCorrection: 'L' | 'M' | 'Q' | 'H' = 'M';
     @state() private padding = 4;
+    @state() private backgroundColor = '#ffffff';
+    @state() private foregroundColor = '#000000';
 
     static styles = css`
         ${BaseTool.styles}
@@ -41,11 +43,29 @@ export class QrCodeGenerator extends BaseTool {
                 <hr />
                 
                 <!-- QR Code Preview section -->
-                <div class="frame flex justify-center items-center min-h-[200px] mb-2">
+                <div class="relative frame flex justify-center items-center min-h-[200px] mb-2">
                     ${this.qrCodeDataUrl 
                         ? html`<img class="qr-image" src="${this.qrCodeDataUrl}" alt="Generated QR Code" />`
                         : html`<span class="opacity-75">QR code will appear here</span>`
                     }
+                    <div class="absolute right-0 top-0.5 pr-0.5 flex flex-col justify-items-center">
+                        <tool-tooltip text="Export PNG">
+                            <button 
+                                class="btn-icon" 
+                                @click=${() => this.downloadQrcode('png')}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-down-icon lucide-image-down"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19 3 3v-5.5"/><path d="m17 22 3-3"/><circle cx="9" cy="9" r="2"/></svg>
+                            </button>
+                        </tool-tooltip>
+                        <tool-tooltip text="Export SVG">
+                            <button 
+                                class="btn-icon" 
+                                @click=${() => this.downloadQrcode('svg')}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            </button>
+                        </tool-tooltip>
+                    </div>
                 </div>
 
                 <!-- Input Type Options -->
@@ -67,6 +87,16 @@ export class QrCodeGenerator extends BaseTool {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video-icon lucide-video"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
                     </tool-radio-item>
                 </tool-radio-group>
+
+                <!-- Conditional Input Fields -->
+                ${this.renderInputField()}
+                
+                ${this.alert ? html`
+                    <tool-alert
+                        .type=${this.alert.type}
+                        .message=${this.alert.message}
+                    ></tool-alert>
+                ` : ''}
 
                 <!-- QR Settings -->
                 <div class="flex flex-col min-[320px]:flex-row gap-4 my-4">
@@ -102,15 +132,25 @@ export class QrCodeGenerator extends BaseTool {
                     </div>
                 </div>
 
-                <!-- Conditional Input Fields -->
-                ${this.renderInputField()}
-                
-                ${this.alert ? html`
-                    <tool-alert
-                        .type=${this.alert.type}
-                        .message=${this.alert.message}
-                    ></tool-alert>
-                ` : ''}
+                <div class="flex flex-col min-[320px]:flex-row w-full gap-4">
+                    <div class="flex-1">
+                        <p class="mb-2 text-xs select-none">Background Color</p>
+                        <tool-color-picker
+                            class="w-full h-7"
+                            .value="${this.backgroundColor}"
+                            @change="${(e: CustomEvent) => this.handleColorChange(e, 'background')}"
+                        ></tool-color-picker>
+                    </div>
+
+                    <div class="flex-1">
+                        <p class="mb-2 text-xs select-none">Foreground Color</p>
+                        <tool-color-picker
+                            class="w-full h-7"
+                            .value="${this.foregroundColor}"
+                            @change="${(e: CustomEvent) => this.handleColorChange(e, 'foreground')}"
+                        ></tool-color-picker>
+                    </div>
+                </div>
             </div>
         `;
     }
@@ -277,6 +317,16 @@ export class QrCodeGenerator extends BaseTool {
         }
     }
 
+    private handleColorChange(e: CustomEvent, colorType: 'background' | 'foreground') {
+        const value = e.detail.value;
+        if (colorType === 'background') {
+            this.backgroundColor = value;
+        } else if (colorType === 'foreground') {
+            this.foregroundColor = value;
+        }
+        this.generateQrCode();
+    }
+
     private async generateQrCode(): Promise<void> {
         if (!this.inputText.trim()) {
             this.qrCodeDataUrl = '';
@@ -289,8 +339,8 @@ export class QrCodeGenerator extends BaseTool {
                 margin: this.padding,
                 width: 200,
                 color: {
-                    dark: '#000000',
-                    light: '#ffffff'
+                    dark: this.foregroundColor || '#000000',
+                    light: this.backgroundColor || '#ffffff'
                 }
             };
 
@@ -303,6 +353,58 @@ export class QrCodeGenerator extends BaseTool {
                 message: 'Failed to generate QR code. The input may be too long or contain invalid characters.' 
             };
             this.qrCodeDataUrl = '';
+        }
+    }
+
+    private async downloadQrcode(format: 'png' | 'svg'): Promise<void> {
+        if (!this.qrCodeDataUrl) {
+            this.alert = { 
+                type: 'warning', 
+                message: 'No QR code to download. Please generate a QR code first.' 
+            };
+            return;
+        }
+
+        try {
+            if (format === 'png') {
+                const base64 = this.qrCodeDataUrl.split(',')[1];
+                const fileName = `qrcode-${new Date().getTime()}.png`;
+                (window as any).vscode?.postMessage?.({
+                    type: 'download',
+                    payload: {
+                        base64,
+                        fileName,
+                        extension: 'png'
+                    }
+                });
+            } else if (format === 'svg') {
+                const svgString = await QRCode.toString(this.inputText, {
+                    errorCorrectionLevel: this.errorCorrection,
+                    margin: this.padding,
+                    type: 'svg',
+                    color: {
+                        dark: this.foregroundColor || '#000000',
+                        light: this.backgroundColor || '#ffffff'
+                    }
+                });
+                
+                const base64 = btoa(unescape(encodeURIComponent(svgString)));
+                const fileName = `qrcode-${new Date().getTime()}.svg`;
+                (window as any).vscode?.postMessage?.({
+                    type: 'download',
+                    payload: {
+                        base64,
+                        fileName,
+                        extension: 'svg'
+                    }
+                });
+            }
+        } catch (error) {
+            this.alert = { 
+                type: 'error', 
+                message: 'Failed to download QR code. Please try again.' 
+            };
+            console.error('Error downloading QR code:', error);
         }
     }
 
