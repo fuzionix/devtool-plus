@@ -16,6 +16,7 @@ export class QrCodeGenerator extends BaseTool {
     @state() private padding = 4;
     @state() private backgroundColor = '#ffffff';
     @state() private foregroundColor = '#000000';
+    @state() private maskPattern = 2;
 
     static styles = css`
         ${BaseTool.styles}
@@ -151,6 +152,19 @@ export class QrCodeGenerator extends BaseTool {
                         ></tool-color-picker>
                     </div>
                 </div>
+
+                <tool-expandable label="Advanced Settings" class="mt-2">
+                    <div class="content-to-expand">
+                        <p class="mb-2 text-xs">Mask Pattern</p>
+                        <tool-slider
+                            min="0"
+                            max="7"
+                            step="1"
+                            .value="${this.maskPattern}"
+                            @change=${this.handleMaskPatternChange}
+                        ></tool-slider>
+                    </div>
+                </tool-expandable>
             </div>
         `;
     }
@@ -327,6 +341,12 @@ export class QrCodeGenerator extends BaseTool {
         this.generateQrCode();
     }
 
+    private handleMaskPatternChange(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.maskPattern = Number(target.value);
+        this.generateQrCode();
+    }
+
     private async generateQrCode(): Promise<void> {
         if (!this.inputText.trim()) {
             this.qrCodeDataUrl = '';
@@ -341,7 +361,8 @@ export class QrCodeGenerator extends BaseTool {
                 color: {
                     dark: this.foregroundColor || '#000000',
                     light: this.backgroundColor || '#ffffff'
-                }
+                },
+                maskPattern: this.maskPattern as QRCode.QRCodeMaskPattern,
             };
 
             const dataUrl = await QRCode.toDataURL(this.inputText, options);
