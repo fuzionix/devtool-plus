@@ -41,6 +41,21 @@ export const TOOLS: Tool[] = [
         }
     },
     {
+        id: 'html-xml-editor',
+        label: 'HTML / XML Editor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<html-xml-editor></html-xml-editor>',
+        icon: 'file-code',
+        tags: ['html', 'xml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        editor: {
+            viewType: 'code',
+            language: 'html',
+            initialValue: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>HTML Example</title>\n</head>\n<body>\n    <h1>Paste or type your HTML or XML here.</h1>\n</body>\n</html>',
+            editorLogicPath: 'src/tools/components/html-xml-editor/HtmlXmlEditorLogic.js'
+        }
+    },
+    {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
         version: '1.0.0',

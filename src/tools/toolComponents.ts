@@ -20,6 +20,7 @@ import './components/contrast-checker/ContrastChecker';
 import './components/cubic-bezier/CubicBezier';
 import './components/diff-checker/DiffChecker';
 import './components/gradient-maker/GradientMaker';
+import './components/html-xml-editor/HtmlXmlEditor';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-editor/JsonEditor';
