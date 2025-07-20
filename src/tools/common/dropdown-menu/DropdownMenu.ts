@@ -6,6 +6,7 @@ export class DropdownMenu extends LitElement {
     @property({ type: Array }) options: { label: string; value: string }[] = [];
     @property({ type: String }) placeholder: string = 'Select an option';
     @property({ type: String }) value: string = '';
+    @property({ type: Boolean }) disabled: boolean = false;
 
     @state() private isOpen: boolean = false;
 
@@ -20,6 +21,12 @@ export class DropdownMenu extends LitElement {
             box-sizing: border-box;
             position: relative;
             width: 100%;
+        }
+
+        .dropdown.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
         }
 
         .selection-body {
@@ -111,7 +118,7 @@ export class DropdownMenu extends LitElement {
         const selectedOption = this.options.find(opt => opt.value === this.value);
 
         return html`
-            <div class="dropdown">
+            <div class="dropdown ${this.disabled ? 'disabled' : ''}">
                 <div 
                     class="selection-body ${this.isOpen ? 'open' : ''}"
                     @click=${this.toggleDropdown}
