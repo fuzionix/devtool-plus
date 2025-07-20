@@ -241,7 +241,8 @@ export class CodeEditorProvider {
                                 break;
                             case 'action':
                                 if (window.toolLogic && typeof window.toolLogic[message.action] === 'function') {
-                                    window.toolLogic[message.action]();
+                                    const { action, ...args } = message;
+                                    window.toolLogic[action](args);
                                 } else {
                                     console.warn('No handler for action:', message.action);
                                 }
@@ -304,7 +305,7 @@ export class CodeEditorProvider {
             if (value && value.action) {
                 this.panel.webview.postMessage({
                     type: 'action',
-                    action: value.action
+                    ...value
                 });
             } else {
                 this.panel.webview.postMessage({

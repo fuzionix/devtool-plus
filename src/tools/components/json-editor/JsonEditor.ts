@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 
 @customElement('json-editor')
@@ -8,6 +8,10 @@ export class JsonEditor extends BaseTool {
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
+
+    @state() private orderBy: string = 'default';
+    @state() private sortOrder: string = 'asc';
+    @state() private lastAction: 'minify' | 'format' = 'format';
 
     protected renderTool() {
         return html`
@@ -30,15 +34,63 @@ export class JsonEditor extends BaseTool {
                     </button>
                 </div>
             </div>
+
+            <div class="flex flex-col min-[320px]:flex-row gap-2 my-4">
+                <div class="flex-1">
+                    <div class="mb-2 text-xs">
+                        Order By
+                    </div>
+                    <tool-dropdown-menu 
+                        .options=${[
+                            { value: 'default', label: 'No Change' },
+                            { value: 'key', label: 'Key' },
+                            { value: 'value', label: 'Value' }
+                        ]}
+                        .value=${this.orderBy}
+                        @change=${this.handleOrderByChange}
+                    ></tool-dropdown-menu>
+                </div>
+                <div class="flex-1">
+                    <div class="mb-2 text-xs">
+                        Sort Order
+                    </div>
+                    <tool-dropdown-menu 
+                        .options=${[
+                            { value: 'asc', label: 'Ascending' },
+                            { value: 'desc', label: 'Descending' }
+                        ]}
+                        .value=${this.sortOrder}
+                        .disabled=${this.orderBy === 'default'}
+                        @change=${this.handleSortOrderChange}
+                    ></tool-dropdown-menu>
+                </div>
+            </div>
         `;
     }
 
+    private handleOrderByChange(e: CustomEvent) {
+        this.orderBy = e.detail.value;
+        this.updateJsonOutput();
+    }
+
+    private handleSortOrderChange(e: CustomEvent) {
+        this.sortOrder = e.detail.value;
+        this.updateJsonOutput();
+    }
+
+    private updateJsonOutput() {
+        this.handleAction(this.lastAction);
+    }
+
     private handleAction(action: 'minify' | 'format') {
+        this.lastAction = action;
         (window as any).vscode.postMessage({
             type: 'update',
             toolId: 'json-editor',
             value: {
-                action: action
+                action: action,
+                orderBy: this.orderBy,
+                sortOrder: this.sortOrder
             }
         });
     }
@@ -50,8 +102,15 @@ export class JsonEditor extends BaseTool {
             const reader = new FileReader();
             reader.onload = () => {
                 try {
-                    const jsonContent = JSON.parse(reader.result as string);
-                    console.log('Valid JSON loaded:', jsonContent);
+                    (window as any).vscode.postMessage({
+                        type: 'update',
+                        toolId: 'json-editor',
+                        value: {
+                            inputText: reader.result as string
+                        }
+                    });
+
+                    setTimeout(() => this.handleAction(this.lastAction), 100);
                 } catch (error) {
                     console.error('Invalid JSON file');
                 }

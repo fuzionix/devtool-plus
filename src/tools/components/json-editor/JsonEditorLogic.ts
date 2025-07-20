@@ -1,12 +1,61 @@
-function minifyJson() {
-    if (!inputEditor || !outputEditor) return;
+function sortJsonObject(obj: any, orderBy: string, sortOrder: string): any {
+    if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+        return obj;
+    }
+
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key) && typeof obj[key] === 'object' && obj[key] !== null) {
+            obj[key] = sortJsonObject(obj[key], orderBy, sortOrder);
+        }
+    }
+
+    if (!Array.isArray(obj) && orderBy !== 'default') {
+        const sortedEntries = Object.entries(obj).sort((a, b) => {
+            // 'a' and 'b' are [key, value] pairs
+            let compareA, compareB;
+
+            if (orderBy === 'key') {
+                compareA = a[0];
+                compareB = b[0];
+            } else {
+                compareA = JSON.stringify(a[1]);
+                compareB = JSON.stringify(b[1]);
+            }
+
+            // Handle numeric values for proper comparison
+            if (!isNaN(Number(compareA)) && !isNaN(Number(compareB))) {
+                compareA = Number(compareA);
+                compareB = Number(compareB);
+            }
+
+            let result = 0;
+            if (compareA < compareB) { result = -1; }
+            if (compareA > compareB) { result = 1; }
+
+            return sortOrder === 'desc' ? -result : result;
+        });
+
+        return Object.fromEntries(sortedEntries);
+    }
+
+    return obj;
+}
+
+function minifyJson(params: any = {}) {
+    if (!inputEditor || !outputEditor) { return; }
     try {
         const inputText = inputEditor.getValue();
         if (!inputText.trim()) {
             outputEditor.setValue('');
             return;
         }
-        const jsonObj = JSON.parse(inputText);
+        
+        let jsonObj = JSON.parse(inputText);
+        
+        if (params.orderBy && params.orderBy !== 'default') {
+            jsonObj = sortJsonObject(jsonObj, params.orderBy, params.sortOrder || 'asc');
+        }
+        
         outputEditor.setValue(JSON.stringify(jsonObj));
     } catch (e: any) {
         outputEditor.setValue(e.message);
@@ -14,15 +63,21 @@ function minifyJson() {
     }
 }
 
-function formatJson() {
-    if (!inputEditor || !outputEditor) return;
+function formatJson(params: any = {}) {
+    if (!inputEditor || !outputEditor) { return; }
     try {
         const inputText = inputEditor.getValue();
         if (!inputText.trim()) {
             outputEditor.setValue('');
             return;
         }
-        const jsonObj = JSON.parse(inputText);
+        
+        let jsonObj = JSON.parse(inputText);
+        
+        if (params.orderBy && params.orderBy !== 'default') {
+            jsonObj = sortJsonObject(jsonObj, params.orderBy, params.sortOrder || 'asc');
+        }
+        
         outputEditor.setValue(JSON.stringify(jsonObj, null, 4)); // Format with 4 spaces
     } catch (e: any) {
         outputEditor.setValue(e.message);
