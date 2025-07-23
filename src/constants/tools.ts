@@ -11,6 +11,21 @@ export const TOOLS: Tool[] = [
         tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator']
     },
     {
+        id: 'data-format-convertor',
+        label: 'Data Format Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<data-format-convertor></data-format-convertor>',
+        icon: 'shapes',
+        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'data', 'structure', 'parser', 'transform', 'editor'],
+        editor: {
+            viewType: 'code',
+            language: 'json',
+            initialValue: '{\n    "message": "Paste or type your JSON here."\n}'
+        }
+
+    },
+    {
         id: 'json-editor',
         label: 'JSON Editor',
         version: '1.0.0',
