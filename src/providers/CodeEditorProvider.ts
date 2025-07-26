@@ -239,6 +239,10 @@ export class CodeEditorProvider {
                             case 'updateConfiguration':
                                 applyFontStyles(message.payload);
                                 break;
+                            case 'updateEditor':
+                                monaco.editor.setModelLanguage(inputEditor.getModel(), message.value.formatFrom || toolLanguage);
+                                monaco.editor.setModelLanguage(outputEditor.getModel(), message.value.formatTo || toolLanguage);
+                                break;
                             case 'action':
                                 if (window.toolLogic && typeof window.toolLogic[message.action] === 'function') {
                                     const { action, ...args } = message;
@@ -306,6 +310,11 @@ export class CodeEditorProvider {
                 this.panel.webview.postMessage({
                     type: 'action',
                     ...value
+                });
+            } else if (value && value.modify) {
+                this.panel.webview.postMessage({
+                    type: 'updateEditor',
+                    value: value.modify
                 });
             } else {
                 this.panel.webview.postMessage({
