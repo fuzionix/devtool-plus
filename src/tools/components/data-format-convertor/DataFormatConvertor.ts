@@ -12,6 +12,11 @@ export class DataFormatConvertor extends BaseTool {
         ${BaseTool.styles}
     `;
 
+    constructor() {
+        super();
+        this.handleFormatChange();
+    }
+
     protected renderTool() {
         return html`
             <div class="tool-inner-container">

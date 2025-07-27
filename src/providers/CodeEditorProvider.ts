@@ -135,6 +135,9 @@ export class CodeEditorProvider {
                         background-color: var(--vscode-editorGroup-border);
                     }
                 </style>
+                <!-- Additional libraries -->
+                <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/fast-xml-parser@5.2.5/lib/fxp.min.js"></script>
             </head>
             <body>
                 <div class="editor-container">

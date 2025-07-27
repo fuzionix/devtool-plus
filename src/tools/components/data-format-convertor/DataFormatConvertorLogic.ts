@@ -1,59 +1,16 @@
 interface Window {
     jsyaml: any;
-    fastXmlParser: any;
-}
-
-const loadedScripts: Record<string, Promise<void>> = {};
-let scriptsLoaded = false;
-
-function loadScript(url: string): Promise<void> {
-    if (Object.prototype.hasOwnProperty.call(loadedScripts, url)) {
-        return loadedScripts[url];
-    }
-
-    const promise = new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
-        document.head.appendChild(script);
-    });
-
-    loadedScripts[url] = promise;
-    return promise;
-}
-
-async function loadScripts() {
-    try {
-        await Promise.all([
-            loadScript('https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js'),
-            loadScript('https://cdn.jsdelivr.net/npm/fast-xml-parser@5.2.5/lib/fxp.min.js')
-        ]);
-
-        if (!window.jsyaml) {
-            throw new Error('js-yaml failed to load properly');
-        }
-        
-        if (!window.fastXmlParser) {
-            throw new Error('fast-xml-parser failed to load properly');
-        }
-        
-        scriptsLoaded = true;
-        console.log('All scripts loaded successfully');
-    } catch (error) {
-        console.error('Error loading scripts:', error);
-        throw error;
-    }
+    fxp: any;
 }
 
 function convertJsonToYaml(jsonStr: string): string {
     const jsonObj = JSON.parse(jsonStr);
-    return window.jsyaml.dump(jsonObj, { lineWidth: -1 });
+    return window.jsyaml.dump(jsonObj, { lineWidth: -1, indent: 4 });
 }
 
 function convertJsonToXml(jsonStr: string): string {
     const jsonObj = JSON.parse(jsonStr);
-    const builder = new window.fastXmlParser.XMLBuilder({
+    const builder = new window.fxp.XMLBuilder({
         format: true,
         ignoreAttributes: false,
         indentBy: '  '
@@ -63,12 +20,12 @@ function convertJsonToXml(jsonStr: string): string {
 
 function convertYamlToJson(yamlStr: string): string {
     const yamlObj = window.jsyaml.load(yamlStr);
-    return JSON.stringify(yamlObj, null, 2);
+    return JSON.stringify(yamlObj, null, 4);
 }
 
 function convertYamlToXml(yamlStr: string): string {
     const yamlObj = window.jsyaml.load(yamlStr);
-    const builder = new window.fastXmlParser.XMLBuilder({
+    const builder = new window.fxp.XMLBuilder({
         format: true,
         ignoreAttributes: false,
         indentBy: '  '
@@ -77,21 +34,21 @@ function convertYamlToXml(yamlStr: string): string {
 }
 
 function convertXmlToJson(xmlStr: string): string {
-    const parser = new window.fastXmlParser.XMLParser({
+    const parser = new window.fxp.XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: "@_"
     });
     const xmlObj = parser.parse(xmlStr);
-    return JSON.stringify(xmlObj, null, 2);
+    return JSON.stringify(xmlObj, null, 4);
 }
 
 function convertXmlToYaml(xmlStr: string): string {
-    const parser = new window.fastXmlParser.XMLParser({
+    const parser = new window.fxp.XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: "@_"
     });
     const xmlObj = parser.parse(xmlStr);
-    return window.jsyaml.dump(xmlObj, { lineWidth: -1 });
+    return window.jsyaml.dump(xmlObj, { lineWidth: -1, indent: 4 });
 }
 
 async function convert(args: { formatFrom: string, formatTo: string }) {
@@ -116,8 +73,6 @@ async function convert(args: { formatFrom: string, formatTo: string }) {
     }
 
     try {
-        await loadScripts();
-
         let result: string;
 
         // Convert based on from/to formats
@@ -152,5 +107,3 @@ async function convert(args: { formatFrom: string, formatTo: string }) {
 window.toolLogic = {
     convert
 };
-
-loadScripts().catch(e => console.error('Failed to preload scripts:', e));
