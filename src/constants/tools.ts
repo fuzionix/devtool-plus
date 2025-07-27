@@ -21,7 +21,8 @@ export const TOOLS: Tool[] = [
         editor: {
             viewType: 'code',
             language: 'json',
-            initialValue: '{\n    "message": "Paste or type your JSON here."\n}'
+            initialValue: '{\n    "message": "Paste or type your JSON here."\n}',
+            editorLogicPath: 'src/tools/components/data-format-convertor/DataFormatConvertorLogic.js'
         }
 
     },
