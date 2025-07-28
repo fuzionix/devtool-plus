@@ -12,8 +12,8 @@ export class DataFormatConvertor extends BaseTool {
         ${BaseTool.styles}
     `;
 
-    constructor() {
-        super();
+    connectedCallback() {
+        super.connectedCallback();
         this.handleFormatChange();
     }
 

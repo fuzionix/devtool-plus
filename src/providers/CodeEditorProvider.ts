@@ -7,7 +7,6 @@ export class CodeEditorProvider {
     public static readonly viewType = 'devtool-plus.codeEditorView';
     private panel?: vscode.WebviewPanel;
     private currentTool?: Tool;
-    private lastState?: any;
 
     constructor(
         private readonly extensionUri: vscode.Uri,
@@ -297,17 +296,10 @@ export class CodeEditorProvider {
                 type: 'updateTool',
                 tool: this.currentTool
             });
-            if (this.lastState) {
-                this.updateFromSidePanel(this.currentTool.id, this.lastState);
-            }
         }
     }
 
     public updateFromSidePanel(toolId: string, value: any) {
-        if (value && !value.action) {
-            this.lastState = value;
-        }
-
         if (this.panel && this.currentTool && this.currentTool.id === toolId) {
             if (value && value.action) {
                 this.panel.webview.postMessage({

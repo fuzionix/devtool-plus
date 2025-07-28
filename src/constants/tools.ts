@@ -2,76 +2,6 @@ import { Tool, ToolCategory } from '../types/tool';
 
 export const TOOLS: Tool[] = [
     {
-        id: 'uuid-generator',
-        label: 'UUID Generator',
-        version: '1.0.0',
-        category: ToolCategory.Data,
-        template: '<uuid-generator></uuid-generator>',
-        icon: 'key',
-        tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator']
-    },
-    {
-        id: 'data-format-convertor',
-        label: 'Data Format Convertor',
-        version: '1.0.0',
-        category: ToolCategory.Data,
-        template: '<data-format-convertor></data-format-convertor>',
-        icon: 'shapes',
-        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'data', 'structure', 'parser', 'transform', 'editor'],
-        editor: {
-            viewType: 'code',
-            language: 'json',
-            initialValue: '{\n    "message": "Paste or type your data here."\n}',
-            editorLogicPath: 'src/tools/components/data-format-convertor/DataFormatConvertorLogic.js'
-        }
-
-    },
-    {
-        id: 'json-editor',
-        label: 'JSON Editor',
-        version: '1.0.0',
-        category: ToolCategory.Data,
-        template: '<json-editor></json-editor>',
-        icon: 'file-json',
-        tags: ['json', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
-        editor: {
-            viewType: 'code',
-            language: 'json',
-            initialValue: '{\n    "message": "Paste or type your JSON here."\n}',
-            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
-        }
-    },
-    {
-        id: 'yaml-editor',
-        label: 'YAML Editor',
-        version: '1.0.0',
-        category: ToolCategory.Data,
-        template: '<yaml-editor></yaml-editor>',
-        icon: 'file-warning',
-        tags: ['yaml', 'yml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
-        editor: {
-            viewType: 'code',
-            language: 'yaml',
-            initialValue: 'message: Paste or type your YAML here.\n',
-            editorLogicPath: 'src/tools/components/yaml-editor/YamlEditorLogic.js'
-        }
-    },
-    {
-        id: 'html-xml-editor',
-        label: 'HTML / XML Editor',
-        version: '1.0.0',
-        category: ToolCategory.Data,
-        template: '<html-xml-editor></html-xml-editor>',
-        icon: 'file-code',
-        tags: ['html', 'xml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
-        editor: {
-            viewType: 'code',
-            language: 'html',
-            initialValue: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>HTML Example</title>\n</head>\n<body>\n    <h1>Paste or type your HTML or XML here.</h1>\n</body>\n</html>',
-            editorLogicPath: 'src/tools/components/html-xml-editor/HtmlXmlEditorLogic.js'
-        }
-    },
-    {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
         version: '1.0.0',
@@ -143,6 +73,76 @@ export const TOOLS: Tool[] = [
         template: '<color-mixer></color-mixer>',
         icon: 'blend',
         tags: ['color', 'mix', 'blend', 'combine', 'design', 'rgb', 'hsl', 'shade', 'tint']
+    },
+    {
+        id: 'uuid-generator',
+        label: 'UUID Generator',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<uuid-generator></uuid-generator>',
+        icon: 'key',
+        tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator']
+    },
+    {
+        id: 'data-format-convertor',
+        label: 'Data Format Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<data-format-convertor></data-format-convertor>',
+        icon: 'shapes',
+        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'data', 'structure', 'parser', 'transform', 'editor'],
+        editor: {
+            viewType: 'code',
+            language: 'json',
+            initialValue: '{\n    "message": "Paste or type your data here."\n}',
+            editorLogicPath: 'src/tools/components/data-format-convertor/DataFormatConvertorLogic.js'
+        }
+
+    },
+    {
+        id: 'json-editor',
+        label: 'JSON Editor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<json-editor></json-editor>',
+        icon: 'file-json',
+        tags: ['json', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        editor: {
+            viewType: 'code',
+            language: 'json',
+            initialValue: '{\n    "message": "Paste or type your JSON here."\n}',
+            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
+        }
+    },
+    {
+        id: 'yaml-editor',
+        label: 'YAML Editor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<yaml-editor></yaml-editor>',
+        icon: 'file-warning',
+        tags: ['yaml', 'yml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        editor: {
+            viewType: 'code',
+            language: 'yaml',
+            initialValue: 'message: Paste or type your YAML here.\n',
+            editorLogicPath: 'src/tools/components/yaml-editor/YamlEditorLogic.js'
+        }
+    },
+    {
+        id: 'html-xml-editor',
+        label: 'HTML / XML Editor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<html-xml-editor></html-xml-editor>',
+        icon: 'file-code',
+        tags: ['html', 'xml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        editor: {
+            viewType: 'code',
+            language: 'html',
+            initialValue: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>HTML Example</title>\n</head>\n<body>\n    <h1>Paste or type your HTML or XML here.</h1>\n</body>\n</html>',
+            editorLogicPath: 'src/tools/components/html-xml-editor/HtmlXmlEditorLogic.js'
+        }
     },
     {
         id: 'text-editor',
