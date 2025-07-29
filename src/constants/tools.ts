@@ -145,6 +145,15 @@ export const TOOLS: Tool[] = [
         }
     },
     {
+        id: 'datetime-convertor',
+        label: 'Datetime Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Data,
+        template: '<datetime-convertor></datetime-convertor>',
+        icon: 'calendar-clock',
+        tags: ['datetime', 'convert', 'format', 'timezone', 'date', 'time', 'parser'],
+    },
+    {
         id: 'text-editor',
         label: 'Text Editor',
         version: '1.0.0',

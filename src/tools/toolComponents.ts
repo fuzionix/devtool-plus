@@ -19,6 +19,7 @@ import './components/color-palette/ColorPalette';
 import './components/contrast-checker/ContrastChecker';
 import './components/cubic-bezier/CubicBezier';
 import './components/data-format-convertor/DataFormatConvertor';
+import './components/datetime-convertor/DatetimeConvertor';
 import './components/diff-checker/DiffChecker';
 import './components/gradient-maker/GradientMaker';
 import './components/html-xml-editor/HtmlXmlEditor';
