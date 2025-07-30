@@ -40,6 +40,83 @@ export class DatetimeConvertor extends BaseTool {
         this.stopTimer();
     }
 
+    static styles = css`
+        ${BaseTool.styles}
+    `;
+
+    protected renderTool() {
+        return html`
+            <div class="tool-inner-container">
+                <p class="opacity-75">Convert between different datetime formats</p>
+                <hr />
+
+                <div class="flex flex-row-reverse justify-between items-baseline text-xs">
+                    <div>
+                        <tool-inline-menu
+                            .options=${[
+                                { label: 'ISO 8601', value: 'iso' },
+                                { label: 'Timestamp (ms)', value: 'timestamp' },
+                                { label: 'UNIX (s)', value: 'unix' },
+                                { label: 'UTC', value: 'utc' },
+                                { label: 'Local', value: 'local' },
+                            ]}
+                            .value=${this.datetimeFormat}
+                            placeholder="Datetime Format"
+                            @change=${this.handleDatetimeFormatChange}
+                        ></tool-inline-menu>
+                    </div>
+                </div>
+
+                <!-- Input Field -->
+                <div class="relative flex items-center mt-1">
+                    <textarea
+                        id="input"
+                        class="input-expandable"
+                        placeholder="Enter datetime"
+                        rows="1"
+                        .value=${this.input}
+                        @input=${this.handleInput}
+                        @focus=${this.handleFocus}
+                        @blur=${this.handleBlur}
+                    ></textarea>
+                    <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
+                        <tool-tooltip text="Now">
+                            <button class="btn-icon" @click=${this.setNow}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </button>
+                        </tool-tooltip>
+                        <tool-tooltip text="Clear">
+                            <button class="btn-icon" id="clear" @click=${this.clearAll}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </tool-tooltip>
+                    </div>
+                </div>
+                ${this.alert ? html`
+                    <tool-alert
+                        .type=${this.alert.type}
+                        .message=${this.alert.message}
+                    ></tool-alert>
+                ` : ''}
+                
+                <!-- Arrow Divider -->
+                <div class="flex justify-center my-2 opacity-75">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                </div>
+                
+                <!-- Format outputs -->
+                <div>
+                    ${this.renderFormatRow('iso', 'ISO')}
+                    ${this.renderFormatRow('timestamp', 'MS')}
+                    ${this.renderFormatRow('unix', 'UNIX')}
+                    ${this.renderFormatRow('utc', 'UTC')}
+                    ${this.renderFormatRow('local', 'Local')}
+                    ${this.renderFormatRow('relative', 'Relative')}
+                </div>
+            </div>
+        `;
+    }
+
     private startTimer() {
         if (!this.updateTimer) {
             this.updateTimer = window.setInterval(() => {
@@ -61,6 +138,10 @@ export class DatetimeConvertor extends BaseTool {
         this.currentDate = new Date();
         this.updateFormats(this.currentDate);
         this.input = this.formatDateBySelection(this.currentDate);
+    }
+
+    private setNow() {
+        this.updateCurrentTime();
     }
 
     private formatDateBySelection(date: Date): string {
@@ -181,78 +262,6 @@ export class DatetimeConvertor extends BaseTool {
         } catch (e) {}
         
         return null;
-    }
-
-    static styles = css`
-        ${BaseTool.styles}
-    `;
-
-    protected renderTool() {
-        return html`
-            <div class="tool-inner-container">
-                <p class="opacity-75">Convert between different datetime formats</p>
-                <hr />
-
-                <div class="flex flex-row-reverse justify-between items-baseline mb-2 text-xs">
-                    <div>
-                        <tool-inline-menu
-                            .options=${[
-                                { label: 'ISO 8601', value: 'iso' },
-                                { label: 'Timestamp (ms)', value: 'timestamp' },
-                                { label: 'UNIX (s)', value: 'unix' },
-                                { label: 'UTC', value: 'utc' },
-                                { label: 'Local', value: 'local' },
-                            ]}
-                            .value=${this.datetimeFormat}
-                            placeholder="Datetime Format"
-                            @change=${this.handleDatetimeFormatChange}
-                        ></tool-inline-menu>
-                    </div>
-                </div>
-
-                <!-- Input Field -->
-                <div class="relative flex items-center mt-2">
-                    <textarea
-                        id="input"
-                        class="input-expandable"
-                        placeholder="Enter datetime"
-                        rows="1"
-                        .value=${this.input}
-                        @input=${this.handleInput}
-                        @focus=${this.handleFocus}
-                        @blur=${this.handleBlur}
-                    ></textarea>
-                    <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <tool-tooltip text="Clear">
-                            <button class="btn-icon" id="clear" @click=${this.clearAll}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                            </button>
-                        </tool-tooltip>
-                    </div>
-                </div>
-                ${this.alert ? html`
-                    <tool-alert
-                        .type=${this.alert.type}
-                        .message=${this.alert.message}
-                    ></tool-alert>
-                ` : ''}
-                
-                <!-- Arrow Divider -->
-                <div class="flex justify-center my-2 opacity-75">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-                </div>
-                
-                <!-- Format outputs -->
-                <div>
-                    ${this.renderFormatRow('iso', 'ISO')}
-                    ${this.renderFormatRow('timestamp', 'MS')}
-                    ${this.renderFormatRow('unix', 'UNIX')}
-                    ${this.renderFormatRow('utc', 'UTC')}
-                    ${this.renderFormatRow('local', 'Local')}
-                    ${this.renderFormatRow('relative', 'Relative')}
-                </div>
-            </div>
-        `;
     }
 
     private handleInput(event: Event): void {
