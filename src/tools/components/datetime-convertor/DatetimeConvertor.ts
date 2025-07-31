@@ -28,7 +28,7 @@ export class DatetimeConvertor extends BaseTool {
     @state() private datetimeFormat = 'iso';
     @state() private copiedFormat: string | null = null;
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
-    @state() private inputFocused = false;
+    @state() private autoUpdateActive = true;
 
     private updateTimer: number | null = null;
     private currentDate: Date | null = null;
@@ -58,14 +58,14 @@ export class DatetimeConvertor extends BaseTool {
                     <div>
                         <tool-inline-menu
                             .options=${[
-                { label: 'ISO 8601', value: 'iso' },
-                { label: 'Timestamp (ms)', value: 'timestamp' },
-                { label: 'UNIX (s)', value: 'unix' },
-                { label: 'UTC', value: 'utc' },
-                { label: 'Local', value: 'local' },
-                { label: 'RFC 2822', value: 'rfc2822' },
-                { label: 'SQL', value: 'sql' },
-            ]}
+                                { label: 'ISO 8601', value: 'iso' },
+                                { label: 'Timestamp (ms)', value: 'timestamp' },
+                                { label: 'UNIX (s)', value: 'unix' },
+                                { label: 'UTC', value: 'utc' },
+                                { label: 'Local', value: 'local' },
+                                { label: 'RFC 2822', value: 'rfc2822' },
+                                { label: 'SQL', value: 'sql' },
+                            ]}
                             .value=${this.datetimeFormat}
                             placeholder="Datetime Format"
                             @change=${this.handleDatetimeFormatChange}
@@ -83,12 +83,16 @@ export class DatetimeConvertor extends BaseTool {
                         .value=${this.input}
                         @input=${this.handleInput}
                         @focus=${this.handleFocus}
-                        @blur=${this.handleBlur}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <tool-tooltip text="Now">
-                            <button class="btn-icon" @click=${this.setNow}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <tool-tooltip text="${this.autoUpdateActive ? 'Pause' : 'Now'}">
+                            <button class="btn-icon" @click=${this.toggleAutoUpdate}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                                    stroke="${this.autoUpdateActive ? 'currentColor' : '#e74c3c'}" 
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
                             </button>
                         </tool-tooltip>
                         <tool-tooltip text="Clear">
@@ -128,7 +132,7 @@ export class DatetimeConvertor extends BaseTool {
     private startTimer() {
         if (!this.updateTimer) {
             this.updateTimer = window.setInterval(() => {
-                if (!this.inputFocused) {
+                if (this.autoUpdateActive) {
                     this.updateCurrentTime();
                 }
             }, 75);
@@ -148,8 +152,13 @@ export class DatetimeConvertor extends BaseTool {
         this.input = this.formatDateBySelection(this.currentDate);
     }
 
-    private setNow() {
-        this.updateCurrentTime();
+    private toggleAutoUpdate() {
+        this.autoUpdateActive = !this.autoUpdateActive;
+        
+        // If we're turning auto-update back on, immediately update the time
+        if (this.autoUpdateActive) {
+            this.updateCurrentTime();
+        }
     }
 
     private formatDateBySelection(date: Date): string {
@@ -300,11 +309,7 @@ export class DatetimeConvertor extends BaseTool {
     }
 
     private handleFocus(): void {
-        this.inputFocused = true;
-    }
-
-    private handleBlur(): void {
-        this.inputFocused = false;
+        this.autoUpdateActive = false;
     }
 
     private handleDatetimeFormatChange(event: CustomEvent): void {
