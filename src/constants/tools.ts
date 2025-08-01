@@ -17,7 +17,16 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<url-encoder></url-encoder>',
         icon: 'link-2',
-        tags: ['url', 'uri', 'encode', 'decode', 'percent-encoding', 'web', 'query']
+        tags: ['url', 'uri', 'encode', 'decode', 'percent-encoding', 'web', 'query', 'parameter']
+    },
+    {
+        id: 'url-parser',
+        label: 'URL Parser',
+        version: '1.0.0',
+        category: ToolCategory.Encode,
+        template: '<url-parser></url-parser>',
+        icon: 'link',
+        tags: ['url', 'uri', 'parse', 'query', 'parameter', 'web', 'extract', 'structure']
     },
     {
         id: 'color-convertor',
@@ -26,7 +35,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<color-convertor></color-convertor>',
         icon: 'paintbrush-vertical',
-        tags: ['color', 'hex', 'rgb', 'hsl', 'convert', 'css', 'design', 'format']
+        tags: ['color', 'hex', 'rgb', 'hsl', 'convert', 'css', 'design', 'format', 'palette', 'picker']
     },
     {
         id: 'color-palette',
@@ -36,7 +45,7 @@ export const TOOLS: Tool[] = [
         template: '<color-palette></color-palette>',
         icon: 'swatch-book',
         isNew: true,
-        tags: ['color', 'palette', 'scheme', 'design', 'ui', 'theme', 'generator', 'harmony']
+        tags: ['color', 'palette', 'scheme', 'design', 'ui', 'theme', 'generator', 'harmony', 'complementary', 'analogous', 'triadic']
     },
     {
         id: 'gradient-maker',
@@ -45,7 +54,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<gradient-maker></gradient-maker>',
         icon: 'rainbow',
-        tags: ['gradient', 'css', 'linear', 'radial', 'design', 'background', 'color', 'transition']
+        tags: ['gradient', 'css', 'linear', 'radial', 'design', 'background', 'color', 'transition', 'blend', 'style']
     },
     {
         id: 'cubic-bezier',
@@ -54,7 +63,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<cubic-bezier></cubic-bezier>',
         icon: 'tangent',
-        tags: ['bezier', 'animation', 'easing', 'curve', 'timing', 'css', 'transition', 'motion']
+        tags: ['bezier', 'animation', 'easing', 'curve', 'timing', 'css', 'transition', 'motion', 'design', 'interactive']
     },
     {
         id: 'contrast-checker',
@@ -63,7 +72,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<contrast-checker></contrast-checker>',
         icon: 'contrast',
-        tags: ['contrast', 'accessibility', 'a11y', 'wcag', 'color', 'ratio', 'readability', 'visibility']
+        tags: ['contrast', 'accessibility', 'a11y', 'wcag', 'color', 'ratio', 'readability', 'visibility', 'design', 'checker', 'compliance']
     },
     {
         id: 'color-mixer',
@@ -72,7 +81,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<color-mixer></color-mixer>',
         icon: 'blend',
-        tags: ['color', 'mix', 'blend', 'combine', 'design', 'rgb', 'hsl', 'shade', 'tint']
+        tags: ['color', 'mix', 'blend', 'combine', 'design', 'rgb', 'hsl', 'shade', 'tint', 'tone', 'saturation', 'hue']
     },
     {
         id: 'uuid-generator',
@@ -81,7 +90,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<uuid-generator></uuid-generator>',
         icon: 'key',
-        tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator']
+        tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator', 'unique'],
     },
     {
         id: 'data-format-convertor',
@@ -106,7 +115,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<json-editor></json-editor>',
         icon: 'file-json',
-        tags: ['json', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        tags: ['json', 'format', 'validate', 'data', 'structure', 'editor', 'parse', 'object', 'array'],
         editor: {
             viewType: 'code',
             language: 'json',
@@ -121,7 +130,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<yaml-editor></yaml-editor>',
         icon: 'file-warning',
-        tags: ['yaml', 'yml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        tags: ['yaml', 'yml', 'format', 'validate', 'data', 'structure', 'editor', 'parse', 'configuration'],
         editor: {
             viewType: 'code',
             language: 'yaml',
@@ -136,7 +145,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<html-xml-editor></html-xml-editor>',
         icon: 'file-code',
-        tags: ['html', 'xml', 'format', 'validate', 'data', 'structure', 'editor', 'parse'],
+        tags: ['html', 'xml', 'format', 'validate', 'data', 'structure', 'editor', 'parse', 'markup'],
         editor: {
             viewType: 'code',
             language: 'html',
@@ -151,7 +160,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Data,
         template: '<datetime-convertor></datetime-convertor>',
         icon: 'calendar-clock',
-        tags: ['datetime', 'convert', 'format', 'timezone', 'date', 'time', 'parser'],
+        tags: ['datetime', 'convert', 'format', 'timezone', 'date', 'time', 'parser', 'relative', 'iso'],
     },
     {
         id: 'text-editor',
@@ -160,7 +169,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<text-editor></text-editor>',
         icon: 'type',
-        tags: ['text', 'editor', 'document', 'plain', 'edit', 'format', 'content'],
+        tags: ['text', 'editor', 'document', 'plain', 'edit', 'format', 'content', 'write', 'notes'],
         editor: {
             viewType: 'simple',
             editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
@@ -173,7 +182,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<diff-checker></diff-checker>',
         icon: 'file-diff',
-        tags: ['diff', 'compare', 'text', 'difference', 'changes', 'comparison', 'version'],
+        tags: ['diff', 'compare', 'text', 'difference', 'changes', 'comparison', 'version', 'editor'],
         editor: {
             viewType: 'diff',
             language: 'plaintext'
@@ -205,7 +214,7 @@ export const TOOLS: Tool[] = [
         template: '<password-generator></password-generator>',
         icon: 'asterisk',
         isNew: true,
-        tags: ['password', 'security', 'random', 'generator', 'strong', 'credentials', 'secret']
+        tags: ['password', 'security', 'random', 'generator', 'strong', 'credentials', 'secret', 'authentication']
     },
     {
         id: 'aes-encryption',
@@ -214,7 +223,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<aes-encryption></aes-encryption>',
         icon: 'lock-keyhole',
-        tags: ['aes', 'encryption', 'decryption', 'security', 'cipher', 'symmetric', 'cryptography']
+        tags: ['aes', 'encryption', 'decryption', 'security', 'cipher', 'symmetric', 'cryptography', 'key', 'algorithm', 'data', 'protection']
     },
     {
         id: 'sha-hashing',
@@ -223,7 +232,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<sha-hashing></sha-hashing>',
         icon: 'hash',
-        tags: ['sha', 'hash', 'sha256', 'sha512', 'digest', 'checksum', 'fingerprint']
+        tags: ['sha', 'hash', 'sha256', 'sha512', 'digest', 'checksum', 'fingerprint', 'security', 'cryptography', 'data', 'integrity']
     },
     {
         id: 'rsa-key-generator',

@@ -51,7 +51,7 @@ export class DatetimeConvertor extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert between different datetime formats</p>
+                <p class="opacity-75">Convert between different datetime formats.</p>
                 <hr />
 
                 <div class="flex flex-row-reverse justify-between items-baseline text-xs">
@@ -205,38 +205,53 @@ export class DatetimeConvertor extends BaseTool {
 
     private getRelativeTimeString(date: Date): string {
         const now = new Date();
-        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+        const diffInSeconds = Math.floor((date.getTime() - now.getTime()) / 1000);
+        const isPast = diffInSeconds < 0;
+        
+        const absDiffInSeconds = Math.abs(diffInSeconds);
 
-        if (diffInSeconds < 0) {
-            return 'in the future';
+        if (absDiffInSeconds < 5) {
+            return `just now`;
         }
 
-        if (diffInSeconds < 60) {
-            return `${diffInSeconds} seconds ago`;
+        if (absDiffInSeconds < 60) {
+            return isPast
+                ? `${absDiffInSeconds} seconds ago`
+                : `${absDiffInSeconds} seconds from now`;
         }
 
-        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        const diffInMinutes = Math.floor(absDiffInSeconds / 60);
         if (diffInMinutes < 60) {
-            return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+            return isPast
+                ? `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`
+                : `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} from now`;
         }
 
         const diffInHours = Math.floor(diffInMinutes / 60);
         if (diffInHours < 24) {
-            return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+            return isPast
+                ? `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`
+                : `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} from now`;
         }
 
         const diffInDays = Math.floor(diffInHours / 24);
         if (diffInDays < 30) {
-            return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+            return isPast
+                ? `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`
+                : `${diffInDays} day${diffInDays !== 1 ? 's' : ''} from now`;
         }
 
         const diffInMonths = Math.floor(diffInDays / 30);
         if (diffInMonths < 12) {
-            return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
+            return isPast
+                ? `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`
+                : `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} from now`;
         }
 
         const diffInYears = Math.floor(diffInMonths / 12);
-        return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
+        return isPast
+            ? `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`
+            : `${diffInYears} year${diffInYears !== 1 ? 's' : ''} from now`;
     }
 
     private clearErrors() {
@@ -374,9 +389,9 @@ export class DatetimeConvertor extends BaseTool {
                         title="Copy to clipboard"
                     >
                         ${isCopied
-                ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check" > <path d="M18 6 7 17l-5-5"></path> <path d="m22 10-7.5 7.5L13 16"></path> </svg>`
-                : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" > <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path> </svg>`
-            }
+                            ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check" > <path d="M18 6 7 17l-5-5"></path> <path d="m22 10-7.5 7.5L13 16"></path> </svg>`
+                            : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" > <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path> </svg>`
+                        }
                     </button>
                 </div>
                 ${hasError ? html`<tool-alert type="error" message="${this.errors[format]}"></tool-alert>` : ''}

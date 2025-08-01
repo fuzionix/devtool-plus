@@ -34,6 +34,7 @@ import './components/rsa-key-generator/RsaKeyGenerator';
 import './components/sha-hashing/ShaHashing';
 import './components/signature-verifier/SignatureVerifier';
 import './components/url-encoder/UrlEncoder';
+import './components/url-parser/UrlParser';
 import './components/uuid-generator/UuidGenerator';
 import './components/yaml-editor/YamlEditor';
 
