@@ -25,7 +25,7 @@ export class DatetimeConvertor extends BaseTool {
         rfc2822: '',
         sql: '',
     };
-    @state() private datetimeFormat = 'iso';
+    @state() private datetimeFormat = 'local';
     @state() private copiedFormat: string | null = null;
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private autoUpdateActive = true;
@@ -210,8 +210,8 @@ export class DatetimeConvertor extends BaseTool {
         
         const absDiffInSeconds = Math.abs(diffInSeconds);
 
-        if (absDiffInSeconds < 5) {
-            return `just now`;
+        if (absDiffInSeconds < 2) {
+            return `Now`;
         }
 
         if (absDiffInSeconds < 60) {
