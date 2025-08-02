@@ -7,6 +7,7 @@ import {
 
 @customElement('jwt-inspector')
 export class JwtInspector extends BaseTool {
+    @state() private selectedMode: 'encode' | 'decode' = 'encode';
     @state() private input = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
 
@@ -27,11 +28,39 @@ export class JwtInspector extends BaseTool {
                 <p class="opacity-75">Your description here.</p>
                 <hr />
 
+                <!-- Radio Group -->
+                <div class="">
+                    <div class="radio-group" role="radiogroup" aria-label="URL Encoding Mode">
+                        <button 
+                            role="radio"
+                            aria-checked=${this.selectedMode === 'encode' ? 'true' : 'false'}
+                            class="radio-group-button flex justify-center items-center"
+                            @click=${() => this.handleModeChange('encode')}
+                        >
+                            <span class="text-xs opacity-75 mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-asterisk-icon lucide-square-asterisk"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="m8.5 14 7-4"/><path d="m8.5 10 7 4"/></svg>
+                            </span>
+                            <h4>Encode</h4>
+                        </button>
+                        <button 
+                            role="radio"
+                            aria-checked=${this.selectedMode === 'decode' ? 'true' : 'false'}
+                            class="radio-group-button flex justify-center items-center"
+                            @click=${() => this.handleModeChange('decode')}
+                        >
+                            <span class="text-xs opacity-75 mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-braces-icon lucide-braces"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></svg>
+                            </span>
+                            <h4>Decode</h4>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Input Field -->
                 <div class="relative flex items-center mt-2">
                     <textarea
                         id="input"
-                        class="input-expandable"
+                        class="input-expandable font-mono"
                         placeholder="Enter JWT"
                         rows="1"
                         .value=${this.input}
@@ -64,6 +93,10 @@ export class JwtInspector extends BaseTool {
         const target = event.target as HTMLTextAreaElement;
         this.input = target.value;
         adjustTextareaHeight(this.inputArea);
+    }
+
+    private handleModeChange(mode: 'encode' | 'decode') {
+        this.selectedMode = mode;
     }
 
     private clearAll(): void {
