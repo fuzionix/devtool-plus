@@ -89,7 +89,7 @@ export const TOOLS: Tool[] = [
         version: '1.0.0',
         category: ToolCategory.Data,
         template: '<uuid-generator></uuid-generator>',
-        icon: 'key',
+        icon: 'rectangle-ellipsis',
         tags: ['uuid', 'guid', 'id', 'identifier', 'random', 'generator', 'unique'],
     },
     {
@@ -215,6 +215,15 @@ export const TOOLS: Tool[] = [
         icon: 'asterisk',
         isNew: true,
         tags: ['password', 'security', 'random', 'generator', 'strong', 'credentials', 'secret', 'authentication']
+    },
+    {
+        id: 'jwt-inspector',
+        label: 'JWT Inspector',
+        version: '1.0.0',
+        category: ToolCategory.Cryptography,
+        template: '<jwt-inspector></jwt-inspector>',
+        icon: 'shield-check',
+        tags: ['jwt', 'token', 'inspect', 'decode', 'security', 'authentication', 'authorization', 'header', 'payload', 'signature']
     },
     {
         id: 'aes-encryption',

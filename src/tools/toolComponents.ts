@@ -26,6 +26,7 @@ import './components/html-xml-editor/HtmlXmlEditor';
 import './components/text-editor/TextEditor';
 import './components/text-editor/TextEditorEditor';
 import './components/json-editor/JsonEditor';
+import './components/jwt-inspector/JwtInspector';
 import './components/password-generator/PasswordGenerator';
 import './components/qr-code-generator/QrCodeGenerator';
 import './components/token-generator/TokenGenerator';
