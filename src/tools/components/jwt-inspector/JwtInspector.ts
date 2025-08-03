@@ -7,12 +7,12 @@ import {
 
 @customElement('jwt-inspector')
 export class JwtInspector extends BaseTool {
-    @state() private input = '';
-    @state() private secretKey = '';
+    @state() private input = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.nahptzfdNj2PE6KIyD_ZcqvtbFzvpuMjBaLzZm_aUoU';
+    @state() private secretKey = 'this-is-a-json-web-token-secret-key';
     @state() private secretEncoding: 'utf-8' | 'base64' = 'utf-8';
-    @state() private isVerified = false;
     @state() private alertInput: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private alertSecretKey: { type: 'error' | 'warning'; message: string } | null = null;
+    @state() private verificationStatus: 'none' | 'verified' | 'invalid' | 'processing' = 'none';
     
     @state() private header: Record<string, any> = {};
     @state() private payload: Record<string, any> = {};
@@ -22,6 +22,11 @@ export class JwtInspector extends BaseTool {
 
     constructor() {
         super();
+    }
+
+    async connectedCallback() {
+        super.connectedCallback();
+        await this.decodeJwt();
     }
 
     static styles = css`
@@ -73,18 +78,14 @@ export class JwtInspector extends BaseTool {
                         id="input"
                         class="input-expandable font-mono"
                         placeholder="Enter JWT token"
-                        rows="1"
+                        rows="3"
                         .value=${this.input}
                         @input=${this.handleInput}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <tool-tooltip text="${this.isVerified ? 'Verified' : 'Invalid'}">
+                        <tool-tooltip text="${this.getVerificationStatusText()}">
                             <button class="btn-icon">
-                                ${this.isVerified ? html`
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a754" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
-                                ` : html`
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-x"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
-                                `}
+                                ${this.renderVerificationIcon()}
                             </button>
                         </tool-tooltip>
                         <tool-tooltip text="Clear">
@@ -126,13 +127,9 @@ export class JwtInspector extends BaseTool {
                         @input=${this.handleInputSecretKey}
                     ></textarea>
                     <div class="absolute right-0 top-0.5 pr-0.5 flex justify-items-center">
-                        <tool-tooltip text="${this.isVerified ? 'Verified' : 'Invalid'}">
+                        <tool-tooltip text="${this.getVerificationStatusText()}">
                             <button class="btn-icon">
-                                ${this.isVerified ? html`
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a754" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
-                                ` : html`
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-x"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
-                                `}
+                                ${this.renderVerificationIcon()}
                             </button>
                         </tool-tooltip>
                         <tool-tooltip text="Clear">
@@ -152,6 +149,36 @@ export class JwtInspector extends BaseTool {
                 ${this.renderJwtContent()}
             </div>
         `;
+    }
+
+    private renderVerificationIcon() {
+        switch (this.verificationStatus) {
+            case 'verified':
+                return html`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a754" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                `;
+            case 'invalid':
+                return html`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-x"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+                `;
+            case 'processing':
+                return html`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-question-mark-icon lucide-badge-question-mark"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                `;
+            default:
+                return html`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-question-mark-icon lucide-badge-question-mark"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                `;
+        }
+    }
+
+    private getVerificationStatusText() {
+        switch (this.verificationStatus) {
+            case 'verified': return 'Signature Verified';
+            case 'invalid': return 'Invalid Signature';
+            case 'processing': return 'Verifying...';
+            default: return 'Not Verified';
+        }
     }
 
     private renderJwtContent() {
@@ -230,23 +257,23 @@ export class JwtInspector extends BaseTool {
         `;
     }
 
-    private handleInput(event: Event): void {
+    private async handleInput(event: Event): Promise<void> {
         const target = event.target as HTMLTextAreaElement;
         this.input = target.value;
         adjustTextareaHeight(target);
-        this.decodeJwt();
+        await this.decodeJwt();
     }
 
-    private handleInputSecretKey(event: Event): void {
+    private async handleInputSecretKey(event: Event): Promise<void> {
         const target = event.target as HTMLTextAreaElement;
         this.secretKey = target.value;
         adjustTextareaHeight(target);
-        this.verifyJwt();
+        await this.verifyJwt();
     }
 
-    private handleSecretEncodingChange(event: CustomEvent): void {
+    private async handleSecretEncodingChange(event: CustomEvent): Promise<void> {
         this.secretEncoding = event.detail.value;
-        this.verifyJwt();
+        await this.verifyJwt();
     }
 
     private clearInput(): void {
@@ -254,7 +281,7 @@ export class JwtInspector extends BaseTool {
         this.header = {};
         this.payload = {};
         this.alertInput = null;
-        this.isVerified = false;
+        this.verificationStatus = 'none';
         
         const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
         if (inputTextarea) {
@@ -267,7 +294,7 @@ export class JwtInspector extends BaseTool {
     private clearSecretKey(): void {
         this.secretKey = '';
         this.alertSecretKey = null;
-        this.isVerified = false;
+        this.verificationStatus = 'none';
         
         const secretKeyTextarea = this.querySelector('#secretKey') as HTMLTextAreaElement;
         if (secretKeyTextarea) {
@@ -277,12 +304,12 @@ export class JwtInspector extends BaseTool {
         this.requestUpdate();
     }
 
-    private decodeJwt(): void {
+    private async decodeJwt(): Promise<void> {
         if (!this.input) {
             this.header = {};
             this.payload = {};
             this.alertInput = null;
-            this.isVerified = false;
+            this.verificationStatus = 'none';
             return;
         }
 
@@ -290,6 +317,7 @@ export class JwtInspector extends BaseTool {
             const parts = this.input.split('.');
             if (parts.length !== 3) {
                 this.alertInput = { type: 'error', message: 'Invalid JWT format. Expected three parts separated by dots.' };
+                this.verificationStatus = 'invalid';
                 return;
             }
 
@@ -305,34 +333,130 @@ export class JwtInspector extends BaseTool {
                 this.alertInput = null;
             } catch (e) {
                 this.alertInput = { type: 'error', message: 'Failed to decode JWT parts: ' + (e as Error).message };
+                this.verificationStatus = 'invalid';
+                return;
             }
 
-            this.verifyJwt();
+            await this.verifyJwt();
         } catch (e) {
             this.alertInput = { type: 'error', message: 'Error decoding JWT: ' + (e as Error).message };
+            this.verificationStatus = 'invalid';
         }
     }
 
-    private verifyJwt(): void {
+    private async verifyJwt(): Promise<void> {
         if (!this.input || !this.secretKey) {
-            this.isVerified = false;
+            this.verificationStatus = 'none';
+            this.alertSecretKey = null;
             return;
         }
 
         try {
-            // Simulate verification result (in real implementation, this would check the signature)
-            // For demonstration, we'll just check if the secret key length is more than 8 characters
-            this.isVerified = this.secretKey.length >= 8;
+            this.verificationStatus = 'processing';
+            this.alertSecretKey = null;
             
+            const parts = this.input.split('.');
+            if (parts.length !== 3) {
+                this.alertInput = { type: 'error', message: 'Invalid JWT format. Expected three parts separated by dots.' };
+                this.verificationStatus = 'invalid';
+                return;
+            }
+
+            const [headerB64, payloadB64, signatureB64] = parts;
+            const data = `${headerB64}.${payloadB64}`;
+            const signature = this.base64UrlToArrayBuffer(signatureB64);
+
+            const alg = this.header.alg;
+            if (!alg) {
+                this.alertSecretKey = { type: 'error', message: 'No algorithm specified in JWT header' };
+                this.verificationStatus = 'invalid';
+                return;
+            }
+
+            const cryptoAlg = this.getWebCryptoAlgorithm(alg);
+            if (!cryptoAlg) {
+                this.alertSecretKey = { type: 'error', message: `Unsupported algorithm: ${alg}` };
+                this.verificationStatus = 'invalid';
+                return;
+            }
+
+            let keyData: ArrayBuffer;
+            if (this.secretEncoding === 'base64') {
+                keyData = this.base64ToArrayBuffer(this.secretKey);
+            } else {
+                keyData = new TextEncoder().encode(this.secretKey).buffer;
+            }
+
+            const key = await window.crypto.subtle.importKey(
+                'raw',
+                keyData,
+                cryptoAlg,
+                false,
+                ['verify']
+            );
+
+            const dataToVerify = new TextEncoder().encode(data);
+
+            const isValid = await window.crypto.subtle.verify(
+                cryptoAlg,
+                key,
+                signature,
+                dataToVerify
+            );
+
+            this.verificationStatus = isValid ? 'verified' : 'invalid';
+            this.alertSecretKey = isValid 
+                ? null 
+                : { type: 'error', message: 'Invalid signature' };
         } catch (e) {
-            this.isVerified = false;
+            this.verificationStatus = 'invalid';
             this.alertSecretKey = { type: 'error', message: 'Error verifying signature: ' + (e as Error).message };
         }
     }
 
+    private getWebCryptoAlgorithm(jwtAlg: string): HmacImportParams | EcKeyImportParams | RsaHashedImportParams | null {
+        switch (jwtAlg) {
+            case 'HS256':
+                return { name: 'HMAC', hash: 'SHA-256' };
+            case 'HS384':
+                return { name: 'HMAC', hash: 'SHA-384' };
+            case 'HS512':
+                return { name: 'HMAC', hash: 'SHA-512' };
+            default:
+                return null;
+        }
+    }
+
+    private base64UrlToArrayBuffer(base64Url: string): ArrayBuffer {
+        const base64 = this.padBase64(base64Url);
+        const binaryString = atob(base64);
+        
+        // Convert binary string to ArrayBuffer
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        return bytes.buffer;
+    }
+
+    private base64ToArrayBuffer(base64: string): ArrayBuffer {
+        const binaryString = atob(base64);
+        
+        // Convert binary string to ArrayBuffer
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        return bytes.buffer;
+    }
+
     private padBase64(base64: string): string {
         // Add padding to base64 if needed
+        // Replace URL safe characters with standard Base64 characters
         base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+        
         switch (base64.length % 4) {
             case 0:
                 return base64;
