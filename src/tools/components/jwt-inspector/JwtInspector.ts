@@ -9,7 +9,12 @@ import {
 export class JwtInspector extends BaseTool {
     @state() private input = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.nahptzfdNj2PE6KIyD_ZcqvtbFzvpuMjBaLzZm_aUoU';
     @state() private secretKey = 'this-is-a-json-web-token-secret-key';
-    @state() private secretEncoding: 'utf-8' | 'base64' = 'utf-8';
+    @state() private secretEncoding: 'utf-8' | 'base64' | 'pem' = 'utf-8';
+    @state() private encodingOptions: Array<{ label: string; value: string }> = [
+        { label: 'UTF-8', value: 'utf-8' },
+        { label: 'Base64', value: 'base64' },
+        { label: 'PEM', value: 'pem' }
+    ];
     @state() private alertInput: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private alertSecretKey: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private verificationStatus: 'none' | 'verified' | 'invalid' | 'processing' = 'none';
@@ -73,7 +78,7 @@ export class JwtInspector extends BaseTool {
                 <div class="flex justify-between items-baseline mb-2 text-xs">
                     <p class="mb-0 text-xs">JSON Web Token (JWT)</p>
                 </div>
-                <div class="relative flex items-center mt-2">
+                <div class="relative mt-2">
                     <textarea
                         id="input"
                         class="input-expandable font-mono"
@@ -102,26 +107,23 @@ export class JwtInspector extends BaseTool {
                     ></tool-alert>
                 ` : ''}
 
-                <!-- Secret Key -->
+                <!-- Secret / Public Key -->
                 <div class="flex justify-between items-baseline mb-2 text-xs mt-4">
-                    <p class="mb-0 text-xs">Secret</p>
+                    <p class="mb-0 text-xs">${this.getAlgorithmType() === 'asymmetric' ? 'Public Key' : 'Secret'}</p>
                     <div>
                         <tool-inline-menu
-                            .options=${[
-                                { label: 'UTF-8', value: 'utf-8' },
-                                { label: 'Base64', value: 'base64' }
-                            ]}
+                            .options=${this.encodingOptions}
                             .value=${this.secretEncoding}
                             placeholder="Input Encoding"
                             @change=${this.handleSecretEncodingChange}
                         ></tool-inline-menu>
                     </div>
                 </div>
-                <div class="relative flex items-center mt-2">
+                <div class="relative mt-2">
                     <textarea
                         id="secretKey"
                         class="input-expandable font-mono"
-                        placeholder="Enter Secret Key"
+                        placeholder="Enter Secret Key${this.getAlgorithmType() === 'asymmetric' ? ' or Public Key' : ''}"
                         rows="1"
                         .value=${this.secretKey}
                         @input=${this.handleInputSecretKey}
@@ -145,10 +147,40 @@ export class JwtInspector extends BaseTool {
                         .message=${this.alertSecretKey.message}
                     ></tool-alert>
                 ` : ''}
-
+                
+                ${this.updateEncodingOptions()}
                 ${this.renderJwtContent()}
             </div>
         `;
+    }
+
+    private updateEncodingOptions() {
+        const algType = this.getAlgorithmType();
+        if (algType === 'symmetric') {
+            this.encodingOptions = [
+                { label: 'UTF-8', value: 'utf-8' },
+                { label: 'Base64', value: 'base64' }
+            ];
+            if (this.secretEncoding === 'pem') { this.secretEncoding = 'utf-8'; }
+        } else if (algType === 'asymmetric') {
+            this.encodingOptions = [
+                { label: 'PEM', value: 'pem' }
+            ];
+            if (this.secretEncoding !== 'pem') { this.secretEncoding = 'pem'; }
+        }
+    }
+
+    private getAlgorithmType(): 'symmetric' | 'asymmetric' | 'unknown' {
+        const alg = this.header.alg;
+        if (!alg) { return 'unknown'; }
+        
+        if (alg.startsWith('HS')) {
+            return 'symmetric';
+        } else if (alg.startsWith('RS') || alg.startsWith('PS') || alg.startsWith('ES')) {
+            return 'asymmetric';
+        }
+        
+        return 'unknown';
     }
 
     private renderVerificationIcon() {
@@ -174,7 +206,7 @@ export class JwtInspector extends BaseTool {
 
     private getVerificationStatusText() {
         switch (this.verificationStatus) {
-            case 'verified': return 'Signature Verified';
+            case 'verified': return 'Verified';
             case 'invalid': return 'Invalid Signature';
             case 'processing': return 'Verifying...';
             default: return 'Not Verified';
@@ -194,8 +226,8 @@ export class JwtInspector extends BaseTool {
         
         return html`
             <div class="jwt-section">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex justify-between items-baseline text-xs">
+                <div class="mb-2">
+                    <div class="text-xs">
                         <p class="mb-0 text-xs">Header</p>
                     </div>
                 </div>
@@ -223,8 +255,8 @@ export class JwtInspector extends BaseTool {
         
         return html`
             <div class="jwt-section">
-                <div class="flex justify-between items-baseline mb-2">
-                    <div class="flex justify-between items-baseline text-xs">
+                <div class="mb-2">
+                    <div class="text-xs">
                         <p class="mb-0 text-xs">Payload</p>
                     </div>
                 </div>
@@ -380,20 +412,52 @@ export class JwtInspector extends BaseTool {
                 return;
             }
 
-            let keyData: ArrayBuffer;
-            if (this.secretEncoding === 'base64') {
-                keyData = this.base64ToArrayBuffer(this.secretKey);
+            let key: CryptoKey;
+            const isAsymmetricAlg = alg.startsWith('RS') || alg.startsWith('PS') || alg.startsWith('ES');
+            
+            // Import key based on algorithm and encoding
+            if (isAsymmetricAlg && this.secretEncoding === 'pem') {
+                try {
+                    // Parse PEM and import as appropriate key type
+                    key = await this.importKeyFromPem(this.secretKey, cryptoAlg);
+                } catch (error) {
+                    this.alertSecretKey = { type: 'error', message: `Invalid PEM key: ${(error as Error).message}` };
+                    this.verificationStatus = 'invalid';
+                    return;
+                }
             } else {
-                keyData = new TextEncoder().encode(this.secretKey).buffer;
-            }
+                let keyData: ArrayBuffer;
+                if (this.secretEncoding === 'base64') {
+                    keyData = this.base64ToArrayBuffer(this.secretKey);
+                } else {
+                    keyData = new TextEncoder().encode(this.secretKey).buffer;
+                }
 
-            const key = await window.crypto.subtle.importKey(
-                'raw',
-                keyData,
-                cryptoAlg,
-                false,
-                ['verify']
-            );
+                if (alg.startsWith('HS')) {
+                    key = await window.crypto.subtle.importKey(
+                        'raw',
+                        keyData,
+                        cryptoAlg,
+                        false,
+                        ['verify']
+                    );
+                } else {
+                    this.alertSecretKey = { type: 'warning', message: 'For asymmetric algorithms (RS/PS/ES), PEM format is recommended' };
+                    try {
+                        key = await window.crypto.subtle.importKey(
+                            'spki',
+                            keyData,
+                            cryptoAlg,
+                            false,
+                            ['verify']
+                        );
+                    } catch (error) {
+                        this.alertSecretKey = { type: 'error', message: `Invalid key format: ${(error as Error).message}` };
+                        this.verificationStatus = 'invalid';
+                        return;
+                    }
+                }
+            }
 
             const dataToVerify = new TextEncoder().encode(data);
 
@@ -414,7 +478,7 @@ export class JwtInspector extends BaseTool {
         }
     }
 
-    private getWebCryptoAlgorithm(jwtAlg: string): HmacImportParams | EcKeyImportParams | RsaHashedImportParams | null {
+    private getWebCryptoAlgorithm(jwtAlg: string): HmacImportParams | EcKeyImportParams | RsaHashedImportParams | RsaPssParams | null {
         switch (jwtAlg) {
             case 'HS256':
                 return { name: 'HMAC', hash: 'SHA-256' };
@@ -422,9 +486,60 @@ export class JwtInspector extends BaseTool {
                 return { name: 'HMAC', hash: 'SHA-384' };
             case 'HS512':
                 return { name: 'HMAC', hash: 'SHA-512' };
+            
+            case 'RS256':
+                return { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
+            case 'RS384':
+                return { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-384' };
+            case 'RS512':
+                return { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-512' };
+            
+            case 'PS256':
+                return { name: 'RSA-PSS', hash: 'SHA-256', saltLength: 32 };
+            case 'PS384':
+                return { name: 'RSA-PSS', hash: 'SHA-384', saltLength: 48 };
+            case 'PS512':
+                return { name: 'RSA-PSS', hash: 'SHA-512', saltLength: 64 };
+            
+            case 'ES256':
+                return { name: 'ECDSA', namedCurve: 'P-256' };
+            case 'ES384':
+                return { name: 'ECDSA', namedCurve: 'P-384' };
+            case 'ES512':
+                return { name: 'ECDSA', namedCurve: 'P-521' };
+            
             default:
                 return null;
         }
+    }
+
+    private async importKeyFromPem(pemKey: string, algorithm: any): Promise<CryptoKey> {
+        // Remove PEM header/footer and whitespace
+        const pemContent = pemKey.replace(/-+BEGIN .+?-+/, '').replace(/-+END .+?-+/, '').replace(/\s+/g, '');
+        
+        // Convert base64 to ArrayBuffer
+        const binaryDer = this.base64ToArrayBuffer(pemContent);
+        
+        let keyFormat = 'spki'; // Default to SubjectPublicKeyInfo format
+        let keyUsage: KeyUsage[] = ['verify'];
+
+        console.log('Importing key from PEM:', pemKey);
+        
+        // Detect if the PEM seems to be a private key
+        if (pemKey.includes('PRIVATE KEY')) {
+            this.alertSecretKey = { 
+                type: 'warning', 
+                message: 'You provided a private key, but verification only requires a public key.' 
+            };
+        }
+        
+        return await window.crypto.subtle.importKey(
+            keyFormat as any,
+            binaryDer,
+            algorithm,
+            false,
+            keyUsage
+        );
     }
 
     private base64UrlToArrayBuffer(base64Url: string): ArrayBuffer {
