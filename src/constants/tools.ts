@@ -198,6 +198,15 @@ export const TOOLS: Tool[] = [
         tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
     },
     {
+        id: 'unix-path-convertor',
+        label: 'UNIX / Windows Path Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<unix-path-convertor></unix-path-convertor>',
+        icon: 'folder-pen',
+        tags: ['unix', 'windows', 'path', 'convertor', 'file', 'system', 'directory', 'format', 'slash', 'backslash'],
+    },
+    {
         id: 'token-generator',
         label: 'Token Generator',
         version: '1.0.0',
