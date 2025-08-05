@@ -14,6 +14,10 @@ A VSCode extension that provides common I/O tools directly in code editor
 
 </br>
 
+<p align="center">
+  <img src="media/devtool-plus-demo.gif" alt="Demo" width="800" />
+</p>
+
 ## 📖 Introduction
 
 DevTool+ brings common developer tools into VSCode. It provides a set of utilities that can be used directly in the code editor, enhancing productivity and streamlining workflows. It includes features like a calculator, unit converter, and more, all accessible without leaving the coding environment.
