@@ -1,4 +1,4 @@
-import { html, TemplateResult } from 'lit';
+import { html, TemplateResult } from "lit";
 
 /**
  * Adjusts the height of a textarea element based on its scroll height
@@ -7,7 +7,7 @@ import { html, TemplateResult } from 'lit';
  */
 export function adjustTextareaHeight(element: HTMLTextAreaElement) {
     if (element instanceof HTMLTextAreaElement) {
-        element.style.height = 'auto';
+        element.style.height = "auto";
         element.style.height = `${element.scrollHeight}px`;
     }
 }

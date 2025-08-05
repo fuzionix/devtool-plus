@@ -6,7 +6,7 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
     public static readonly viewType = 'devtool-plus.toolsExplorer';
     private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-    
+
     private searchTerm: string = '';
 
     constructor(readonly context: vscode.ExtensionContext) { }
@@ -28,8 +28,8 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
         if (!element) {
             let filteredTools = TOOLS;
             if (this.searchTerm) {
-                filteredTools = TOOLS.filter(tool => 
-                    tool.label.toLowerCase().includes(this.searchTerm) || 
+                filteredTools = TOOLS.filter(tool =>
+                    tool.label.toLowerCase().includes(this.searchTerm) ||
                     tool.category.toLowerCase().includes(this.searchTerm) ||
                     (tool.tags && tool.tags.some(tag => tag.toLowerCase().startsWith(this.searchTerm)))
                 );

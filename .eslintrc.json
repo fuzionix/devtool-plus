@@ -14,7 +14,10 @@
             "warn",
             {
                 "selector": "import",
-                "format": [ "camelCase", "PascalCase" ]
+                "format": [
+                    "camelCase",
+                    "PascalCase"
+                ]
             }
         ],
         "@typescript-eslint/semi": "warn",

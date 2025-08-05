@@ -271,7 +271,7 @@
         color: var(--vscode-input-foreground);
         box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
     }
-    
+
     .code-block pre {
         background-color: transparent;
         white-space: pre-wrap;

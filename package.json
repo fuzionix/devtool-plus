@@ -1,144 +1,144 @@
 {
-  "name": "devtool-plus",
-  "displayName": "DevTool+",
-  "publisher": "Fuzionix",
-  "description": "A VSCode extension that provides common I/O tools directly in code editor",
-  "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fuzionix/devtool-plus.git"
-  },
-  "engines": {
-    "vscode": "^1.62.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "keywords": [
-    "vscode",
-    "vscode-extension",
-    "devtool",
-    "tool",
-    "utility",
-    "converter",
-    "generator",
-    "encoder"
-  ],
-  "icon": "media/logo.png",
-  "bugs": {
-    "url": "https://github.com/fuzionix/devtool-plus/issues"
-  },
-  "homepage": "https://github.com/fuzionix/devtool-plus",
-  "activationEvents": [],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "devtool-plus",
-          "title": "DevTool+",
-          "icon": "media/activity-bar-icon.svg"
-        }
-      ]
+    "name": "devtool-plus",
+    "displayName": "DevTool+",
+    "publisher": "Fuzionix",
+    "description": "A VSCode extension that provides common I/O tools directly in code editor",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/fuzionix/devtool-plus.git"
     },
-    "views": {
-      "devtool-plus": [
-        {
-          "type": "webview",
-          "id": "devtool-plus.toolsView",
-          "name": "Input / Output",
-          "icon": "media/activity-bar-icon.svg",
-          "visibility": "visible"
-        },
-        {
-          "type": "tree",
-          "id": "devtool-plus.toolsExplorer",
-          "name": "Explorer",
-          "visibility": "visible"
-        }
-      ]
+    "engines": {
+        "vscode": "^1.62.0"
     },
-    "commands": [
-      {
-        "command": "devtool-plus.homeButton",
-        "title": "Home",
-        "icon": "$(home)"
-      },
-      {
-        "command": "devtool-plus.refreshButton",
-        "title": "Refresh",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "devtool-plus.aboutButton",
-        "title": "About",
-        "icon": "$(info)"
-      }
+    "categories": [
+        "Other"
     ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "devtool-plus.homeButton",
-          "when": "view == devtool-plus.toolsView",
-          "group": "navigation@1"
+    "keywords": [
+        "vscode",
+        "vscode-extension",
+        "devtool",
+        "tool",
+        "utility",
+        "converter",
+        "generator",
+        "encoder"
+    ],
+    "icon": "media/logo.png",
+    "bugs": {
+        "url": "https://github.com/fuzionix/devtool-plus/issues"
+    },
+    "homepage": "https://github.com/fuzionix/devtool-plus",
+    "activationEvents": [],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "devtool-plus",
+                    "title": "DevTool+",
+                    "icon": "media/activity-bar-icon.svg"
+                }
+            ]
         },
-        {
-          "command": "devtool-plus.refreshButton",
-          "when": "view == devtool-plus.toolsView",
-          "group": "navigation@2"
+        "views": {
+            "devtool-plus": [
+                {
+                    "type": "webview",
+                    "id": "devtool-plus.toolsView",
+                    "name": "Input / Output",
+                    "icon": "media/activity-bar-icon.svg",
+                    "visibility": "visible"
+                },
+                {
+                    "type": "tree",
+                    "id": "devtool-plus.toolsExplorer",
+                    "name": "Explorer",
+                    "visibility": "visible"
+                }
+            ]
         },
-        {
-          "command": "devtool-plus.aboutButton",
-          "when": "view == devtool-plus.toolsView",
-          "group": "navigation@3"
+        "commands": [
+            {
+                "command": "devtool-plus.homeButton",
+                "title": "Home",
+                "icon": "$(home)"
+            },
+            {
+                "command": "devtool-plus.refreshButton",
+                "title": "Refresh",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "devtool-plus.aboutButton",
+                "title": "About",
+                "icon": "$(info)"
+            }
+        ],
+        "menus": {
+            "view/title": [
+                {
+                    "command": "devtool-plus.homeButton",
+                    "when": "view == devtool-plus.toolsView",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "devtool-plus.refreshButton",
+                    "when": "view == devtool-plus.toolsView",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "devtool-plus.aboutButton",
+                    "when": "view == devtool-plus.toolsView",
+                    "group": "navigation@3"
+                }
+            ]
         }
-      ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run package",
+        "compile": "npm run check-types && npm run lint && node esbuild.js",
+        "watch": "npm-run-all -p watch:*",
+        "watch:esbuild": "node esbuild.js --watch",
+        "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+        "package": "npm run check-types && npm run lint && node esbuild.js --production",
+        "compile-tests": "tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "npm run compile-tests && npm run compile && npm run lint",
+        "check-types": "tsc --noEmit",
+        "lint": "eslint src --ext ts",
+        "test": "vscode-test"
+    },
+    "devDependencies": {
+        "@types/js-yaml": "^4.0.9",
+        "@types/mime-db": "^1.43.5",
+        "@types/mocha": "^10.0.7",
+        "@types/node": "20.x",
+        "@types/vscode": "^1.62.0",
+        "@typescript-eslint/eslint-plugin": "^7.14.1",
+        "@typescript-eslint/parser": "^7.11.0",
+        "@vscode/test-cli": "^0.0.9",
+        "@vscode/test-electron": "^2.4.0",
+        "autoprefixer": "^10.4.20",
+        "esbuild": "^0.21.5",
+        "eslint": "^8.57.0",
+        "eslint-plugin-unicorn": "^56.0.1",
+        "glob": "^11.0.3",
+        "monaco-editor": "^0.52.2",
+        "npm-run-all": "^4.1.5",
+        "postcss": "^8.5.1",
+        "tailwindcss": "^3.4.17",
+        "typescript": "^5.4.5"
+    },
+    "dependencies": {
+        "@types/qrcode": "^1.5.5",
+        "bezier-easing": "^2.1.0",
+        "colord": "^2.9.3",
+        "js-yaml": "^4.1.0",
+        "lit": "^3.2.1",
+        "mime-db": "^1.53.0",
+        "qrcode": "^1.5.4",
+        "uuid": "^11.0.5",
+        "xml2js": "^0.6.2"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && node esbuild.js",
-    "watch": "npm-run-all -p watch:*",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test"
-  },
-  "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
-    "@types/mime-db": "^1.43.5",
-    "@types/mocha": "^10.0.7",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.62.0",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.11.0",
-    "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.4.0",
-    "autoprefixer": "^10.4.20",
-    "esbuild": "^0.21.5",
-    "eslint": "^8.57.0",
-    "eslint-plugin-unicorn": "^56.0.1",
-    "glob": "^11.0.3",
-    "monaco-editor": "^0.52.2",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "@types/qrcode": "^1.5.5",
-    "bezier-easing": "^2.1.0",
-    "colord": "^2.9.3",
-    "js-yaml": "^4.1.0",
-    "lit": "^3.2.1",
-    "mime-db": "^1.53.0",
-    "qrcode": "^1.5.4",
-    "uuid": "^11.0.5",
-    "xml2js": "^0.6.2"
-  }
 }
