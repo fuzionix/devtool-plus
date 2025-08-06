@@ -23,6 +23,7 @@ A VSCode extension that provides common I/O tools directly in code editor
 DevTool+ brings common developer tools into VSCode. It provides a set of utilities that can be used directly in the code editor, enhancing productivity and streamlining workflows. It includes features like a calculator, unit converter, and more, all accessible without leaving the coding environment.
 
 The extension features two main sections:
+
 - **Side Panel**: A compact view with an upper I/O section for tool interactions and a lower section listing all tools.
 - **Editor Section**: A full-screen editor panel for more complex tasks (e.g., code editing or diff checking).
 
@@ -37,6 +38,202 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
 - [⚡ **Real-Time Update**] - Tools like editors and converters update instantly, with features like auto-formatting, validation, and live previews.
 - [💻 **Performance**] - Built with Lit for fast, efficient rendering and minimal resource usage.
 - [🔍 **Searchable Tools**] - Quickly find tools by name, category, or tags.
+
+## 🧰 Tool List
+
+<table align="center">
+  <tr>
+    <th>Tool</th>
+    <th>Version</th>
+    <th>Editor</th>
+    <th>Is New</th>
+  </tr>
+  <tr>
+    <th colspan="4">[⌛ Encode / Decode]</th>
+  </tr>
+  <tr>
+    <td>Base64 Encoder / Decoder</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>URL Encoder</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>URL Parser</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+
+  <tr>
+    <th colspan="4">[📱 UI / UX Design]</th>
+  </tr>
+  <tr>
+    <td>Color Convertor</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Color Palette Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Gradient Maker</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Cubic Bezier</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Contrast Checker</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Color Mixer</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+
+  <tr>
+    <th colspan="4">[💽 Data Manipulation]</th>
+  </tr>
+  <tr>
+    <td>UUID Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Data Format Convertor</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>JSON Editor</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>YAML Editor</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>HTML / XML Editor</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Datetime Convertor</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+
+  <tr>
+    <th colspan="4">[📝 Text]</th>
+  </tr>
+  <tr>
+    <td>Text Editor</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Difference Checker</td>
+    <td align="center">1.0.0</td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+  </tr>
+
+  <tr>
+    <th colspan="4">[🧰 Utility]</th>
+  </tr>
+  <tr>
+    <td>QR Code Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>UNIX / Windows Path Convertor</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+
+  <tr>
+    <th colspan="4">[🔒 Cryptography]</th>
+  </tr>
+  <tr>
+    <td>Token Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Password Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>JWT Inspector</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>AES Encryption / Decryption</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>SHA Hashing</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>RSA Key Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>RSA Encryption / Decryption</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Signature Signer / Verifier</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
+  </tr>
+</table>
 
 ## 📄 License
 
