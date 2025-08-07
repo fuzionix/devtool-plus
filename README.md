@@ -46,7 +46,7 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
     <th>Tool</th>
     <th>Version</th>
     <th>Editor</th>
-    <th>Is New</th>
+    <th>Progress</th>
   </tr>
   <tr>
     <th colspan="4">[⌛ Encode / Decode]</th>
@@ -232,6 +232,9 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
     <td align="center">1.0.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td colspan="4" align="right">✅ = Released | 🚧 = In Progress | 📝 = Planning</td>
   </tr>
 </table>
 
