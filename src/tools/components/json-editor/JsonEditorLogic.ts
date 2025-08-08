@@ -78,7 +78,7 @@ function formatJson(params: any = {}) {
             jsonObj = sortJsonObject(jsonObj, params.orderBy, params.sortOrder || 'asc');
         }
         
-        outputEditor.setValue(JSON.stringify(jsonObj, null, 4)); // Format with 4 spaces
+        outputEditor.setValue(JSON.stringify(jsonObj, null, 2));
     } catch (e: any) {
         outputEditor.setValue(e.message);
         vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });

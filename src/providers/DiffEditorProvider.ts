@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Tool } from '../types/tool';
+import { EditorConfigPayload } from '../types/config';
 
 export class DiffEditorProvider {
     public static readonly viewType = 'devtool-plus.diffEditorView';
@@ -66,14 +67,37 @@ export class DiffEditorProvider {
 
     private sendConfiguration(webview: vscode.Webview) {
         const editorConfig = vscode.workspace.getConfiguration('editor');
+    
+        const configKeys: Array<[keyof EditorConfigPayload, string]> = [
+            ['fontFamily', 'fontFamily'],
+            ['fontSize', 'fontSize'],
+            ['fontWeight', 'fontWeight'],
+            ['fontLigatures', 'fontLigatures'],
+            ['lineHeight', 'lineHeight'],
+            ['letterSpacing', 'letterSpacing'],
+            ['wordWrap', 'wordWrap'],
+            ['tabSize', 'tabSize'],
+            ['insertSpaces', 'insertSpaces'],
+            ['cursorStyle', 'cursorStyle'],
+            ['cursorBlinking', 'cursorBlinking'],
+            ['lineNumbers', 'lineNumbers'],
+            ['renderWhitespace', 'renderWhitespace'],
+            ['renderControlCharacters', 'renderControlCharacters'],
+            ['smoothScrolling', 'smoothScrolling'],
+            ['scrollBeyondLastLine', 'scrollBeyondLastLine'],
+        ];
+    
+        const payload: any = {
+            themeKind: vscode.window.activeColorTheme.kind,
+        };
+    
+        for (const [prop, configKey] of configKeys) {
+            payload[prop] = editorConfig.get(configKey as any);
+        }
+    
         webview.postMessage({
             type: 'updateConfiguration',
-            payload: {
-                fontFamily: editorConfig.get('fontFamily'),
-                fontSize: editorConfig.get('fontSize'),
-                fontWeight: editorConfig.get('fontWeight'),
-                fontLigatures: editorConfig.get('fontLigatures'),
-            }
+            payload
         });
     }
 
@@ -119,15 +143,25 @@ export class DiffEditorProvider {
 
                     let diffEditor;
                     let currentToolId;
-                    let initialFontSettings;
+                    let pendingConfig;
                     const toolLanguage = '${toolLanguage}';
                     const initialContent = ${defaultContent};
+
+                    const bodyClassObserver = new MutationObserver(() => {
+                        if (window.monaco) {
+                            createOrUpdateMonacoTheme();
+                        }
+                    });
+
+                    bodyClassObserver.observe(document.body, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
 
                     require.config({ paths: { 'vs': '${monacoUri}' } });
                     require(['vs/editor/editor.main'], function() {
                         const editorOptions = {
                             automaticLayout: true,
-                            theme: document.body.classList.contains('vscode-dark') ? 'vs-dark' : 'vs',
                             readOnly: false,
                             renderSideBySide: true,
                             originalEditable: true
@@ -146,9 +180,12 @@ export class DiffEditorProvider {
                         setTimeout(() => {
                             diffEditor.getOriginalEditor().focus();
                         }, 0);
-                        
-                        if (initialFontSettings) {
-                            applyFontStyles(initialFontSettings);
+
+                        createOrUpdateMonacoTheme();
+
+                        if (pendingConfig) {
+                            applyEditorConfiguration(pendingConfig);
+                            pendingConfig = undefined;
                         }
 
                         vscode.postMessage({ type: 'ready' });
@@ -162,29 +199,95 @@ export class DiffEditorProvider {
                                 document.title = \`DevTool+ - \${message.tool.label}\`;
                                 break;
                             case 'update':
+                                // lastState is resent from extension if needed
                                 break;
                             case 'updateConfiguration':
-                                applyFontStyles(message.payload);
+                                if (window.monaco && diffEditor) {
+                                    applyEditorConfiguration(message.payload);
+                                } else {
+                                    pendingConfig = message.payload;
+                                }
                                 break;
                         }
                     });
 
-                    function applyFontStyles(settings) {
-                        if (!settings) return;
+                    function cssVar(name) {
+                        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                    }
 
-                        if (!diffEditor) {
-                            initialFontSettings = settings;
-                            return;
-                        }
+                    function createOrUpdateMonacoTheme() {
+                        const isDark = document.body.classList.contains('vscode-dark');
+                        const isHC = document.body.classList.contains('vscode-high-contrast') || document.body.classList.contains('vscode-high-contrast-light');
+                        const base = isHC ? (document.body.classList.contains('vscode-high-contrast-light') ? 'hc-light' : 'hc-black') : (isDark ? 'vs-dark' : 'vs');
 
-                        const monacoSettings = {
-                            fontFamily: settings.fontFamily,
-                            fontSize: settings.fontSize,
-                            fontWeight: settings.fontWeight,
-                            fontLigatures: settings.fontLigatures,
+                        const colors = {
+                            'editor.background': cssVar('--vscode-editor-background') || undefined,
+                            'editor.foreground': cssVar('--vscode-editor-foreground') || undefined,
+                            'editorLineNumber.foreground': cssVar('--vscode-editorLineNumber-foreground') || undefined,
+                            'editorLineNumber.activeForeground': cssVar('--vscode-editorLineNumber-activeForeground') || undefined,
+                            'editorCursor.foreground': cssVar('--vscode-editorCursor-foreground') || undefined,
+                            'editor.selectionBackground': cssVar('--vscode-editor-selectionBackground') || undefined,
+                            'editor.selectionHighlightBackground': cssVar('--vscode-editor-selectionHighlightBackground') || undefined,
+                            'editor.findMatchBackground': cssVar('--vscode-editor-findMatchBackground') || undefined,
+                            'editor.findMatchHighlightBackground': cssVar('--vscode-editor-findMatchHighlightBackground') || undefined,
+                            'editor.findRangeHighlightBackground': cssVar('--vscode-editor-findRangeHighlightBackground') || undefined,
+                            'editor.rangeHighlightBackground': cssVar('--vscode-editor-rangeHighlightBackground') || undefined,
+                            'editorIndentGuide.background': cssVar('--vscode-editorIndentGuide-background') || undefined,
+                            'editorIndentGuide.activeBackground': cssVar('--vscode-editorIndentGuide-activeBackground') || undefined,
+                            'editorRuler.foreground': cssVar('--vscode-editorRuler-foreground') || undefined,
                         };
 
-                        diffEditor.updateOptions(monacoSettings);
+                        Object.keys(colors).forEach(k => colors[k] === undefined && delete colors[k]);
+
+                        monaco.editor.defineTheme('vs-code', {
+                            base,
+                            inherit: true,
+                            rules: [],
+                            colors
+                        });
+                        monaco.editor.setTheme('vs-code');
+                    }
+
+                    function applyEditorConfiguration(config) {
+                        createOrUpdateMonacoTheme();
+
+                        const fontOptions = {
+                            fontFamily: config.fontFamily,
+                            fontSize: config.fontSize,
+                            fontWeight: config.fontWeight,
+                            fontLigatures: config.fontLigatures
+                        };
+
+                        const commonOptions = {
+                            ...fontOptions,
+                            wordWrap: config.wordWrap,
+                            cursorStyle: config.cursorStyle,
+                            cursorBlinking: config.cursorBlinking,
+                            lineNumbers: (config.lineNumbers === 'interval') ? 'on' : config.lineNumbers,
+                            renderWhitespace: (config.renderWhitespace === 'trailing') ? 'all' : config.renderWhitespace,
+                            renderControlCharacters: config.renderControlCharacters,
+                            smoothScrolling: config.smoothScrolling,
+                            scrollBeyondLastLine: config.scrollBeyondLastLine,
+                            minimap: { enabled: config.minimapEnabled },
+                        };
+
+                        if (typeof config.lineHeight === 'number' && config.lineHeight > 0) {
+                            commonOptions.lineHeight = config.lineHeight;
+                        }
+                        if (typeof config.letterSpacing === 'number') {
+                            commonOptions.letterSpacing = config.letterSpacing;
+                        }
+
+                        diffEditor?.updateOptions(commonOptions);
+
+                        const models = diffEditor?.getModel();
+                        if (models) {
+                            const modelOptions = {};
+                            if (typeof config.tabSize === 'number') modelOptions.tabSize = config.tabSize;
+                            if (typeof config.insertSpaces === 'boolean') modelOptions.insertSpaces = config.insertSpaces;
+                            models.original?.updateOptions(modelOptions);
+                            models.modified?.updateOptions(modelOptions);
+                        }
                     }
                 </script>
             </body>

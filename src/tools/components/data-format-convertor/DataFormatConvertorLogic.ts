@@ -5,7 +5,7 @@ interface Window {
 
 function convertJsonToYaml(jsonStr: string): string {
     const jsonObj = JSON.parse(jsonStr);
-    return window.jsyaml.dump(jsonObj, { lineWidth: -1, indent: 4 });
+    return window.jsyaml.dump(jsonObj, { lineWidth: -1, indent: 2 });
 }
 
 function convertJsonToXml(jsonStr: string): string {
@@ -48,7 +48,7 @@ function convertXmlToYaml(xmlStr: string): string {
         attributeNamePrefix: "@_"
     });
     const xmlObj = parser.parse(xmlStr);
-    return window.jsyaml.dump(xmlObj, { lineWidth: -1, indent: 4 });
+    return window.jsyaml.dump(xmlObj, { lineWidth: -1, indent: 2 });
 }
 
 async function convert(args: { formatFrom: string, formatTo: string }) {

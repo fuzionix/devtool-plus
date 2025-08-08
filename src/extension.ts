@@ -35,15 +35,14 @@ export function activate(context: vscode.ExtensionContext) {
             toolDecorationProvider
         ),
         vscode.workspace.onDidChangeConfiguration(e => {
-            if (
-                e.affectsConfiguration('editor.fontFamily') ||
-                e.affectsConfiguration('editor.fontSize') ||
-                e.affectsConfiguration('editor.fontWeight') ||
-                e.affectsConfiguration('editor.fontLigatures')
-            ) {
+            if (e.affectsConfiguration('editor')) {
                 codeEditorProvider.updateEditorConfiguration();
                 diffEditorProvider.updateEditorConfiguration();
             }
+        }),
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            codeEditorProvider.updateEditorConfiguration();
+            diffEditorProvider.updateEditorConfiguration();
         })
     );
 

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Tool } from '../types/tool';
+import { EditorConfigPayload} from '../types/config';
 
 export class CodeEditorProvider {
     public static readonly viewType = 'devtool-plus.codeEditorView';
@@ -67,14 +68,37 @@ export class CodeEditorProvider {
 
     private sendConfiguration(webview: vscode.Webview) {
         const editorConfig = vscode.workspace.getConfiguration('editor');
+    
+        const configKeys: Array<[keyof EditorConfigPayload, string]> = [
+            ['fontFamily', 'fontFamily'],
+            ['fontSize', 'fontSize'],
+            ['fontWeight', 'fontWeight'],
+            ['fontLigatures', 'fontLigatures'],
+            ['lineHeight', 'lineHeight'],
+            ['letterSpacing', 'letterSpacing'],
+            ['wordWrap', 'wordWrap'],
+            ['tabSize', 'tabSize'],
+            ['insertSpaces', 'insertSpaces'],
+            ['cursorStyle', 'cursorStyle'],
+            ['cursorBlinking', 'cursorBlinking'],
+            ['lineNumbers', 'lineNumbers'],
+            ['renderWhitespace', 'renderWhitespace'],
+            ['renderControlCharacters', 'renderControlCharacters'],
+            ['smoothScrolling', 'smoothScrolling'],
+            ['scrollBeyondLastLine', 'scrollBeyondLastLine'],
+        ];
+    
+        const payload: any = {
+            themeKind: vscode.window.activeColorTheme.kind,
+        };
+    
+        for (const [prop, configKey] of configKeys) {
+            payload[prop] = editorConfig.get(configKey as any);
+        }
+    
         webview.postMessage({
             type: 'updateConfiguration',
-            payload: {
-                fontFamily: editorConfig.get('fontFamily'),
-                fontSize: editorConfig.get('fontSize'),
-                fontWeight: editorConfig.get('fontWeight'),
-                fontLigatures: editorConfig.get('fontLigatures'),
-            }
+            payload
         });
     }
 
@@ -134,7 +158,7 @@ export class CodeEditorProvider {
                         background-color: var(--vscode-editorGroup-border);
                     }
                 </style>
-                <!-- Additional libraries -->
+                <!-- Optional additional libs -->
                 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
                 <script src="https://cdn.jsdelivr.net/npm/fast-xml-parser@5.2.5/lib/fxp.min.js"></script>
             </head>
@@ -153,16 +177,27 @@ export class CodeEditorProvider {
                     let inputEditor;
                     let outputEditor;
                     let currentToolId;
-                    let initialFontSettings;
+                    let pendingConfig;
                     const toolLanguage = '${toolLanguage}';
                     const initialContent = ${safeToolInitialValue};
+
+                    // Observe theme class changes
+                    const bodyClassObserver = new MutationObserver(() => {
+                        if (window.monaco) {
+                            createOrUpdateMonacoTheme();
+                        }
+                    });
+
+                    bodyClassObserver.observe(document.body, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
 
                     require.config({ paths: { 'vs': '${monacoUri}' } });
                     require(['vs/editor/editor.main'], function() {
                         const editorOptions = {
                             automaticLayout: true,
                             minimap: { enabled: false },
-                            theme: document.body.classList.contains('vscode-dark') ? 'vs-dark' : 'vs',
                             wordWrap: 'on',
                         };
 
@@ -179,47 +214,33 @@ export class CodeEditorProvider {
                             value: '',
                         });
 
-                        if (initialFontSettings) {
-                            applyFontStyles(initialFontSettings);
-                        }
-
-                        inputEditor.onDidChangeModelContent(() => {
-                            vscode.postMessage({
-                                type: 'update',
-                                value: {
-                                    inputText: inputEditor.getValue()
-                                }
-                            });
-                        });
-
                         let isSyncingLeft = false;
                         let isSyncingRight = false;
 
                         inputEditor.onDidScrollChange((e) => {
-                            if (!e.scrollTopChanged) {
-                                return;
-                            }
-                            // If the right pane is not already being synced, proceed.
+                            if (!e.scrollTopChanged) return;
                             if (!isSyncingLeft) {
                                 isSyncingRight = true;
                                 outputEditor.setScrollTop(e.scrollTop);
                             }
-                            // Reset the flag for the left pane.
                             isSyncingLeft = false;
                         });
 
                         outputEditor.onDidScrollChange((e) => {
-                            if (!e.scrollTopChanged) {
-                                return;
-                            }
-                            // If the left pane is not already being synced, proceed.
+                            if (!e.scrollTopChanged) return;
                             if (!isSyncingRight) {
                                 isSyncingLeft = true;
                                 inputEditor.setScrollTop(e.scrollTop);
                             }
-                            // Reset the flag for the right pane.
                             isSyncingRight = false;
                         });
+
+                        createOrUpdateMonacoTheme();
+
+                        if (pendingConfig) {
+                            applyEditorConfiguration(pendingConfig);
+                            pendingConfig = undefined;
+                        }
 
                         vscode.postMessage({ type: 'ready' });
                     });
@@ -233,17 +254,27 @@ export class CodeEditorProvider {
                                 break;
                             case 'update':
                                 if (message.value && typeof message.value.inputText === 'string') {
-                                    if (inputEditor.getValue() !== message.value.inputText) {
+                                    if (inputEditor && inputEditor.getValue() !== message.value.inputText) {
                                         inputEditor.setValue(message.value.inputText);
                                     }
                                 }
                                 break;
                             case 'updateConfiguration':
-                                applyFontStyles(message.payload);
+                                if (window.monaco && inputEditor && outputEditor) {
+                                    applyEditorConfiguration(message.payload);
+                                } else {
+                                    pendingConfig = message.payload;
+                                }
                                 break;
                             case 'updateEditor':
-                                monaco.editor.setModelLanguage(inputEditor.getModel(), message.value.formatFrom || toolLanguage);
-                                monaco.editor.setModelLanguage(outputEditor.getModel(), message.value.formatTo || toolLanguage);
+                                if (window.monaco && inputEditor && outputEditor) {
+                                    if (message.value.formatFrom) {
+                                        monaco.editor.setModelLanguage(inputEditor.getModel(), message.value.formatFrom);
+                                    }
+                                    if (message.value.formatTo) {
+                                        monaco.editor.setModelLanguage(outputEditor.getModel(), message.value.formatTo);
+                                    }
+                                }
                                 break;
                             case 'action':
                                 if (window.toolLogic && typeof window.toolLogic[message.action] === 'function') {
@@ -256,24 +287,84 @@ export class CodeEditorProvider {
                         }
                     });
 
-                    function applyFontStyles(settings) {
-                        if (!settings) return;
+                    function cssVar(name) {
+                        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                    }
 
-                        // If editors aren't created yet, store the settings
-                        if (!inputEditor || !outputEditor) {
-                            initialFontSettings = settings;
-                            return;
-                        }
+                    function createOrUpdateMonacoTheme() {
+                        const isDark = document.body.classList.contains('vscode-dark');
+                        const isHC = document.body.classList.contains('vscode-high-contrast') || document.body.classList.contains('vscode-high-contrast-light');
+                        const base = isHC ? (document.body.classList.contains('vscode-high-contrast-light') ? 'hc-light' : 'hc-black') : (isDark ? 'vs-dark' : 'vs');
 
-                        const monacoSettings = {
-                            fontFamily: settings.fontFamily,
-                            fontSize: settings.fontSize,
-                            fontWeight: settings.fontWeight,
-                            fontLigatures: settings.fontLigatures,
+                        const colors = {
+                            'editor.background': cssVar('--vscode-editor-background') || undefined,
+                            'editor.foreground': cssVar('--vscode-editor-foreground') || undefined,
+                            'editorLineNumber.foreground': cssVar('--vscode-editorLineNumber-foreground') || undefined,
+                            'editorLineNumber.activeForeground': cssVar('--vscode-editorLineNumber-activeForeground') || undefined,
+                            'editorCursor.foreground': cssVar('--vscode-editorCursor-foreground') || undefined,
+                            'editor.selectionBackground': cssVar('--vscode-editor-selectionBackground') || undefined,
+                            'editor.selectionHighlightBackground': cssVar('--vscode-editor-selectionHighlightBackground') || undefined,
+                            'editor.findMatchBackground': cssVar('--vscode-editor-findMatchBackground') || undefined,
+                            'editor.findMatchHighlightBackground': cssVar('--vscode-editor-findMatchHighlightBackground') || undefined,
+                            'editor.findRangeHighlightBackground': cssVar('--vscode-editor-findRangeHighlightBackground') || undefined,
+                            'editor.rangeHighlightBackground': cssVar('--vscode-editor-rangeHighlightBackground') || undefined,
+                            'editorIndentGuide.background': cssVar('--vscode-editorIndentGuide-background') || undefined,
+                            'editorIndentGuide.activeBackground': cssVar('--vscode-editorIndentGuide-activeBackground') || undefined,
+                            'editorRuler.foreground': cssVar('--vscode-editorRuler-foreground') || undefined,
                         };
 
-                        inputEditor.updateOptions(monacoSettings);
-                        outputEditor.updateOptions(monacoSettings);
+                        // Remove undefined entries to avoid warnings
+                        Object.keys(colors).forEach(k => colors[k] === undefined && delete colors[k]);
+
+                        monaco.editor.defineTheme('vs-code', {
+                            base,
+                            inherit: true,
+                            rules: [],
+                            colors
+                        });
+                        monaco.editor.setTheme('vs-code');
+                    }
+
+                    function applyEditorConfiguration(config) {
+                        createOrUpdateMonacoTheme();
+
+                        const fontOptions = {
+                            fontFamily: config.fontFamily,
+                            fontSize: config.fontSize,
+                            fontWeight: config.fontWeight,
+                            fontLigatures: config.fontLigatures
+                        };
+
+                        const commonOptions = {
+                            ...fontOptions,
+                            wordWrap: config.wordWrap,
+                            cursorStyle: config.cursorStyle,
+                            cursorBlinking: config.cursorBlinking,
+                            lineNumbers: (config.lineNumbers === 'interval') ? 'on' : config.lineNumbers, // Monaco doesn't support 'interval'
+                            renderWhitespace: (config.renderWhitespace === 'trailing') ? 'all' : config.renderWhitespace, // closest
+                            renderControlCharacters: config.renderControlCharacters,
+                            smoothScrolling: config.smoothScrolling,
+                            scrollBeyondLastLine: config.scrollBeyondLastLine,
+                            minimap: { enabled: false },
+                        };
+
+                        if (typeof config.lineHeight === 'number' && config.lineHeight > 0) {
+                            commonOptions.lineHeight = config.lineHeight;
+                        }
+                            
+                        if (typeof config.letterSpacing === 'number') {
+                            commonOptions.letterSpacing = config.letterSpacing;
+                        }
+
+                        inputEditor?.updateOptions(commonOptions);
+                        outputEditor?.updateOptions(commonOptions);
+
+                        const modelOptions = {};
+                        if (typeof config.tabSize === 'number') modelOptions.tabSize = config.tabSize;
+                        if (typeof config.insertSpaces === 'boolean') modelOptions.insertSpaces = config.insertSpaces;
+
+                        inputEditor?.getModel()?.updateOptions(modelOptions);
+                        outputEditor?.getModel()?.updateOptions(modelOptions);
                     }
                 </script>
                 <script>
