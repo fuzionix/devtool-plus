@@ -67,7 +67,7 @@ export class DiffEditorProvider {
 
     private sendConfiguration(webview: vscode.Webview) {
         const editorConfig = vscode.workspace.getConfiguration('editor');
-    
+
         const configKeys: Array<[keyof EditorConfigPayload, string]> = [
             ['fontFamily', 'fontFamily'],
             ['fontSize', 'fontSize'],
@@ -86,15 +86,15 @@ export class DiffEditorProvider {
             ['smoothScrolling', 'smoothScrolling'],
             ['scrollBeyondLastLine', 'scrollBeyondLastLine'],
         ];
-    
+
         const payload: any = {
             themeKind: vscode.window.activeColorTheme.kind,
         };
-    
+
         for (const [prop, configKey] of configKeys) {
             payload[prop] = editorConfig.get(configKey as any);
         }
-    
+
         webview.postMessage({
             type: 'updateConfiguration',
             payload
@@ -102,7 +102,8 @@ export class DiffEditorProvider {
     }
 
     private getHtmlForWebview(): string {
-        const monacoUri = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs';
+        const monacoPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'monaco-editor', 'vs');
+        const monacoUri = this.panel!.webview.asWebviewUri(monacoPath);
         const toolLanguage = this.currentTool?.editor?.language || 'plaintext';
         const defaultContent = JSON.stringify({
             original: 'This is the original text. You can edit it here.',

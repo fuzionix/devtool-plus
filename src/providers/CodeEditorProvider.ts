@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Tool } from '../types/tool';
-import { EditorConfigPayload} from '../types/config';
+import { EditorConfigPayload } from '../types/config';
 
 export class CodeEditorProvider {
     public static readonly viewType = 'devtool-plus.codeEditorView';
@@ -68,7 +68,7 @@ export class CodeEditorProvider {
 
     private sendConfiguration(webview: vscode.Webview) {
         const editorConfig = vscode.workspace.getConfiguration('editor');
-    
+
         const configKeys: Array<[keyof EditorConfigPayload, string]> = [
             ['fontFamily', 'fontFamily'],
             ['fontSize', 'fontSize'],
@@ -87,15 +87,15 @@ export class CodeEditorProvider {
             ['smoothScrolling', 'smoothScrolling'],
             ['scrollBeyondLastLine', 'scrollBeyondLastLine'],
         ];
-    
+
         const payload: any = {
             themeKind: vscode.window.activeColorTheme.kind,
         };
-    
+
         for (const [prop, configKey] of configKeys) {
             payload[prop] = editorConfig.get(configKey as any);
         }
-    
+
         webview.postMessage({
             type: 'updateConfiguration',
             payload
@@ -120,7 +120,8 @@ export class CodeEditorProvider {
     }
 
     private getHtmlForWebview(): string {
-        const monacoUri = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs';
+        const monacoPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'monaco-editor', 'vs');
+        const monacoUri = this.panel!.webview.asWebviewUri(monacoPath);
         const toolLogicScript = this.getToolLogicScript();
         const toolLanguage = this.currentTool?.editor?.language || 'plaintext';
         const toolInitialValue = this.currentTool?.editor?.initialValue || '';

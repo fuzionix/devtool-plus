@@ -4,6 +4,8 @@ const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
 const { glob } = require('glob');
 const fs = require('fs/promises');
+const fsExtra = require('fs-extra');
+const path = require('path');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -106,7 +108,13 @@ async function main() {
     }
 }
 
-main().catch(e => {
+async function copyMonaco() {
+    const src = path.join(__dirname, 'node_modules', 'monaco-editor', 'min', 'vs');
+    const dest = path.join(__dirname, 'dist', 'monaco-editor', 'vs');
+    await fsExtra.copy(src, dest);
+}
+
+main().then(copyMonaco).catch(e => {
     console.error(e);
     process.exit(1);
 });

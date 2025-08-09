@@ -134,9 +134,11 @@
         "@types/qrcode": "^1.5.5",
         "bezier-easing": "^2.1.0",
         "colord": "^2.9.3",
+        "fs-extra": "^11.3.1",
         "js-yaml": "^4.1.0",
         "lit": "^3.2.1",
         "mime-db": "^1.53.0",
+        "monaco-editor-core": "^0.52.2",
         "qrcode": "^1.5.4",
         "uuid": "^11.0.5",
         "xml2js": "^0.6.2"
