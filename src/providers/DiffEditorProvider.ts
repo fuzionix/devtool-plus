@@ -110,12 +110,22 @@ export class DiffEditorProvider {
             modified: 'This is the modified text. You can edit it here.'
         });
 
+        const nonce = this.getNonce();
+        const csp = `
+            default-src 'none';
+            img-src ${this.panel!.webview.cspSource} data:;
+            font-src ${this.panel!.webview.cspSource};
+            style-src ${this.panel!.webview.cspSource} 'unsafe-inline';
+            script-src 'strict-dynamic' 'nonce-${nonce}';
+        `;
+
         return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="Content-Security-Policy" content="${csp}">
                 <title>DevTool+ Diff Editor</title>
                 <link rel="stylesheet" href="${monacoUri}/editor/editor.main.css">
                 <style>
@@ -137,8 +147,8 @@ export class DiffEditorProvider {
             <body>
                 <div id="diff-editor" class="editor-container"></div>
 
-                <script src="${monacoUri}/loader.js"></script>
-                <script>
+                <script nonce="${nonce}" src="${monacoUri}/loader.js"></script>
+                <script nonce="${nonce}">
                     const vscode = acquireVsCodeApi();
                     window.vscode = vscode;
 
@@ -324,5 +334,15 @@ export class DiffEditorProvider {
                 value: value
             });
         }
+    }
+
+    private getNonce() {
+        let text = '';
+        const possible =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 }

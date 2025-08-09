@@ -1,16 +1,14 @@
-interface Window {
-    jsyaml: any;
-    fxp: any;
-}
+import * as YAML from 'js-yaml';
+import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 
 function convertJsonToYaml(jsonStr: string): string {
     const jsonObj = JSON.parse(jsonStr);
-    return window.jsyaml.dump(jsonObj, { lineWidth: -1, indent: 2 });
+    return YAML.dump(jsonObj, { lineWidth: -1, indent: 2 });
 }
 
 function convertJsonToXml(jsonStr: string): string {
     const jsonObj = JSON.parse(jsonStr);
-    const builder = new window.fxp.XMLBuilder({
+    const builder = new XMLBuilder({
         format: true,
         ignoreAttributes: false,
         indentBy: '  '
@@ -19,13 +17,13 @@ function convertJsonToXml(jsonStr: string): string {
 }
 
 function convertYamlToJson(yamlStr: string): string {
-    const yamlObj = window.jsyaml.load(yamlStr);
+    const yamlObj = YAML.load(yamlStr);
     return JSON.stringify(yamlObj, null, 4);
 }
 
 function convertYamlToXml(yamlStr: string): string {
-    const yamlObj = window.jsyaml.load(yamlStr);
-    const builder = new window.fxp.XMLBuilder({
+    const yamlObj = YAML.load(yamlStr);
+    const builder = new XMLBuilder({
         format: true,
         ignoreAttributes: false,
         indentBy: '  '
@@ -34,7 +32,7 @@ function convertYamlToXml(yamlStr: string): string {
 }
 
 function convertXmlToJson(xmlStr: string): string {
-    const parser = new window.fxp.XMLParser({
+    const parser = new XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: "@_"
     });
@@ -43,12 +41,12 @@ function convertXmlToJson(xmlStr: string): string {
 }
 
 function convertXmlToYaml(xmlStr: string): string {
-    const parser = new window.fxp.XMLParser({
+    const parser = new XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: "@_"
     });
     const xmlObj = parser.parse(xmlStr);
-    return window.jsyaml.dump(xmlObj, { lineWidth: -1, indent: 2 });
+    return YAML.dump(xmlObj, { lineWidth: -1, indent: 2 });
 }
 
 async function convert(args: { formatFrom: string, formatTo: string }) {

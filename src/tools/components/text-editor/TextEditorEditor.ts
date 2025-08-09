@@ -42,7 +42,6 @@ export class TextEditorEditor extends BaseTool {
                     placeholder="Enter text to edit"
                     .value=${this.inputText}
                     @input=${this.handleInput}
-                    autofocus
                 ></textarea>
                 <div class="editor-divider"></div>
                 <textarea
