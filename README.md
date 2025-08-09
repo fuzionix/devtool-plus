@@ -39,6 +39,22 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
 - [💻 **Performance**] - Built with Lit for fast, efficient rendering and minimal resource usage.
 - [🔍 **Searchable Tools**] - Quickly find tools by name, category, or tags.
 
+## 📦 Installation
+
+<p align="center">
+  <a href="#">Install From Marketplace</a>
+</p>
+
+---
+
+<p align="center">
+  --- or ---
+</p>
+
+```sh
+code --install-extension Fuzionix.devtool-plus
+```
+
 ## 🧰 Tool List
 
 <table align="center">
@@ -237,6 +253,14 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
     <td colspan="4" align="right">✅ = Released | 🚧 = In Progress | 📝 = Planning</td>
   </tr>
 </table>
+
+## 🔐 Privacy
+> [!NOTE]
+> Tool logic runs locally; no data is sent to any remote service.
+
+> [!WARNING]
+> Editor assets may be fetched by VS Code (e.g., Monaco) depending on your environment. However, the tools I/O are not transmitted externally by the extension.
+
 
 ## 📄 License
 
