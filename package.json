@@ -3,7 +3,7 @@
     "displayName": "DevTool+",
     "publisher": "Fuzionix",
     "description": "A VSCode extension that provides common I/O tools directly in code editor",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/fuzionix/devtool-plus.git"
@@ -22,7 +22,10 @@
         "utility",
         "converter",
         "generator",
-        "encoder"
+        "encoder",
+        "decoder",
+        "developer",
+        "development"
     ],
     "icon": "media/devtool-plus-logo.png",
     "bugs": {
