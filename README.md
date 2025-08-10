@@ -258,10 +258,6 @@ code --install-extension Fuzionix.devtool-plus
 > [!NOTE]
 > Tool logic runs locally; no data is sent to any remote service.
 
-> [!WARNING]
-> Editor assets may be fetched by VS Code (e.g., Monaco) depending on your environment. However, the tools I/O are not transmitted externally by the extension.
-
-
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE). See the LICENSE file for details.
