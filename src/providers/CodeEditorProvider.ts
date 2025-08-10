@@ -127,12 +127,22 @@ export class CodeEditorProvider {
         const toolInitialValue = this.currentTool?.editor?.initialValue || '';
         const safeToolInitialValue = JSON.stringify(toolInitialValue);
 
+        const nonce = this.getNonce();
+        const csp = `
+            default-src 'none';
+            img-src ${this.panel!.webview.cspSource} data:;
+            font-src ${this.panel!.webview.cspSource};
+            style-src ${this.panel!.webview.cspSource} 'unsafe-inline';
+            script-src 'strict-dynamic' 'nonce-${nonce}';
+        `;
+
         return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="Content-Security-Policy" content="${csp}">
                 <title>DevTool+ Code Editor</title>
                 <link rel="stylesheet" href="${monacoUri}/editor/editor.main.css">
                 <style>
@@ -159,9 +169,6 @@ export class CodeEditorProvider {
                         background-color: var(--vscode-editorGroup-border);
                     }
                 </style>
-                <!-- Optional additional libs -->
-                <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/fast-xml-parser@5.2.5/lib/fxp.min.js"></script>
             </head>
             <body>
                 <div class="editor-container">
@@ -170,8 +177,8 @@ export class CodeEditorProvider {
                     <div id="output-editor" class="editor-pane"></div>
                 </div>
 
-                <script src="${monacoUri}/loader.js"></script>
-                <script>
+                <script nonce="${nonce}" src="${monacoUri}/loader.js"></script>
+                <script nonce="${nonce}">
                     const vscode = acquireVsCodeApi();
                     window.vscode = vscode;
 
@@ -368,7 +375,7 @@ export class CodeEditorProvider {
                         outputEditor?.getModel()?.updateOptions(modelOptions);
                     }
                 </script>
-                <script>
+                <script nonce="${nonce}">
                     ${toolLogicScript}
                 </script>
             </body>
@@ -411,5 +418,15 @@ export class CodeEditorProvider {
                 });
             }
         }
+    }
+
+    private getNonce() {
+        let text = '';
+        const possible =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 }

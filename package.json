@@ -24,7 +24,7 @@
         "generator",
         "encoder"
     ],
-    "icon": "media/logo.png",
+    "icon": "media/devtool-plus-logo.png",
     "bugs": {
         "url": "https://github.com/fuzionix/devtool-plus/issues"
     },
@@ -134,6 +134,7 @@
         "@types/qrcode": "^1.5.5",
         "bezier-easing": "^2.1.0",
         "colord": "^2.9.3",
+        "fast-xml-parser": "^5.2.5",
         "fs-extra": "^11.3.1",
         "js-yaml": "^4.1.0",
         "lit": "^3.2.1",
