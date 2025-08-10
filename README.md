@@ -42,7 +42,7 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
 ## 📦 Installation
 
 <p align="center">
-  <a href="#">Install From Marketplace</a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus&ssr=false#review-details">Install From Marketplace</a>
 </p>
 
 ---
