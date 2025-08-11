@@ -42,7 +42,11 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
 ## 📦 Installation
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus">Install From Marketplace</a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus">Visual Studio Code</a>
+  <span>|</span>
+  <a href="https://open-vsx.org/extension/Fuzionix/devtool-plus">Cursor</a>
+  <span>|</span>
+  <a href="https://open-vsx.org/extension/Fuzionix/devtool-plus">Windsurf</a>
 </p>
 
 ---
