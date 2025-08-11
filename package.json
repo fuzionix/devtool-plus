@@ -3,7 +3,7 @@
     "displayName": "DevTool+",
     "publisher": "Fuzionix",
     "description": "A VSCode extension that provides common I/O tools directly in code editor",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/fuzionix/devtool-plus.git"
@@ -11,27 +11,44 @@
     "engines": {
         "vscode": "^1.62.0"
     },
+    "galleryBanner": {
+        "color": "#161616",
+        "theme": "dark"
+    },
     "categories": [
+        "Visualization",
+        "Formatters",
+        "Testing",
         "Other"
     ],
     "keywords": [
         "vscode",
         "vscode-extension",
         "devtool",
-        "tool",
+        "tools",
         "utility",
-        "converter",
-        "generator",
+        "converters",
+        "generators",
         "encoder",
         "decoder",
+        "hashing",
+        "encryption",
         "developer",
         "development"
     ],
     "icon": "media/devtool-plus-logo.png",
+    "badges": [
+        {
+            "url": "https://img.shields.io/github/stars/fuzionix/devtool-plus?style=social",
+            "href": "https://github.com/fuzionix/devtool-plus",
+            "description": "Star on GitHub"
+        }
+    ],
+    "homepage": "https://github.com/fuzionix/devtool-plus",
     "bugs": {
         "url": "https://github.com/fuzionix/devtool-plus/issues"
     },
-    "homepage": "https://github.com/fuzionix/devtool-plus",
+    "changelog": "https://github.com/fuzionix/devtool-plus/blob/main/CHANGELOG.md",
     "activationEvents": [],
     "main": "./dist/extension.js",
     "contributes": {
@@ -146,5 +163,6 @@
         "qrcode": "^1.5.4",
         "uuid": "^11.0.5",
         "xml2js": "^0.6.2"
-    }
+    },
+    "license": "MIT"
 }
