@@ -47,6 +47,7 @@
         "url": "https://github.com/fuzionix/devtool-plus/issues"
     },
     "changelog": "https://github.com/fuzionix/devtool-plus/blob/main/CHANGELOG.md",
+    "privacy": "https://github.com/fuzionix/devtool-plus/blob/main/PRIVACY.md",
     "activationEvents": [],
     "main": "./dist/extension.js",
     "contributes": {
