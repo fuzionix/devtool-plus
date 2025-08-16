@@ -10,6 +10,10 @@ export class ToolDecorationProvider implements vscode.FileDecorationProvider {
     }
 
     provideFileDecoration(uri: vscode.Uri): vscode.ProviderResult<vscode.FileDecoration> {
+        if (uri.scheme !== 'devtool-plus') {
+            return null;
+        }
+        
         const toolId = uri.path.split('/').pop();
         const tool = TOOLS.find(t => t.id === toolId);
 
