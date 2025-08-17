@@ -15,7 +15,7 @@ A VSCode extension that provides common I/O tools directly in code editor
 </br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/fuzionix/devtool-plus/refs/heads/main/media/devtool-plus-demo.gif" alt="Demo" width="800" />
+  <img src="https://raw.githubusercontent.com/fuzionix/devtool-plus/refs/heads/main/media/devtool-plus-demo.gif" alt="Demo" width="840" />
 </p>
 
 ## 📖 Introduction

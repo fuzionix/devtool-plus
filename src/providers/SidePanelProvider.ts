@@ -1,15 +1,20 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { Tool } from '../types/tool';
+import { TOOLS } from '../constants/tools';
 
 export class SidePanelProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'devtool-plus.toolsView';
     private view?: vscode.WebviewView;
     private currentTool?: Tool;
+    private readonly context: vscode.ExtensionContext;
 
     constructor(
         private readonly extensionUri: vscode.Uri,
-    ) { }
+        context: vscode.ExtensionContext
+    ) { 
+        this.context = context;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -72,6 +77,9 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                     vscode.commands.executeCommand('devtool-plus.searchTools', message.value);
                     break;
                 }
+                case 'selectToolFromHistory':
+                    vscode.commands.executeCommand('devtool-plus.selectToolFromHistory', message.toolId);
+                    break;
             }
         });
     }
@@ -94,7 +102,17 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                             <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-2 top-1/2 transform -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </div>
                     </div>
-                    <p class="mt-2 text-center opacity-70">Select a tool from the Tools Explorer below</p>
+                    <p class="mt-2 text-center opacity-70">Select a tool from the Tools Explorer</p>
+                    <hr />
+
+                    <!-- Recent Tools Section -->
+                    <div id="recent-tools" class="mt-4" style="display: none;">
+                        <h6 class="text-xs opacity-70 mb-2 font-medium">Recent Tools</h6>
+                        <div id="recent-tools-list" class="flex flex-wrap max-content gap-2 mb-4">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
                     <!-- Arrow Divider -->
                     <div class="fixed flex justify-center bottom-2 left-[50%] translate-x-[-50%] mt-2 opacity-75">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
@@ -160,6 +178,9 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                             case 'about':
                                 showAbout();
                                 break;
+                            case 'recentTools':
+                                renderRecentTools(message.tools);
+                                break;
                         }
                     });
 
@@ -195,6 +216,47 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
 
                     function showAbout() {
                         setViewState('about');
+                    }
+
+                    function renderRecentTools(tools) {
+                        const recentToolsContainer = document.getElementById('recent-tools');
+                        const recentToolsList = document.getElementById('recent-tools-list');
+                        
+                        if (!tools || !tools.length) {
+                            recentToolsContainer.style.display = 'none';
+                            return;
+                        }
+                        
+                        recentToolsContainer.style.display = 'block';
+                        recentToolsList.innerHTML = '';
+                        
+                        tools.forEach(tool => {
+                            const button = document.createElement('button');
+                            button.className = 'btn-outline w-max py-1 px-3 items-center gap-2 text-xs';
+                            button.title = tool.label;
+                            button.dataset.toolId = tool.id;
+                            
+                            // Add icon
+                            const icon = document.createElement('img');
+                            icon.className = 'w-4 h-4 mr-1';
+                            icon.src = '${toolIconUri}/' + tool.icon + '.svg';
+                            icon.alt = '';
+                            button.appendChild(icon);
+                            
+                            // Add label
+                            const label = document.createElement('span');
+                            label.textContent = tool.label;
+                            button.appendChild(label);
+                            
+                            button.addEventListener('click', () => {
+                                vscode.postMessage({
+                                    type: 'selectToolFromHistory',
+                                    toolId: tool.id
+                                });
+                            });
+                            
+                            recentToolsList.appendChild(button);
+                        });
                     }
 
                     function resetView() {
@@ -241,12 +303,27 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private sendRecentTools() {
+        if (!this.view) return;
+        
+        const historyIds = this.context.workspaceState.get<string[]>('devtool-plus.toolHistory', []);
+        const recentTools = historyIds
+            .map(id => TOOLS.find(t => t.id === id))
+            .filter(Boolean);
+            
+        this.view.webview.postMessage({
+            type: 'recentTools',
+            tools: recentTools
+        });
+    }
+
     public reset() {
         this.currentTool = undefined;
         if (this.view) {
             this.view.webview.postMessage({
                 type: 'reset'
             });
+            this.sendRecentTools();
         }
     }
 
