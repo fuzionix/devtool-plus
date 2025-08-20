@@ -29,6 +29,15 @@ export const TOOLS: Tool[] = [
         tags: ['url', 'uri', 'parse', 'query', 'parameter', 'web', 'extract', 'structure']
     },
     {
+        id: 'ascii-encoder',
+        label: 'ASCII Binary / Hex',
+        version: '1.0.0',
+        category: ToolCategory.Encode,
+        template: '<ascii-encoder></ascii-encoder>',
+        icon: 'binary',
+        tags: ['ascii', 'encode', 'decode', 'text', 'string', 'binary', 'hex', 'hexadecimal']
+    },
+    {
         id: 'color-convertor',
         label: 'Color Convertor',
         version: '1.0.0',
