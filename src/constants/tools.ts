@@ -35,7 +35,18 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<ascii-encoder></ascii-encoder>',
         icon: 'binary',
+        isNew: true,
         tags: ['ascii', 'encode', 'decode', 'text', 'string', 'binary', 'hex', 'hexadecimal']
+    },
+    {
+        id: 'unicode-inspector',
+        label: 'Unicode Inspector',
+        version: '1.0.0',
+        category: ToolCategory.Encode,
+        template: '<unicode-inspector></unicode-inspector>',
+        icon: 'book-type',
+        isNew: true,
+        tags: ['unicode', 'inspect', 'text', 'string', 'character', 'codepoint']
     },
     {
         id: 'color-convertor',
@@ -53,7 +64,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Design,
         template: '<color-palette></color-palette>',
         icon: 'swatch-book',
-        isNew: true,
         tags: ['color', 'palette', 'scheme', 'design', 'ui', 'theme', 'generator', 'harmony', 'complementary', 'analogous', 'triadic']
     },
     {
@@ -231,7 +241,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Cryptography,
         template: '<password-generator></password-generator>',
         icon: 'asterisk',
-        isNew: true,
         tags: ['password', 'security', 'random', 'generator', 'strong', 'credentials', 'secret', 'authentication']
     },
     {

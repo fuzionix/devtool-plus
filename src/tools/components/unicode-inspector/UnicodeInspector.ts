@@ -6,14 +6,13 @@ import {
     renderCopyButton
 } from '../../../utils/util';
 
-@customElement('url-encoder')
-export class UrlEncoder extends BaseTool {
+@customElement('unicode-inspector')
+export class UnicodeInspector extends BaseTool {
     @state() private selectedMode: 'encode' | 'decode' = 'encode';
     @state() private input = '';
     @state() private output = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
-    @state() private preserveUrl = true;
 
     static styles = css`
         ${BaseTool.styles}
@@ -23,12 +22,12 @@ export class UrlEncoder extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">URL encoding converts special characters into a transmitted format over the Internet, replacing unsafe characters with a '%' followed by two hexadecimal digits.</p>
+                <p class="opacity-75">Unicode is a standard for representing text in different writing systems. It enables consistent encoding, representation, and handling of text.</p>
                 <hr />
 
                 <!-- Radio Group -->
                 <div class="">
-                    <div class="radio-group" role="radiogroup" aria-label="URL Encoding Mode">
+                    <div class="radio-group" role="radiogroup" aria-label="ASCII Conversion Mode">
                         <button 
                             role="radio"
                             aria-checked=${this.selectedMode === 'encode' ? 'true' : 'false'}
@@ -58,7 +57,7 @@ export class UrlEncoder extends BaseTool {
                     <textarea
                         id="input"
                         class="input-expandable"
-                        placeholder="Enter URL"
+                        placeholder="Enter text"
                         rows="1"
                         .value=${this.input}
                         @input=${this.handleInput}
@@ -87,7 +86,7 @@ export class UrlEncoder extends BaseTool {
                 <div class="relative flex items-center">
                     <textarea
                         id="output"
-                        class="input-expandable mt-2 pr-6"
+                        class="input-expandable mt-2 pr-6 font-mono"
                         placeholder="Output will appear here"
                         rows="3"
                         readonly
@@ -103,15 +102,6 @@ export class UrlEncoder extends BaseTool {
                         </button>
                     </div>
                 </div>
-
-                <div class="mt-2">
-                    <tool-switch
-                        .checked=${this.preserveUrl}
-                        rightLabel="Preserve URL structure"
-                        ariaLabel="Encoding Method"
-                        @change=${this.handleEncodingMethodChange}
-                    ></tool-switch>
-                </div>
             </div>
         `;
     }
@@ -121,16 +111,26 @@ export class UrlEncoder extends BaseTool {
         this.processInput();
     }
 
-    private handleEncodingMethodChange(event: CustomEvent) {
-        this.preserveUrl = event.detail.checked;
-        this.processInput();
-    }
-
     private handleInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.input = target.value;
         adjustTextareaHeight(target);
         this.processInput();
+    }
+
+    private processInput(): void {
+        this.alert = null;
+        if (!this.input) {
+            this.output = '';
+            return;
+        }
+
+        // TODO
+
+        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
+        if (outputTextarea) {
+            adjustTextareaHeight(outputTextarea);
+        }
     }
 
     private async copyToClipboard() {
@@ -143,65 +143,6 @@ export class UrlEncoder extends BaseTool {
             }, 2000);
         } catch (err) {
             console.error('Failed to copy text:', err);
-        }
-    }
-
-    private processInput(): void {
-        this.alert = null;
-        if (!this.input) {
-            this.output = '';
-            return;
-        }
-
-        try {
-            if (this.selectedMode === 'encode') {
-                this.output = this.encodeURL(this.input);
-            } else {
-                this.output = this.decodeURL(this.input);
-            }
-        } catch (error) {
-            this.alert = {
-                type: 'error',
-                message: `Failed to ${this.selectedMode} URL: ${(error as Error).message}`
-            };
-            this.output = '';
-        }
-
-        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
-        if (outputTextarea) {
-            adjustTextareaHeight(outputTextarea);
-        }
-    }
-
-    private encodeURL(input: string): string {
-        try {
-            if (this.preserveUrl) {
-                return encodeURI(input);
-            } else {
-                return encodeURIComponent(input);
-            }
-        } catch (error) {
-            this.alert = {
-                type: 'error',
-                message: `Failed to encode URL: ${(error as Error).message}`
-            };
-            return '';
-        }
-    }
-
-    private decodeURL(input: string): string {
-        try {
-            if (this.preserveUrl) {
-                return decodeURI(input);
-            } else {
-                return decodeURIComponent(input);
-            }
-        } catch (error) {
-            this.alert = {
-                type: 'error',
-                message: `Failed to decode URL: ${(error as Error).message}`
-            };
-            return '';
         }
     }
 

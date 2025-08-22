@@ -26,7 +26,7 @@ export class UrlParser extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">URL Parser extracts query parameters from a URL.</p>
+                <p class="opacity-75">URLs are used to access resources on the web. They consist of several components, including the protocol, domain, path, and query parameters.</p>
                 <hr />
 
                 <!-- Input Field -->

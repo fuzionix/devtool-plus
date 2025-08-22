@@ -22,7 +22,7 @@ export class AsciiEncoder extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert text to binary or hexadecimal representation, with each character separated by spaces.</p>
+                <p class="opacity-75">ASCII is a character encoding standard for electronic communication. It represents text in computers and other devices that use text.</p>
                 <hr />
 
                 <!-- Radio Group -->

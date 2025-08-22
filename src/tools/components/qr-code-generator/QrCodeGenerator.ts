@@ -40,7 +40,7 @@ export class QrCodeGenerator extends BaseTool {
             }
             </style>
             <div class="tool-inner-container">
-                <p class="opacity-75">Generate QR codes from various data types. Select the input type and enter your data.</p>
+                <p class="opacity-75">QR codes are a type of matrix barcode (or two-dimensional barcode) that can be read by devices such as smartphones and QR code readers.</p>
                 <hr />
                 
                 <!-- QR Code Preview section -->

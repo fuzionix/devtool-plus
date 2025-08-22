@@ -35,6 +35,7 @@ import './components/rsa-encryption/RsaEncryption';
 import './components/rsa-key-generator/RsaKeyGenerator';
 import './components/sha-hashing/ShaHashing';
 import './components/signature-verifier/SignatureVerifier';
+import './components/unicode-inspector/UnicodeInspector';
 import './components/unix-path-convertor/UnixPathConvertor';
 import './components/url-encoder/UrlEncoder';
 import './components/url-parser/UrlParser';
