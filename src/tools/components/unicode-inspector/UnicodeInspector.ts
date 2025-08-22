@@ -1,18 +1,28 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, property } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     adjustTextareaHeight,
     renderCopyButton
 } from '../../../utils/util';
 
+const FORMAT_OPTIONS = [
+    { value: 'codepoint', label: 'U+XXXX' },
+    { value: 'js', label: '\\uXXXX' },
+    { value: 'html', label: '&#xXXXX;' },
+    { value: 'css', label: '\\XXXX' },
+];
+
 @customElement('unicode-inspector')
 export class UnicodeInspector extends BaseTool {
     @state() private selectedMode: 'encode' | 'decode' = 'encode';
     @state() private input = '';
     @state() private output = '';
+    @state() private format: string = 'codepoint';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
+
+    @property({ type: Array }) formatOptions = FORMAT_OPTIONS;
 
     static styles = css`
         ${BaseTool.styles}
@@ -21,6 +31,27 @@ export class UnicodeInspector extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>
+            .block-label {
+                display: inline-flex;
+                align-items: center;
+                margin-right: 8px;
+                margin-bottom: 4px;
+                font-size: 10px;
+                border-radius: 4px;
+                padding: 2px 6px;
+                background-color: var(--vscode-editor-background);
+                border: 1px solid var(--vscode-panel-border);
+            }
+            
+            .color-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 4px;
+                display: inline-block;
+            }
+            </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Unicode is a standard for representing text in different writing systems. It enables consistent encoding, representation, and handling of text.</p>
                 <hr />
@@ -53,6 +84,17 @@ export class UnicodeInspector extends BaseTool {
                     </div>
                 </div>
                 <!-- Input Field -->
+                <div class="flex justify-between items-baseline mb-2 text-xs mt-4">
+                    <p class="mb-0 text-xs"></p>
+                    <div>
+                        <tool-inline-menu
+                            .options=${this.formatOptions}
+                            .value=${this.format}
+                            placeholder="Format"
+                            @change=${this.handleFormatChange}
+                        ></tool-inline-menu>
+                    </div>
+                </div>
                 <div class="relative flex items-center mt-2">
                     <textarea
                         id="input"
@@ -108,6 +150,11 @@ export class UnicodeInspector extends BaseTool {
 
     private handleModeChange(mode: 'encode' | 'decode') {
         this.selectedMode = mode;
+        this.processInput();
+    }
+
+    private handleFormatChange(e: CustomEvent) {
+        this.format = e.detail.value;
         this.processInput();
     }
 
