@@ -10,7 +10,14 @@ import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 export class UUIDGenerator extends BaseTool {
     @state() private selectedVersion: 'v1' | 'v4' = 'v4';
     @state() private output = '';
+    @state() private autoRefresh = false;
     @state() private isCopied = false;
+    private refreshInterval: number | null = null;
+
+    constructor() {
+        super();
+        this.generateUUID();
+    }
 
     static styles = css`
         ${BaseTool.styles}
@@ -80,13 +87,38 @@ export class UUIDGenerator extends BaseTool {
                         </button>
                     </div>
                 </div>
+
+                <div class="mt-2">
+                    <tool-switch
+                        .checked=${this.autoRefresh}
+                        rightLabel="Auto Refresh"
+                        ariaLabel="Auto Refresh"
+                        @change=${this.handleAutoRefreshChange}
+                    ></tool-switch>
+                </div>
             </div>
         `;
     }
 
     private handleVersionChange(version: 'v1' | 'v4') {
         this.selectedVersion = version;
+        this.generateUUID();
     }
+
+    private handleAutoRefreshChange = (event: CustomEvent) => {
+        this.autoRefresh = event.detail.checked;
+        
+        if (this.autoRefresh) {
+            this.refreshInterval = window.setInterval(() => {
+                this.generateUUID();
+            }, 750);
+        } else {
+            if (this.refreshInterval !== null) {
+                clearInterval(this.refreshInterval);
+                this.refreshInterval = null;
+            }
+        }
+    };
 
     private generateUUID() {
         this.output = (this.selectedVersion === 'v4') ? uuidv4() : uuidv1();
@@ -102,6 +134,14 @@ export class UUIDGenerator extends BaseTool {
             }, 2000);
         } catch (err) {
             console.error('Failed to copy text:', err);
+        }
+    }
+
+    disconnectedCallback(): void {
+        super.disconnectedCallback();
+        if (this.refreshInterval !== null) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
         }
     }
 }

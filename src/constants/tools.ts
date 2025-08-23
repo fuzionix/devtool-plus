@@ -105,7 +105,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'uuid-generator',
         label: 'UUID Generator',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<uuid-generator></uuid-generator>',
         icon: 'rectangle-ellipsis',
