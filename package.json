@@ -46,6 +46,10 @@
     },
     "changelog": "https://github.com/fuzionix/devtool-plus/blob/main/CHANGELOG.md",
     "privacy": "https://github.com/fuzionix/devtool-plus/blob/main/PRIVACY.md",
+    "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/fuzionix"
+    },
     "activationEvents": [],
     "main": "./dist/extension.js",
     "contributes": {
