@@ -197,7 +197,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'diff-checker',
         label: 'Difference Checker',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Text,
         template: '<diff-checker></diff-checker>',
         icon: 'file-diff',

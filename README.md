@@ -89,6 +89,18 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
+  <tr>
+    <td>ASCII Binary / Hex</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>Unicode Inspector</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
 
   <tr>
     <th colspan="4">[📱 UI / UX Design]</th>
@@ -181,7 +193,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Difference Checker</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
