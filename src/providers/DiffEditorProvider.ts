@@ -50,6 +50,9 @@ export class DiffEditorProvider {
                     this.sendConfiguration(this.panel!.webview);
                     this.updateWebview();
                     break;
+                case 'update':
+                    vscode.commands.executeCommand('devtool-plus.diffContentChanged', message.toolId, message.value);
+                    break;
                 case 'error':
                     vscode.window.showErrorMessage(message.value);
                     break;
@@ -191,6 +194,46 @@ export class DiffEditorProvider {
                         setTimeout(() => {
                             diffEditor.getOriginalEditor().focus();
                         }, 0);
+
+                        diffEditor.getOriginalEditor().onDidChangeModelContent(debounce(() => {
+                            const originalValue = diffEditor.getOriginalEditor().getValue();
+                            const modifiedValue = diffEditor.getModifiedEditor().getValue();
+                            
+                            vscode.postMessage({
+                                type: 'update',
+                                toolId: currentToolId,
+                                value: {
+                                    original: originalValue,
+                                    modified: modifiedValue
+                                }
+                            });
+                        }, 300));
+
+                        diffEditor.getModifiedEditor().onDidChangeModelContent(debounce(() => {
+                            const originalValue = diffEditor.getOriginalEditor().getValue();
+                            const modifiedValue = diffEditor.getModifiedEditor().getValue();
+                            
+                            vscode.postMessage({
+                                type: 'update',
+                                toolId: currentToolId,
+                                value: {
+                                    original: originalValue,
+                                    modified: modifiedValue
+                                }
+                            });
+                        }, 300));
+
+                        function debounce(func, wait) {
+                            let timeout;
+                            return function executedFunction(...args) {
+                                const later = () => {
+                                    clearTimeout(timeout);
+                                    func(...args);
+                                };
+                                clearTimeout(timeout);
+                                timeout = setTimeout(later, wait);
+                            };
+                        }
 
                         createOrUpdateMonacoTheme();
 

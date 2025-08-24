@@ -88,6 +88,10 @@ export function activate(context: vscode.ExtensionContext) {
             if (tool) {
                 vscode.commands.executeCommand('devtool-plus.selectTool', tool);
             }
+        }),
+
+        vscode.commands.registerCommand('devtool-plus.diffContentChanged', (toolId: string, value: any) => {
+            sidePanelProvider.updateFromEditor(toolId, value);
         })
     );
 

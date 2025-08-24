@@ -303,6 +303,16 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    public updateFromEditor(toolId: string, value: any) {
+        if (this.view && this.currentTool && this.currentTool.id === toolId) {
+            this.view.webview.postMessage({
+                type: 'updateFromEditor',
+                toolId: toolId,
+                value: value
+            });
+        }
+    }
+
     private sendRecentTools() {
         if (!this.view) return;
         
