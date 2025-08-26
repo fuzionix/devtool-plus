@@ -44,6 +44,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async message => {
             switch (message.type) {
                 case 'ready':
+                    this.sendRecentTools();
                     break;
                 case 'error':
                     vscode.window.showErrorMessage(message.value);
