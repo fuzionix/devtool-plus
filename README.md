@@ -147,7 +147,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>UUID Generator</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -181,6 +181,18 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
+  <tr>
+    <td>File Compressor / Decompressor</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">🚧</td>
+  </tr>
+  <tr>
+    <td>Random Data Generator</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">📝</td>
+  </tr>
 
   <tr>
     <th colspan="4">[📝 Text]</th>
@@ -196,6 +208,12 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Markdown Table Builder</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">📝</td>
   </tr>
 
   <tr>
