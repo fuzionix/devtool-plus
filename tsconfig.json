@@ -19,5 +19,8 @@
         "noUnusedLocals": true,
         "experimentalDecorators": true,
         "useDefineForClassFields": false,
-    }
+    },
+    "exclude": [
+        "website"
+    ]
 }
