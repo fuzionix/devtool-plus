@@ -94,6 +94,11 @@
                 "command": "devtool-plus.aboutButton",
                 "title": "About",
                 "icon": "$(info)"
+            },
+            {
+                "command": "devtool-plus.searchButton",
+                "title": "Search Tools",
+                "icon": "$(search)"
             }
         ],
         "menus": {
@@ -112,6 +117,11 @@
                     "command": "devtool-plus.aboutButton",
                     "when": "view == devtool-plus.toolsView",
                     "group": "navigation@3"
+                },
+                {
+                    "command": "devtool-plus.searchButton",
+                    "when": "view == devtool-plus.toolsExplorer",
+                    "group": "navigation@1"                    
                 }
             ]
         }

@@ -4,7 +4,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
-        version: '1.0.0',
+        version: '1.0.1',
         category: ToolCategory.Encode,
         template: '<base64-encoder></base64-encoder>',
         icon: 'file-digit',

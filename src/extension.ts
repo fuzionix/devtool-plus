@@ -74,6 +74,38 @@ export function activate(context: vscode.ExtensionContext) {
             sidePanelProvider.about();
         }),
 
+        vscode.commands.registerCommand('devtool-plus.searchButton', async () => {
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.placeholder = 'E.g. UUID Generator';
+            quickPick.matchOnDescription = true;
+            quickPick.matchOnDetail = true;
+
+            quickPick.onDidChangeValue((value) => {
+                const searchTerm = value.trim().toLowerCase();
+                const filteredTools = TOOLS.filter(tool =>
+                    tool.label.toLowerCase().includes(searchTerm) ||
+                    tool.category.toLowerCase().includes(searchTerm) ||
+                    (tool.tags && tool.tags.some(tag => tag.toLowerCase().startsWith(searchTerm)))
+                );
+                quickPick.items = filteredTools.map(tool => ({
+                    label: tool.label,
+                    description: tool.category,
+                    detail: tool.tags?.join(', ') ?? '',
+                    tool: tool
+                }));
+            });
+
+            quickPick.onDidAccept(() => {
+                const selected = quickPick.selectedItems[0];
+                if (selected && (selected as any).tool) {
+                    vscode.commands.executeCommand('devtool-plus.selectTool', (selected as any).tool);
+                    quickPick.hide();
+                }
+            });
+
+            quickPick.show();
+        }),
+
         vscode.commands.registerCommand('devtool-plus.searchTools', (searchTerm: string) => {
             toolsViewProvider.searchTools(searchTerm);
         }),
