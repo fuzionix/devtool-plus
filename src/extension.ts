@@ -2,19 +2,17 @@ import * as vscode from 'vscode';
 import { SidePanelProvider } from './providers/SidePanelProvider';
 import { ToolsViewProvider } from './providers/ToolsViewProvider';
 import { ToolDecorationProvider } from './providers/ToolDecorationProvider';
-import { EditorViewProvider } from './providers/EditorViewProvider';
 import { CodeEditorProvider } from './providers/CodeEditorProvider';
 import { DiffEditorProvider } from './providers/DiffEditorProvider';
 import { Tool } from './types/tool';
 import { TOOLS } from './constants/tools';
 
-const activeEditorProviders = new Map<string, EditorViewProvider | CodeEditorProvider | DiffEditorProvider>();
+const activeEditorProviders = new Map<string, CodeEditorProvider | DiffEditorProvider>();
 
 export function activate(context: vscode.ExtensionContext) {
     const sidePanelProvider = new SidePanelProvider(context.extensionUri, context);
     const toolsViewProvider = new ToolsViewProvider(context);
     const toolDecorationProvider = new ToolDecorationProvider();
-    const editorViewProvider = new EditorViewProvider(context.extensionUri);
     const codeEditorProvider = new CodeEditorProvider(context.extensionUri);
     const diffEditorProvider = new DiffEditorProvider(context.extensionUri);
 
@@ -59,9 +57,6 @@ export function activate(context: vscode.ExtensionContext) {
                 } else if (tool.editor.viewType === 'diff') {
                     diffEditorProvider.showTool(tool);
                     activeEditorProviders.set(tool.id, diffEditorProvider);
-                } else {
-                    editorViewProvider.showTool(tool);
-                    activeEditorProviders.set(tool.id, editorViewProvider);
                 }
             }
             toolsViewProvider.searchTools('');

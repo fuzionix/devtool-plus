@@ -182,19 +182,6 @@ export const TOOLS: Tool[] = [
         tags: ['datetime', 'convert', 'format', 'timezone', 'date', 'time', 'parser', 'relative', 'iso'],
     },
     {
-        id: 'text-editor',
-        label: 'Text Editor',
-        version: '1.0.0',
-        category: ToolCategory.Text,
-        template: '<text-editor></text-editor>',
-        icon: 'type',
-        tags: ['text', 'editor', 'document', 'plain', 'edit', 'format', 'content', 'write', 'notes'],
-        editor: {
-            viewType: 'simple',
-            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
-        }
-    },
-    {
         id: 'diff-checker',
         label: 'Difference Checker',
         version: '1.1.0',
@@ -206,6 +193,15 @@ export const TOOLS: Tool[] = [
             viewType: 'diff',
             language: 'plaintext'
         }
+    },
+    {
+        id: 'markdown-table-builder',
+        label: 'Markdown Table Builder',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<markdown-table-builder></markdown-table-builder>',
+        icon: 'table',
+        tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
         id: 'qr-code-generator',
