@@ -13,7 +13,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'url-encoder',
         label: 'URL Encoder',
-        version: '1.0.0',
+        version: '1.0.1',
         category: ToolCategory.Encode,
         template: '<url-encoder></url-encoder>',
         icon: 'link-2',
