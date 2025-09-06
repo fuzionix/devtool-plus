@@ -27,6 +27,9 @@ export class UnixPathConvertor extends BaseTool {
                 <hr />
 
                 <!-- UNIX Path Input Field -->
+                <div class="flex justify-between items-baseline mb-2 text-xs">
+                    <p class="mb-0 text-xs">UNIX Path</p>
+                </div>
                 <div class="relative flex items-center mt-2">
                     <textarea
                         id="unix-input"
@@ -66,6 +69,9 @@ export class UnixPathConvertor extends BaseTool {
                 </div>
 
                 <!-- Windows Path Input Field -->
+                <div class="flex justify-between items-baseline mb-2 text-xs">
+                    <p class="mb-0 text-xs">Windows Path</p>
+                </div>
                 <div class="relative flex items-center mt-2">
                     <textarea
                         id="windows-input"
