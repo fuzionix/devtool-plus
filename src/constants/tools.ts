@@ -35,7 +35,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<ascii-encoder></ascii-encoder>',
         icon: 'binary',
-        isNew: true,
         tags: ['ascii', 'encode', 'decode', 'text', 'string', 'binary', 'hex', 'hexadecimal']
     },
     {
@@ -45,7 +44,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<unicode-inspector></unicode-inspector>',
         icon: 'book-type',
-        isNew: true,
         tags: ['unicode', 'inspect', 'text', 'string', 'character', 'codepoint']
     },
     {
@@ -201,6 +199,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<markdown-table-builder></markdown-table-builder>',
         icon: 'table',
+        isNew: true,
         tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
