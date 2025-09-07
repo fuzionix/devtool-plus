@@ -1,52 +1,39 @@
 import * as YAML from 'js-yaml';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 
-function convertJsonToYaml(jsonStr: string): string {
-    const jsonObj = JSON.parse(jsonStr);
-    return YAML.dump(jsonObj, { lineWidth: -1, indent: 2 });
+function toJSON(input: string, sourceFormat: string): any {
+    switch (sourceFormat) {
+        case 'json':
+            return JSON.parse(input);
+        case 'yaml':
+            return YAML.load(input);
+        case 'xml':
+            const parser = new XMLParser({
+                ignoreAttributes: false,
+                attributeNamePrefix: "@_"
+            });
+            return parser.parse(input);
+        default:
+            throw new Error(`Unsupported source format: ${sourceFormat}`);
+    }
 }
 
-function convertJsonToXml(jsonStr: string): string {
-    const jsonObj = JSON.parse(jsonStr);
-    const builder = new XMLBuilder({
-        format: true,
-        ignoreAttributes: false,
-        indentBy: '  '
-    });
-    return builder.build(jsonObj);
-}
-
-function convertYamlToJson(yamlStr: string): string {
-    const yamlObj = YAML.load(yamlStr);
-    return JSON.stringify(yamlObj, null, 4);
-}
-
-function convertYamlToXml(yamlStr: string): string {
-    const yamlObj = YAML.load(yamlStr);
-    const builder = new XMLBuilder({
-        format: true,
-        ignoreAttributes: false,
-        indentBy: '  '
-    });
-    return builder.build(yamlObj);
-}
-
-function convertXmlToJson(xmlStr: string): string {
-    const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: "@_"
-    });
-    const xmlObj = parser.parse(xmlStr);
-    return JSON.stringify(xmlObj, null, 4);
-}
-
-function convertXmlToYaml(xmlStr: string): string {
-    const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: "@_"
-    });
-    const xmlObj = parser.parse(xmlStr);
-    return YAML.dump(xmlObj, { lineWidth: -1, indent: 2 });
+function fromJSON(jsonObj: any, targetFormat: string): string {
+    switch (targetFormat) {
+        case 'json':
+            return JSON.stringify(jsonObj, null, 4);
+        case 'yaml':
+            return YAML.dump(jsonObj, { lineWidth: -1, indent: 2 });
+        case 'xml':
+            const builder = new XMLBuilder({
+                format: true,
+                ignoreAttributes: false,
+                indentBy: '  '
+            });
+            return builder.build(jsonObj);
+        default:
+            throw new Error(`Unsupported target format: ${targetFormat}`);
+    }
 }
 
 async function convert(args: { formatFrom: string, formatTo: string }) {
@@ -61,8 +48,7 @@ async function convert(args: { formatFrom: string, formatTo: string }) {
         return;
     }
 
-    const formatFrom = args.formatFrom;
-    const formatTo = args.formatTo;
+    const { formatFrom, formatTo } = args;
 
     // No conversion needed if formats are the same
     if (formatFrom === formatTo) {
@@ -71,25 +57,9 @@ async function convert(args: { formatFrom: string, formatTo: string }) {
     }
 
     try {
-        let result: string;
-
-        // Convert based on from/to formats
-        if (formatFrom === 'json' && formatTo === 'yaml') {
-            result = convertJsonToYaml(inputText);
-        } else if (formatFrom === 'json' && formatTo === 'xml') {
-            result = convertJsonToXml(inputText);
-        } else if (formatFrom === 'yaml' && formatTo === 'json') {
-            result = convertYamlToJson(inputText);
-        } else if (formatFrom === 'yaml' && formatTo === 'xml') {
-            result = convertYamlToXml(inputText);
-        } else if (formatFrom === 'xml' && formatTo === 'json') {
-            result = convertXmlToJson(inputText);
-        } else if (formatFrom === 'xml' && formatTo === 'yaml') {
-            result = convertXmlToYaml(inputText);
-        } else {
-            throw new Error(`Unsupported conversion: ${formatFrom} to ${formatTo}`);
-        }
-
+        const jsonObj = toJSON(inputText, formatFrom);
+        const result = fromJSON(jsonObj, formatTo);
+        
         outputEditor.setValue(result);
     } catch (error: any) {
         console.error('Error during conversion:', error);
