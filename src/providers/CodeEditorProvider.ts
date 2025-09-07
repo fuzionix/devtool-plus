@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Tool } from '../types/tool';
 import { EditorConfigPayload } from '../types/config';
+import { getFileExtensionForLanguage } from '../utils/util';
 
 export class CodeEditorProvider {
     public static readonly viewType = 'devtool-plus.codeEditorView';
@@ -53,6 +54,9 @@ export class CodeEditorProvider {
                     break;
                 case 'error':
                     vscode.window.showErrorMessage(message.value);
+                    break;
+                case 'export':
+                    this.handleExport(message.content, message.language);
                     break;
             }
         });
@@ -168,13 +172,45 @@ export class CodeEditorProvider {
                         width: 1px;
                         background-color: var(--vscode-editorGroup-border);
                     }
+                    .export-button {
+                        position: absolute;
+                        display: flex;
+                        align-items: center;
+                        bottom: 12px;
+                        right: 24px;
+                        z-index: 100;
+                        height: 32px;
+                        gap: 8px;
+                        background-color: var(--vscode-button-background);
+                        color: var(--vscode-button-foreground);
+                        border: none;
+                        padding: 4px 12px;
+                        border-radius: 2px;
+                        font-family: var(--vscode-font-family);
+                        font-size: 12px;
+                        cursor: pointer;
+                    }
+                    .export-button:hover {
+                        background-color: var(--vscode-button-hoverBackground);
+                    }
+                    .export-button-separator {
+                        border-left: 1px solid var(--vscode-button-foreground); 
+                        height: 16px; 
+                        opacity: 0.25;
+                    }
                 </style>
             </head>
             <body>
                 <div class="editor-container">
                     <div id="input-editor" class="editor-pane"></div>
                     <div class="editor-divider"></div>
-                    <div id="output-editor" class="editor-pane"></div>
+                    <div id="output-editor" class="editor-pane">
+                        <button id="export-button" class="export-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                            <div class="export-button-separator"></div>
+                            <span>Export</span>
+                        </button>
+                    </div>
                 </div>
 
                 <script nonce="${nonce}" src="${monacoUri}/loader.js"></script>
@@ -249,6 +285,23 @@ export class CodeEditorProvider {
                             applyEditorConfiguration(pendingConfig);
                             pendingConfig = undefined;
                         }
+
+                        document.getElementById('export-button').addEventListener('click', () => {
+                            const outputContent = outputEditor.getValue();
+                            if (!outputContent.trim()) {
+                                vscode.postMessage({ 
+                                    type: 'error', 
+                                    value: 'Nothing to export: output is empty' 
+                                });
+                                return;
+                            }
+                            
+                            vscode.postMessage({
+                                type: 'export',
+                                content: outputContent,
+                                language: outputEditor.getModel().getLanguageId()
+                            });
+                        });
 
                         vscode.postMessage({ type: 'ready' });
                     });
@@ -395,6 +448,32 @@ export class CodeEditorProvider {
                 type: 'updateTool',
                 tool: this.currentTool
             });
+        }
+    }
+
+    private async handleExport(content: string, language: string) {
+        try {
+            let extension = getFileExtensionForLanguage(language);
+            let defaultFilename = `export${extension}`;
+            
+            const uri = await vscode.window.showSaveDialog({
+                defaultUri: vscode.Uri.joinPath(
+                    vscode.workspace.workspaceFolders?.[0]?.uri || 
+                    vscode.Uri.file(require('os').homedir()), 
+                    defaultFilename
+                ),
+                filters: {
+                    'All Files': ['*']
+                },
+                saveLabel: 'Export'
+            });
+            
+            if (uri) {
+                await vscode.workspace.fs.writeFile(uri, Buffer.from(content, 'utf8'));
+                vscode.window.showInformationMessage(`Successfully exported to ${uri.fsPath}`);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Export failed: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
