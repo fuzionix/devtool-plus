@@ -112,11 +112,11 @@ export const TOOLS: Tool[] = [
     {
         id: 'data-format-convertor',
         label: 'Data Format Convertor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<data-format-convertor></data-format-convertor>',
         icon: 'shapes',
-        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'data', 'structure', 'parser', 'transform', 'editor'],
+        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'toml', 'data', 'structure', 'parser', 'transform', 'editor'],
         editor: {
             viewType: 'code',
             language: 'json',

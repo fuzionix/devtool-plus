@@ -121,7 +121,7 @@
                 {
                     "command": "devtool-plus.searchButton",
                     "when": "view == devtool-plus.toolsExplorer",
-                    "group": "navigation@1"                    
+                    "group": "navigation@1"
                 }
             ]
         }
@@ -172,6 +172,7 @@
         "mime-db": "^1.53.0",
         "monaco-editor-core": "^0.52.2",
         "qrcode": "^1.5.4",
+        "toml": "^3.0.0",
         "uuid": "^11.0.5",
         "xml2js": "^0.6.2"
     },

@@ -20,10 +20,10 @@ export class DataFormatConvertor extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert between different data formats including JSON, YAML, and XML.</p>
+                <p class="opacity-75">Convert between different data formats including JSON, YAML, XML, and TOML.</p>
                 <hr />
                 <tool-file-dropzone 
-                    accept=".json,.yaml,.yml,.xml" 
+                    accept=".json,.yaml,.yml,.xml,.toml" 
                     placeholder="Drop your file here or paste content in the editor"
                     @files-changed=${this.handleFilesChanged}
                 ></tool-file-dropzone>
@@ -35,7 +35,8 @@ export class DataFormatConvertor extends BaseTool {
                         .options=${[
                             { value: 'json', label: 'JSON' },
                             { value: 'yaml', label: 'YAML' },
-                            { value: 'xml', label: 'XML' }
+                            { value: 'xml', label: 'XML' },
+                            { value: 'toml', label: 'TOML' }
                         ]}
                         .value=${this.formatFrom}
                         @change=${this.handleFormatFromChange}
@@ -50,6 +51,7 @@ export class DataFormatConvertor extends BaseTool {
                             { value: 'json', label: 'JSON' },
                             { value: 'yaml', label: 'YAML' },
                             { value: 'xml', label: 'XML' }
+                            // Note: TOML is excluded from target formats
                         ]}
                         .value=${this.formatTo}
                         @change=${this.handleFormatToChange}
@@ -79,7 +81,13 @@ export class DataFormatConvertor extends BaseTool {
     private swapFormats() {
         const temp = this.formatFrom;
         this.formatFrom = this.formatTo;
-        this.formatTo = temp;
+        
+        if (temp === 'toml') {
+            this.formatTo = 'json';
+        } else {
+            this.formatTo = temp;
+        }
+        
         this.handleFormatChange();
     }
 
@@ -128,6 +136,8 @@ export class DataFormatConvertor extends BaseTool {
                 this.formatFrom = 'yaml';
             } else if (fileName.endsWith('.xml')) {
                 this.formatFrom = 'xml';
+            } else if (fileName.endsWith('.toml')) {
+                this.formatFrom = 'toml';
             }
             
             const reader = new FileReader();
