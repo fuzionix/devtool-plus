@@ -22,7 +22,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'url-parser',
         label: 'URL Parser',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Encode,
         template: '<url-parser></url-parser>',
         icon: 'link',
