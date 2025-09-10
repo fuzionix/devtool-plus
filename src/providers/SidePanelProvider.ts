@@ -133,6 +133,10 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
                         <h4>About DevTool+</h4>
                     </div>
                     <hr />
+                    <div>
+                        <p>Built with Lit and TypeScript, DevTool+ maintains VS Code's native UI patterns while extending its functionality.</p>
+                        <p>The extension will keep evolving. Your feedback is invaluable in shaping its future. Feel free to share your thoughts and suggestions!</p>
+                    </div>
                     <div id="about-content" class="pt-2 pb-2 border border-[var(--vscode-panel-border)] rounded-sm">
                         <h5 class="text-center">Version: <span>0.2.0 beta</span></h5>  
                         <div class="flex justify-center gap-1 mb-2 mt-4">
