@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     adjustTextareaHeight,
@@ -14,6 +14,9 @@ export class UnixPathConvertor extends BaseTool {
     @state() private windowsPath = 'C:\\Path\\To\\File\\Example.txt';
     @state() private windowsPathalert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isWindowsCopied = false;
+
+    @query('#unix-input') unixPathTextarea!: HTMLTextAreaElement;
+    @query('#windows-input') windowsPathTextarea!: HTMLTextAreaElement;
 
     static styles = css`
         ${BaseTool.styles}
@@ -108,10 +111,9 @@ export class UnixPathConvertor extends BaseTool {
         `;
     }
 
-    private handleUnixPathInput(event: Event): void {
+    private async handleUnixPathInput(event: Event): Promise<void> {
         const target = event.target as HTMLTextAreaElement;
         this.unixPath = target.value;
-        adjustTextareaHeight(target);
         
         // Convert UNIX path to Windows path
         if (this.unixPath) {
@@ -145,12 +147,15 @@ export class UnixPathConvertor extends BaseTool {
             this.windowsPath = '';
             this.windowsPathalert = null;
         }
+
+        adjustTextareaHeight(this.unixPathTextarea);
+        await this.updateComplete;
+        adjustTextareaHeight(this.windowsPathTextarea);
     }
 
-    private handleWindowsPathInput(event: Event): void {
+    private async handleWindowsPathInput(event: Event): Promise<void> {
         const target = event.target as HTMLTextAreaElement;
         this.windowsPath = target.value;
-        adjustTextareaHeight(target);
         
         // Convert Windows path to UNIX path
         if (this.windowsPath) {
@@ -163,8 +168,8 @@ export class UnixPathConvertor extends BaseTool {
                     // Replace C:\ with /c/
                     const pathAfterDrive = this.windowsPath.substring(2);
                     const formattedPath = pathAfterDrive.startsWith('\\') ? 
-                        pathAfterDrive.substring(1).replace(/\\/g, '/') : 
-                        pathAfterDrive.replace(/\\/g, '/');
+                    pathAfterDrive.substring(1).replace(/\\/g, '/') : 
+                    pathAfterDrive.replace(/\\/g, '/');
                     this.unixPath = `/${driveLetter}/${formattedPath}`;
                 } 
                 // Handle network paths (UNC)
@@ -187,6 +192,10 @@ export class UnixPathConvertor extends BaseTool {
             this.unixPath = '';
             this.unixPathalert = null;
         }
+
+        adjustTextareaHeight(this.windowsPathTextarea);
+        await this.updateComplete;
+        adjustTextareaHeight(this.unixPathTextarea);
     }
 
     private async copyUnixPath() {

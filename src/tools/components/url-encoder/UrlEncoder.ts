@@ -172,8 +172,8 @@ export class UrlEncoder extends BaseTool {
             this.output = '';
         }
 
-        await this.updateComplete;
         if (this.outputTextarea) {
+            await this.updateComplete;
             adjustTextareaHeight(this.outputTextarea);
         }
     }
