@@ -28,6 +28,9 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
             localResourceRoots: [this.extensionUri]
         };
 
+        const themeKind = vscode.window.activeColorTheme.kind;
+        const iconTheme = themeKind === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+
         const toolComponentsUri = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this.extensionUri, 'dist', 'tools', 'toolComponents.js')
         );
@@ -37,7 +40,7 @@ export class SidePanelProvider implements vscode.WebviewViewProvider {
         );
 
         const toolIconUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.joinPath(this.extensionUri, 'media', 'tools')
+            vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', iconTheme)
         );
 
         webviewView.webview.html = this.getHtmlForWebview(toolComponentsUri, styleUri, toolIconUri);

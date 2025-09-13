@@ -76,7 +76,9 @@ export class ToolTreeItem extends vscode.TreeItem {
             title: 'Select Tool',
             arguments: [tool]
         };
-        const iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'media', 'tools', `${tool.icon}.svg`);
+        const themeKind = vscode.window.activeColorTheme.kind;
+        const iconTheme = themeKind === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+        const iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'media', 'tools', iconTheme, `${tool.icon}.svg`);
         this.iconPath = iconPath.path;
         this.resourceUri = vscode.Uri.parse(`devtool-plus:/${tool.id}`);
     }
