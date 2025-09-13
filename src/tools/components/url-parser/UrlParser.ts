@@ -9,7 +9,17 @@ import {
 export class UrlParser extends BaseTool {
     @state() private input = 'https://example.com/?cat=meow';
     @state() private params: Array<{key: string, value: string}> = [{key: '', value: ''}];
+    @state() private selectedPanel: 'params' | 'detail' = 'params';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
+    
+    @state() private urlComponents = {
+        protocol: '',
+        domain: '',
+        port: '',
+        pathname: '',
+        query: '',
+        hash: ''
+    };
 
     @query('#input') inputArea!: HTMLTextAreaElement;
 
@@ -20,14 +30,79 @@ export class UrlParser extends BaseTool {
 
     static styles = css`
         ${BaseTool.styles}
-        /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>
+            .detail-item {
+                display: flex;
+                align-items: center;
+                height: 32px;
+                margin-bottom: 8px;
+                position: relative;
+                background-color: var(--vscode-panel-background);
+                box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            
+            .detail-value {
+                flex: 1;
+                padding: 6px 10px;
+                word-break: break-all;
+            }
+
+            .detail-separator {
+                width: 1px;
+                height: 60%;
+                background-color: var(--vscode-panel-border);
+            }
+            
+            .detail-label {
+                width: 70px;
+                padding: 6px 10px;
+                color: var(--vscode-descriptionForeground);
+                font-size: 0.75rem;
+                text-align: right;
+            }
+            
+            .empty-value {
+                opacity: 0.5;
+                font-style: italic;
+            }
+            </style>
             <div class="tool-inner-container">
                 <p class="opacity-75">URLs are used to access resources on the web. They consist of several components, including the protocol, domain, path, and query parameters.</p>
                 <hr />
+
+                <!-- Radio Group -->
+                <div class="">
+                    <div class="radio-group" role="radiogroup" aria-label="URL Encoding Mode">
+                        <button 
+                            role="radio"
+                            aria-checked=${this.selectedPanel === 'params' ? 'true' : 'false'}
+                            class="radio-group-button flex justify-center items-center"
+                            @click=${() => this.handlePanelChange('params')}
+                        >
+                            <span class="text-xs opacity-75 mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ampersand-icon lucide-ampersand"><path d="M17.5 12c0 4.4-3.6 8-8 8A4.5 4.5 0 0 1 5 15.5c0-6 8-4 8-8.5a3 3 0 1 0-6 0c0 3 2.5 8.5 12 13"/><path d="M16 12h3"/></svg>
+                            </span>
+                            <h4>Params</h4>
+                        </button>
+                        <button 
+                            role="radio"
+                            aria-checked=${this.selectedPanel === 'detail' ? 'true' : 'false'}
+                            class="radio-group-button flex justify-center items-center"
+                            @click=${() => this.handlePanelChange('detail')}
+                        >
+                            <span class="text-xs opacity-75 mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-text-search-icon lucide-text-search"><path d="M21 5H3"/><path d="M10 12H3"/><path d="M10 19H3"/><circle cx="17" cy="15" r="3"/><path d="m21 19-1.9-1.9"/></svg>
+                            </span>
+                            <h4>Detail</h4>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Input Field -->
                 <div class="relative flex items-center mt-2">
@@ -60,13 +135,36 @@ export class UrlParser extends BaseTool {
                 </div>
 
                 <!-- Parameter Items -->
-                <div class="flex items-center mb-2 gap-2">
-                    <span class="flex-[1] !bg-transparent">Keys</span>
-                    <span class="text-gray-500">=</span>
-                    <span class="flex-[3] !bg-transparent">Values</span>
-                </div>
-                <div>
-                    ${this.params.map((param, index) => this.renderParamRow(param, index))}
+                ${this.selectedPanel === 'params' ? html`
+                    <div class="flex items-center mb-2 gap-2">
+                        <span class="flex-[1] !bg-transparent">Keys</span>
+                        <span class="text-gray-500">=</span>
+                        <span class="flex-[3] !bg-transparent">Values</span>
+                    </div>
+                    <div>
+                        ${this.params.map((param, index) => this.renderParamRow(param, index))}
+                    </div>
+                ` : html`
+                    <div class="mt-2">
+                        ${this.renderDetailItem('Protocol', this.urlComponents.protocol)}
+                        ${this.renderDetailItem('Domain', this.urlComponents.domain)}
+                        ${this.renderDetailItem('Port', this.urlComponents.port)}
+                        ${this.renderDetailItem('Path', this.urlComponents.pathname)}
+                        ${this.renderDetailItem('Query', this.urlComponents.query)}
+                        ${this.renderDetailItem('Fragment', this.urlComponents.hash)}
+                    </div>
+                `}
+            </div>
+        `;
+    }
+
+    private renderDetailItem(label: string, value: string) {
+        return html`
+            <div class="detail-item">
+                <div class="detail-label">${label}</div>
+                <div class="detail-separator"></div>
+                <div class="detail-value ${!value ? 'empty-value' : ''}">
+                    ${value || 'None'}
                 </div>
             </div>
         `;
@@ -79,9 +177,14 @@ export class UrlParser extends BaseTool {
         this.parseUrl();
     }
 
+    private handlePanelChange(mode: 'params' | 'detail') {
+        this.selectedPanel = mode;
+    }
+
     private parseUrl(): void {
         if (!this.input.trim()) {
             this.params = [{key: '', value: ''}];
+            this.resetUrlComponents();
             this.alert = null;
             return;
         }
@@ -94,6 +197,15 @@ export class UrlParser extends BaseTool {
                 // If URL is invalid without protocol, try adding https://
                 url = new URL(`https://${this.input}`);
             }
+
+            this.urlComponents = {
+                protocol: url.protocol,
+                domain: url.hostname,
+                port: url.port,
+                pathname: url.pathname,
+                query: url.search,
+                hash: url.hash
+            };
 
             const searchParams = url.searchParams;
             const newParams: Array<{key: string, value: string}> = [];
@@ -111,11 +223,23 @@ export class UrlParser extends BaseTool {
             this.params = newParams;
             this.alert = null;
         } catch (error) {
+            this.resetUrlComponents();
             this.alert = {
                 type: 'error',
                 message: 'Invalid URL format'
             };
         }
+    }
+
+    private resetUrlComponents(): void {
+        this.urlComponents = {
+            protocol: '',
+            domain: '',
+            port: '',
+            pathname: '',
+            query: '',
+            hash: ''
+        };
     }
 
     private renderParamRow(param: {key: string, value: string}, index: number) {
@@ -204,6 +328,7 @@ export class UrlParser extends BaseTool {
             }
             
             this.input = url.toString();
+            this.parseUrl();
             this.alert = null;
         } catch (error) {
             this.alert = {
@@ -216,6 +341,7 @@ export class UrlParser extends BaseTool {
     private clearAll(): void {
         this.input = '';
         this.params = [{key: '', value: ''}];
+        this.resetUrlComponents();
         this.alert = null;
         const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
         if (inputTextarea) {

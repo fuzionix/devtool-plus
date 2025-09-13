@@ -370,13 +370,13 @@ export class Base64Encoder extends BaseTool {
 
         if (file) {
             try {
+                this.file = file;
                 this.fileName = file.name;
                 this.inputMimeType = file.type;
 
                 const MAX_AUTO_ENCODE_SIZE = 10 * 1024 * 1024;
 
                 if (file.size > MAX_AUTO_ENCODE_SIZE) {
-                    this.file = file;
                     this.alert = {
                         type: 'warning',
                         message: `File exceeds 10MB which may cause performance issues. You can still encode the file manually.`,

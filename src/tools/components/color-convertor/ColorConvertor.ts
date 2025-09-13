@@ -22,6 +22,7 @@ export class ColorConvertor extends BaseTool {
         lch: 'lch(54.78% 67.95 273.92)',
         name: ''
     };
+    @state() private isLight = true;
     @state() private exactName = false; // Track if the name is exact or approximate
     @state() private errors = {
         hex: '',
@@ -60,8 +61,14 @@ export class ColorConvertor extends BaseTool {
             <div class="tool-inner-container">
                 <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, LCH, and named colors. Edit any format directly or use the color picker.</p>
                 <hr />
-                                
-                <div class="flex flex-col items-center">
+
+                <div class="relative flex flex-col items-center">
+                    <div class="absolute flex items-center top-[6px] left-[6px] z-10 pointer-events-none" style="color: ${this.isLight ? '#000' : '#fff'}">
+                        ${this.isLight 
+                            ? html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`
+                            : html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>`
+                        }
+                    </div>
                     <tool-color-picker
                         class="w-full h-7"
                         .value="${this.colorValue}"
@@ -374,6 +381,7 @@ export class ColorConvertor extends BaseTool {
                 this.exactName = false;
             }
             
+            this.isLight = parsedColor.isLight();
         } catch (error) {
             console.error('Failed to update color formats:', error);
         }
@@ -411,6 +419,7 @@ export class ColorConvertor extends BaseTool {
             updatedFormats.name = colorName;
             
             this.formats = updatedFormats;
+            this.isLight = parsedColor.isLight();
         } catch (error) {
             console.error('Failed to update other color formats:', error);
         }
@@ -456,7 +465,7 @@ export class ColorConvertor extends BaseTool {
             };
             
             this.colorValue = parsedColor.toHex();
-            
+            this.isLight = parsedColor.isLight();
         } catch (error) {
             console.error('Failed to update from HSL:', error);
         }
@@ -500,7 +509,7 @@ export class ColorConvertor extends BaseTool {
             };
             
             this.colorValue = parsedColor.toHex();
-            
+            this.isLight = parsedColor.isLight();
         } catch (error) {
             console.error('Failed to update from LCH:', error);
         }

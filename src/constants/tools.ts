@@ -4,7 +4,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
-        version: '1.0.0',
+        version: '1.0.1',
         category: ToolCategory.Encode,
         template: '<base64-encoder></base64-encoder>',
         icon: 'file-digit',
@@ -13,7 +13,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'url-encoder',
         label: 'URL Encoder',
-        version: '1.0.0',
+        version: '1.0.1',
         category: ToolCategory.Encode,
         template: '<url-encoder></url-encoder>',
         icon: 'link-2',
@@ -22,7 +22,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'url-parser',
         label: 'URL Parser',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Encode,
         template: '<url-parser></url-parser>',
         icon: 'link',
@@ -35,7 +35,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<ascii-encoder></ascii-encoder>',
         icon: 'binary',
-        isNew: true,
         tags: ['ascii', 'encode', 'decode', 'text', 'string', 'binary', 'hex', 'hexadecimal']
     },
     {
@@ -45,13 +44,12 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<unicode-inspector></unicode-inspector>',
         icon: 'book-type',
-        isNew: true,
         tags: ['unicode', 'inspect', 'text', 'string', 'character', 'codepoint']
     },
     {
         id: 'color-convertor',
         label: 'Color Convertor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Design,
         template: '<color-convertor></color-convertor>',
         icon: 'paintbrush-vertical',
@@ -114,11 +112,11 @@ export const TOOLS: Tool[] = [
     {
         id: 'data-format-convertor',
         label: 'Data Format Convertor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<data-format-convertor></data-format-convertor>',
         icon: 'shapes',
-        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'data', 'structure', 'parser', 'transform', 'editor'],
+        tags: ['convert', 'format', 'json', 'yaml', 'xml', 'toml', 'data', 'structure', 'parser', 'transform', 'editor'],
         editor: {
             viewType: 'code',
             language: 'json',
@@ -182,19 +180,6 @@ export const TOOLS: Tool[] = [
         tags: ['datetime', 'convert', 'format', 'timezone', 'date', 'time', 'parser', 'relative', 'iso'],
     },
     {
-        id: 'text-editor',
-        label: 'Text Editor',
-        version: '1.0.0',
-        category: ToolCategory.Text,
-        template: '<text-editor></text-editor>',
-        icon: 'type',
-        tags: ['text', 'editor', 'document', 'plain', 'edit', 'format', 'content', 'write', 'notes'],
-        editor: {
-            viewType: 'simple',
-            editorLogicPath: 'src/tools/components/json-editor/JsonEditorLogic.js'
-        }
-    },
-    {
         id: 'diff-checker',
         label: 'Difference Checker',
         version: '1.1.0',
@@ -206,6 +191,16 @@ export const TOOLS: Tool[] = [
             viewType: 'diff',
             language: 'plaintext'
         }
+    },
+    {
+        id: 'markdown-table-builder',
+        label: 'Markdown Table Builder',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<markdown-table-builder></markdown-table-builder>',
+        icon: 'table',
+        isNew: true,
+        tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
         id: 'qr-code-generator',

@@ -118,7 +118,7 @@ export class AsciiEncoder extends BaseTool {
         this.processInput();
     }
 
-    private processInput(): void {
+    private async processInput(): Promise<void> {
         this.alert = null;
         if (!this.input) {
             this.output = '';
@@ -141,6 +141,7 @@ export class AsciiEncoder extends BaseTool {
 
         const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
         if (outputTextarea) {
+            await this.updateComplete;
             adjustTextareaHeight(outputTextarea);
         }
     }

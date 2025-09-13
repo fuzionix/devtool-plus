@@ -197,6 +197,6 @@ export class DiffChecker extends BaseTool {
         
         const distance = dp[len1][len2];
         const maxLen = Math.max(len1, len2);
-        return maxLen === 0 ? 100 : Math.round((1 - distance / maxLen) * 100);
+        return maxLen === 0 ? 100 : parseFloat(((1 - distance / maxLen) * 100).toFixed(2));
     }
 }

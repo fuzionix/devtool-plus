@@ -6,7 +6,6 @@ import { BaseTool } from '../../base/BaseTool';
 export class DataFormatConvertor extends BaseTool {
     @state() private formatFrom: string = 'json';
     @state() private formatTo: string = 'yaml';
-    @state() private isProcessing: boolean = false;
 
     static styles = css`
         ${BaseTool.styles}
@@ -20,10 +19,10 @@ export class DataFormatConvertor extends BaseTool {
     protected renderTool() {
         return html`
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert between different data formats including JSON, YAML, and XML.</p>
+                <p class="opacity-75">Convert between different data formats including JSON, YAML, XML, and TOML.</p>
                 <hr />
                 <tool-file-dropzone 
-                    accept=".json,.yaml,.yml,.xml" 
+                    accept=".json,.yaml,.yml,.xml,.toml" 
                     placeholder="Drop your file here or paste content in the editor"
                     @files-changed=${this.handleFilesChanged}
                 ></tool-file-dropzone>
@@ -35,7 +34,8 @@ export class DataFormatConvertor extends BaseTool {
                         .options=${[
                             { value: 'json', label: 'JSON' },
                             { value: 'yaml', label: 'YAML' },
-                            { value: 'xml', label: 'XML' }
+                            { value: 'xml', label: 'XML' },
+                            { value: 'toml', label: 'TOML' }
                         ]}
                         .value=${this.formatFrom}
                         @change=${this.handleFormatFromChange}
@@ -50,19 +50,13 @@ export class DataFormatConvertor extends BaseTool {
                             { value: 'json', label: 'JSON' },
                             { value: 'yaml', label: 'YAML' },
                             { value: 'xml', label: 'XML' }
+                            // Note: TOML is excluded from target formats
                         ]}
                         .value=${this.formatTo}
                         @change=${this.handleFormatToChange}
                     ></tool-dropdown-menu>
                 </div>
             </div>
-
-            <button class="btn btn-primary w-full gap-2" 
-                    @click=${this.handleAction}
-                    ?disabled=${this.isProcessing}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-                <h4>${this.isProcessing ? 'Converting ...' : 'Convert'}</h4>
-            </button>
         `;
     }
 
@@ -79,25 +73,14 @@ export class DataFormatConvertor extends BaseTool {
     private swapFormats() {
         const temp = this.formatFrom;
         this.formatFrom = this.formatTo;
-        this.formatTo = temp;
-        this.handleFormatChange();
-    }
-
-    private handleAction() {
-        this.isProcessing = true;
-        (window as any).vscode.postMessage({
-            type: 'update',
-            toolId: 'data-format-convertor',
-            value: {
-                action: 'convert',
-                formatFrom: this.formatFrom,
-                formatTo: this.formatTo
-            }
-        });
         
-        setTimeout(() => {
-            this.isProcessing = false;
-        }, 800);
+        if (temp === 'toml') {
+            this.formatTo = 'json';
+        } else {
+            this.formatTo = temp;
+        }
+        
+        this.handleFormatChange();
     }
 
     private handleFormatChange() {
@@ -112,7 +95,15 @@ export class DataFormatConvertor extends BaseTool {
             }
         });
 
-        this.handleAction();
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'data-format-convertor',
+            value: {
+                action: 'updateFormats',
+                formatFrom: this.formatFrom,
+                formatTo: this.formatTo
+            }
+        });
     }
 
     private handleFilesChanged(e: CustomEvent) {
@@ -128,6 +119,8 @@ export class DataFormatConvertor extends BaseTool {
                 this.formatFrom = 'yaml';
             } else if (fileName.endsWith('.xml')) {
                 this.formatFrom = 'xml';
+            } else if (fileName.endsWith('.toml')) {
+                this.formatFrom = 'toml';
             }
             
             const reader = new FileReader();
@@ -144,8 +137,6 @@ export class DataFormatConvertor extends BaseTool {
                             }
                         }
                     });
-                    
-                    this.handleAction();
                 } catch (error) {
                     console.error('Invalid file');
                 }

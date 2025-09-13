@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     adjustTextareaHeight,
@@ -14,6 +14,8 @@ export class UrlEncoder extends BaseTool {
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
     @state() private preserveUrl = true;
+
+    @query('#output') outputTextarea!: HTMLTextAreaElement;
 
     static styles = css`
         ${BaseTool.styles}
@@ -104,14 +106,17 @@ export class UrlEncoder extends BaseTool {
                     </div>
                 </div>
 
-                <div class="mt-2">
-                    <tool-switch
-                        .checked=${this.preserveUrl}
-                        rightLabel="Preserve URL structure"
-                        ariaLabel="Encoding Method"
-                        @change=${this.handleEncodingMethodChange}
-                    ></tool-switch>
-                </div>
+                ${this.selectedMode === 'encode' ? html`
+                    <div class="mt-2">
+                        <tool-switch
+                            .checked=${this.preserveUrl}
+                            rightLabel="Preserve URL structure"
+                            ariaLabel="Encoding Method"
+                            @change=${this.handleEncodingMethodChange}
+                        ></tool-switch>
+                    </div>
+                ` : ''}
+                
             </div>
         `;
     }
@@ -146,7 +151,7 @@ export class UrlEncoder extends BaseTool {
         }
     }
 
-    private processInput(): void {
+    private async processInput(): Promise<void> {
         this.alert = null;
         if (!this.input) {
             this.output = '';
@@ -167,9 +172,9 @@ export class UrlEncoder extends BaseTool {
             this.output = '';
         }
 
-        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
-        if (outputTextarea) {
-            adjustTextareaHeight(outputTextarea);
+        if (this.outputTextarea) {
+            await this.updateComplete;
+            adjustTextareaHeight(this.outputTextarea);
         }
     }
 

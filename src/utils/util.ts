@@ -55,3 +55,30 @@ export function renderCopyButton(isCopied: boolean): TemplateResult {
             </svg>
         `;
 }
+
+export function getFileExtensionForLanguage(language: string): string {
+    const extensionMap: Record<string, string> = {
+        'javascript': '.js',
+        'typescript': '.ts',
+        'html': '.html',
+        'css': '.css',
+        'json': '.json',
+        'markdown': '.md',
+        'xml': '.xml',
+        'yaml': '.yaml',
+        'python': '.py',
+        'java': '.java',
+        'c': '.c',
+        'cpp': '.cpp',
+        'csharp': '.cs',
+        'go': '.go',
+        'rust': '.rs',
+        'php': '.php',
+        'ruby': '.rb',
+        'sql': '.sql',
+        'shellscript': '.sh',
+        'plaintext': '.txt'
+    };
+    
+    return extensionMap[language] || '.txt';
+}

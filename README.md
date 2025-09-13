@@ -69,23 +69,23 @@ code --install-extension Fuzionix.devtool-plus
     <th>Progress</th>
   </tr>
   <tr>
-    <th colspan="4">[⌛ Encode / Decode]</th>
+    <th colspan="4">[Encode / Decode]</th>
   </tr>
   <tr>
     <td>Base64 Encoder / Decoder</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.0.1</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>URL Encoder</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.0.1</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>URL Parser</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -93,21 +93,21 @@ code --install-extension Fuzionix.devtool-plus
     <td>ASCII Binary / Hex</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
   <tr>
     <td>Unicode Inspector</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
 
   <tr>
-    <th colspan="4">[📱 UI / UX Design]</th>
+    <th colspan="4">[UI / UX Design]</th>
   </tr>
   <tr>
     <td>Color Convertor</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -143,7 +143,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
 
   <tr>
-    <th colspan="4">[💽 Data Manipulation]</th>
+    <th colspan="4">[Data Manipulation]</th>
   </tr>
   <tr>
     <td>UUID Generator</td>
@@ -153,7 +153,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Data Format Convertor</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
@@ -195,7 +195,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
 
   <tr>
-    <th colspan="4">[📝 Text]</th>
+    <th colspan="4">[Text]</th>
   </tr>
   <tr>
     <td>Text Editor</td>
@@ -213,11 +213,17 @@ code --install-extension Fuzionix.devtool-plus
     <td>Markdown Table Builder</td>
     <td align="center"></td>
     <td align="center"></td>
-    <td align="center">📝</td>
+    <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>Slug Generator</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">🚧</td>
   </tr>
 
   <tr>
-    <th colspan="4">[🧰 Utility]</th>
+    <th colspan="4">[Utility]</th>
   </tr>
   <tr>
     <td>QR Code Generator</td>
@@ -231,9 +237,15 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
+  <tr>
+    <td>Data Unit Converter</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">📝</td>
+  </tr>
 
   <tr>
-    <th colspan="4">[🔒 Cryptography]</th>
+    <th colspan="4">[Cryptography]</th>
   </tr>
   <tr>
     <td>Token Generator</td>
