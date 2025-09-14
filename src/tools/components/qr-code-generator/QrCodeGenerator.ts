@@ -170,7 +170,6 @@ export class QrCodeGenerator extends BaseTool {
     }
 
     private renderInputField() {
-        console.log('Selected Type:', this.selectedType);
         switch(this.selectedType) {
             case 'link':
                 return html`

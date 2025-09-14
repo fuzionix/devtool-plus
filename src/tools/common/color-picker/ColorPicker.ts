@@ -206,7 +206,7 @@ export class ColorPicker extends LitElement {
 
         .format-toggle {
             font-size: 11px;
-            color: white;
+            color: var(--vscode-input-foreground);
             background-color: transparent;
             border: none;
             opacity: 0.75;
