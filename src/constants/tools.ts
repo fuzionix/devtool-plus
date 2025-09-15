@@ -203,6 +203,15 @@ export const TOOLS: Tool[] = [
         tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
+        id: 'slug-generator',
+        label: 'Slug Generator',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<slug-generator></slug-generator>',
+        icon: 'case-kebab',
+        tags: ['slug', 'url', 'identifier', 'string', 'text', 'format', 'convert', 'title', 'web', 'link', 'seo'],
+    },
+    {
         id: 'qr-code-generator',
         label: 'QR Code Generator',
         version: '1.0.0',
