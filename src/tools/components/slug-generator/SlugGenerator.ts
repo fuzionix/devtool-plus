@@ -8,9 +8,10 @@ import {
 
 @customElement('slug-generator')
 export class SlugGenerator extends BaseTool {
-    @state() private input = '';
+    @state() private input = 'Talk is cheap. Show me the slug!';
     @state() private output = '';
     @state() private separator: 'hyphen' | 'underscore' = 'hyphen';
+    @state() private preserveLanguage = true;
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
 
@@ -20,6 +21,11 @@ export class SlugGenerator extends BaseTool {
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.processInput();
+    }
 
     protected renderTool() {
         return html`
@@ -92,7 +98,15 @@ export class SlugGenerator extends BaseTool {
                         </button>
                     </div>
                 </div>
-                
+
+                <!-- Mode Toggle -->
+                <div class="flex items-center mt-2">
+                    <tool-switch
+                        .checked=${this.preserveLanguage}
+                        rightLabel="Preserve non-Latin characters"
+                        @change=${this.handleLanguageToggle}
+                    ></tool-switch>
+                </div>
             </div>
         `;
     }
@@ -109,6 +123,11 @@ export class SlugGenerator extends BaseTool {
         this.processInput();
     }
 
+    private handleLanguageToggle(event: CustomEvent): void {
+        this.preserveLanguage = event.detail.checked;
+        this.processInput();
+    }
+
     private async copyToClipboard() {
         if (!this.output) return;
         try {
@@ -122,11 +141,50 @@ export class SlugGenerator extends BaseTool {
         }
     }
 
+    private slugify(text: string, separator: string = '-', preserveLanguage: boolean = false): string {
+        if (!text) return '';
+
+        let result = text.trim();
+        result = result.replace(/\s+/g, separator);
+
+        if (preserveLanguage) {
+            result = result
+                .replace(/[.,\/#!$%\^&\*;:{}=`~()'"]/g, '')                     // Remove punctuation
+                .replace(/\s+/g, separator)                                     // Replace any remaining whitespace with separator
+                .replace(/[^\p{L}\p{N}]+/gu, separator)                         // Replace non-alphanumeric with separator, using Unicode properties
+                .toLowerCase()
+                .replace(new RegExp(`${separator}{2,}`, 'g'), separator)        // Replace multiple separators with a single one
+                .replace(new RegExp(`^${separator}|${separator}$`, 'g'), '');   // Remove leading/trailing separator
+        } else {
+            result = result
+                .normalize('NFD')                   // Split accented characters into base characters and diacritical marks
+                .replace(/[\u0300-\u036f]/g, '')    // Remove diacritical marks
+                .toLowerCase()
+                .replace(/[^\w\s-]/g, '')           // Remove non-word chars (except spaces and hyphens)
+                .replace(/[\s_-]+/g, separator)     // Replace spaces, underscores, and hyphens with the separator
+                .replace(new RegExp(`^${separator}+|${separator}+$`, 'g'), ''); // Remove leading/trailing separator
+        }
+
+        return result;
+    }
+
     private async processInput(): Promise<void> {
         this.alert = null;
         if (!this.input) {
             this.output = '';
             return;
+        }
+
+        try {
+            const separatorChar = this.separator === 'hyphen' ? '-' : '_';
+            this.output = this.slugify(this.input, separatorChar, this.preserveLanguage);
+        } catch (error) {
+            console.error('Error generating slug:', error);
+            this.alert = {
+                type: 'error',
+                message: 'Failed to generate slug. Please try again.'
+            };
+            this.output = '';
         }
 
         if (this.outputTextarea) {
