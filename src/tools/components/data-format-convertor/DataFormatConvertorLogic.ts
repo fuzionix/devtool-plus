@@ -1,6 +1,7 @@
 import * as YAML from 'js-yaml';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import * as TOML from 'toml';
+import { jsonToToml } from './tomlUtils';
 
 let currentFormatFrom = 'json';
 let currentFormatTo = 'yaml';
@@ -39,7 +40,7 @@ function fromJSON(jsonObj: any, targetFormat: string): string {
             });
             return builder.build(jsonObj);
         case 'toml':
-            throw new Error("TOML stringification is not supported. Please choose a different target format.");
+            return jsonToToml(jsonObj, { indent: '  ' });
         default:
             throw new Error(`Unsupported target format: ${targetFormat}`);
     }

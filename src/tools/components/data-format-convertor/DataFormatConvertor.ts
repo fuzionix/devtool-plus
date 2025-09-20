@@ -49,8 +49,8 @@ export class DataFormatConvertor extends BaseTool {
                         .options=${[
                             { value: 'json', label: 'JSON' },
                             { value: 'yaml', label: 'YAML' },
-                            { value: 'xml', label: 'XML' }
-                            // Note: TOML is excluded from target formats
+                            { value: 'xml', label: 'XML' },
+                            { value: 'toml', label: 'TOML' }
                         ]}
                         .value=${this.formatTo}
                         @change=${this.handleFormatToChange}
@@ -73,13 +73,7 @@ export class DataFormatConvertor extends BaseTool {
     private swapFormats() {
         const temp = this.formatFrom;
         this.formatFrom = this.formatTo;
-        
-        if (temp === 'toml') {
-            this.formatTo = 'json';
-        } else {
-            this.formatTo = temp;
-        }
-        
+        this.formatTo = temp;
         this.handleFormatChange();
     }
 
