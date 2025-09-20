@@ -115,7 +115,7 @@ export const TOOLS: Tool[] = [
         version: '1.1.0',
         category: ToolCategory.Data,
         template: '<data-format-convertor></data-format-convertor>',
-        icon: 'shapes',
+        icon: 'chevrons-left-right-ellipsis',
         tags: ['convert', 'format', 'json', 'yaml', 'xml', 'toml', 'data', 'structure', 'parser', 'transform', 'editor'],
         editor: {
             viewType: 'code',
@@ -228,6 +228,15 @@ export const TOOLS: Tool[] = [
         template: '<unix-path-convertor></unix-path-convertor>',
         icon: 'folder-pen',
         tags: ['unix', 'windows', 'path', 'convertor', 'file', 'system', 'directory', 'format', 'slash', 'backslash'],
+    },
+    {
+        id: 'data-unit-convertor',
+        label: 'Data Unit Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<data-unit-convertor></data-unit-convertor>',
+        icon: 'floppy-disk',
+        tags: ['data', 'unit', 'convertor', 'bytes', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb', 'bit', 'information'],
     },
     {
         id: 'token-generator',

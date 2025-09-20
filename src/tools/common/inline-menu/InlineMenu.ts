@@ -48,7 +48,7 @@ export class InlineMenu extends LitElement {
             top: calc(100% + 4px);
             right: 0;
             z-index: 1000;
-            max-height: 200px;
+            max-height: 500px;
             overflow-y: auto;
             background-color: var(--vscode-panel-background);
             border: 1px solid var(--vscode-panel-border);
