@@ -112,7 +112,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'data-format-convertor',
         label: 'Data Format Convertor',
-        version: '1.1.0',
+        version: '1.2.0',
         category: ToolCategory.Data,
         template: '<data-format-convertor></data-format-convertor>',
         icon: 'chevrons-left-right-ellipsis',
@@ -199,7 +199,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<markdown-table-builder></markdown-table-builder>',
         icon: 'table',
-        isNew: true,
         tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
@@ -209,6 +208,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<slug-generator></slug-generator>',
         icon: 'case-kebab',
+        isNew: true,
         tags: ['slug', 'url', 'identifier', 'string', 'text', 'format', 'convert', 'title', 'web', 'link', 'seo'],
     },
     {
@@ -221,13 +221,14 @@ export const TOOLS: Tool[] = [
         tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
     },
     {
-        id: 'unix-path-convertor',
-        label: 'UNIX / Windows Path Convertor',
+        id: 'http-status-code',
+        label: 'HTTP Status Code',
         version: '1.0.0',
         category: ToolCategory.Util,
-        template: '<unix-path-convertor></unix-path-convertor>',
-        icon: 'folder-pen',
-        tags: ['unix', 'windows', 'path', 'convertor', 'file', 'system', 'directory', 'format', 'slash', 'backslash'],
+        template: '<http-status-code></http-status-code>',
+        icon: 'server',
+        isNew: true,
+        tags: ['http', 'status', 'code', 'response', 'request', 'web', 'protocol', 'error', 'success', 'client', 'server']
     },
     {
         id: 'data-unit-convertor',
@@ -236,7 +237,17 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<data-unit-convertor></data-unit-convertor>',
         icon: 'floppy-disk',
+        isNew: true,
         tags: ['data', 'unit', 'convertor', 'bytes', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb', 'bit', 'information'],
+    },
+    {
+        id: 'unix-path-convertor',
+        label: 'UNIX / Windows Path Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<unix-path-convertor></unix-path-convertor>',
+        icon: 'folder-pen',
+        tags: ['unix', 'windows', 'path', 'convertor', 'file', 'system', 'directory', 'format', 'slash', 'backslash'],
     },
     {
         id: 'token-generator',

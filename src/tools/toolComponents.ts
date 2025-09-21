@@ -25,6 +25,7 @@ import './components/data-unit-convertor/DataUnitConvertor';
 import './components/diff-checker/DiffChecker';
 import './components/gradient-maker/GradientMaker';
 import './components/html-xml-editor/HtmlXmlEditor';
+import './components/http-status-code/HttpStatusCode';
 import './components/json-editor/JsonEditor';
 import './components/jwt-inspector/JwtInspector';
 import './components/markdown-table-builder/MarkdownTableBuilder';
