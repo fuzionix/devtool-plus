@@ -118,6 +118,15 @@ function updateFormats(args: { formatFrom: string, formatTo: string }) {
     }
 }
 
+function swapContent() {
+    const inputText = inputEditor.getValue();
+    const outputText = outputEditor.getValue();
+
+    if (inputText.trim() && outputText.trim()) {
+        inputEditor.setValue(outputText);
+    }
+}
+
 function setupRealTimeConversion() {
     if (!inputEditor || !outputEditor) {
         return;
@@ -160,5 +169,6 @@ function convert(args: { formatFrom: string, formatTo: string }) {
 
 window.toolLogic = {
     convert,
-    updateFormats
+    updateFormats,
+    swapContent
 };

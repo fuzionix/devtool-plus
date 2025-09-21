@@ -74,6 +74,15 @@ export class DataFormatConvertor extends BaseTool {
         const temp = this.formatFrom;
         this.formatFrom = this.formatTo;
         this.formatTo = temp;
+        
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'data-format-convertor',
+            value: {
+                action: 'swapContent'
+            }
+        });
+        
         this.handleFormatChange();
     }
 
