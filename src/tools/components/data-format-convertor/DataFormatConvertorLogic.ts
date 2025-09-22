@@ -5,6 +5,7 @@ import { jsonToToml } from './tomlUtils';
 
 let currentFormatFrom = 'json';
 let currentFormatTo = 'yaml';
+let currentIndentation = 2;
 let conversionListener: { dispose: () => void } | null = null;
 
 function toJSON(input: string, sourceFormat: string): any {
@@ -29,18 +30,18 @@ function toJSON(input: string, sourceFormat: string): any {
 function fromJSON(jsonObj: any, targetFormat: string): string {
     switch (targetFormat) {
         case 'json':
-            return JSON.stringify(jsonObj, null, 4);
+            return JSON.stringify(jsonObj, null, currentIndentation);
         case 'yaml':
-            return YAML.dump(jsonObj, { lineWidth: -1, indent: 2 });
+            return YAML.dump(jsonObj, { lineWidth: -1, indent: currentIndentation });
         case 'xml':
             const builder = new XMLBuilder({
                 format: true,
                 ignoreAttributes: false,
-                indentBy: '  '
+                indentBy: ' '.repeat(currentIndentation)
             });
             return builder.build(jsonObj);
         case 'toml':
-            return jsonToToml(jsonObj, { indent: '  ' });
+            return jsonToToml(jsonObj, { indent: ' '.repeat(currentIndentation) });
         default:
             throw new Error(`Unsupported target format: ${targetFormat}`);
     }
@@ -108,9 +109,22 @@ const convertLarge = throttle((text) => {
     performConversion(text, currentFormatFrom, currentFormatTo);
 }, 800);
 
-function updateFormats(args: { formatFrom: string, formatTo: string }) {
+function updateFormats(args: { formatFrom: string, formatTo: string, indentation?: number }) {
     currentFormatFrom = args.formatFrom;
     currentFormatTo = args.formatTo;
+    
+    if (typeof args.indentation === 'number') {
+        currentIndentation = args.indentation;
+    }
+    
+    const text = inputEditor.getValue();
+    if (text.length > 0) {
+        performConversion(text, currentFormatFrom, currentFormatTo);
+    }
+}
+
+function updateIndentation(args: { indentation: number }) {
+    currentIndentation = args.indentation;
     
     const text = inputEditor.getValue();
     if (text.length > 0) {
@@ -163,12 +177,13 @@ function initializeWhenReady() {
 
 initializeWhenReady();
 
-function convert(args: { formatFrom: string, formatTo: string }) {
+function convert(args: { formatFrom: string, formatTo: string, indentation?: number }) {
     updateFormats(args);
 }
 
 window.toolLogic = {
     convert,
     updateFormats,
+    updateIndentation,
     swapContent
 };
