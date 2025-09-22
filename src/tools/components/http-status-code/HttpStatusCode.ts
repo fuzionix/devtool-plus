@@ -172,6 +172,10 @@ export class HttpStatusCode extends BaseTool {
                 opacity: 0.75;
             }
 
+            .http-description-hidden {
+                display: none;
+            }
+
             .http-label {
                 width: 50px;
                 padding: 6px 10px;
@@ -188,14 +192,15 @@ export class HttpStatusCode extends BaseTool {
                 cursor: pointer;
                 color: var(--vscode-foreground);
                 opacity: 0.8;
+                transition: transform 0.2s;
             }
 
             .expand-collapse-button:hover {
                 opacity: 1;
             }
 
-            .hidden {
-                display: none;
+            .expand-collapse-button-active {
+                transform: rotate(180deg);
             }
             </style>
             <div class="tool-inner-container">
@@ -225,13 +230,10 @@ export class HttpStatusCode extends BaseTool {
                 <div class="http-separator"></div>
                 <div class="http-content">
                     <div class="http-value">${item.name}</div>
-                    <div class="http-description ${isExpanded ? '' : 'hidden'}">${item.description}</div>
+                    <div class="http-description ${isExpanded ? '' : 'http-description-hidden'}">${item.description}</div>
                 </div>
-                <button class="expand-collapse-button" @click=${() => this.toggleExpand(item.code)}>
-                ${isExpanded ?
-                    html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up"><path d="m18 15-6-6-6 6"/></svg>` :
-                    html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>`
-                }
+                <button class="expand-collapse-button ${isExpanded ? 'expand-collapse-button-active' : ''}" @click=${() => this.toggleExpand(item.code)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
             </div>
         `;
