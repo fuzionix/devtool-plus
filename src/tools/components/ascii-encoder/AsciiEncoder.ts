@@ -14,13 +14,14 @@ export class AsciiEncoder extends BaseTool {
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">ASCII is a character encoding standard for electronic communication. It represents text in computers and other devices that use text.</p>
                 <hr />

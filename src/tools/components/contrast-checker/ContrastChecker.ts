@@ -13,8 +13,76 @@ export class ContrastChecker extends BaseTool {
     @state() private sampleText = 'Lorem ipsum dolor sit amet.';
     @state() private fontSize = 14;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .preview-container {
+            padding: 24px;
+            border-radius: 2px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            word-break: break-word;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .pass {
+            background-color: #82d681;
+            color: #000;
+        }
+        
+        .fail {
+            background-color: #d68680;
+            color: #000;
+        }
+        
+        .warning {
+            background-color: #d6d480;
+            color: #000;
+        }
+        
+        .result-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background-color: var(--vscode-editor-background);
+            border-radius: 2px;
+            border: 1px solid var(--vscode-panel-border);
+        }
+        
+        .result-value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .guideline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .guideline-item {
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            background-color: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+        }
     `;
 
     protected renderTool() {
@@ -29,75 +97,7 @@ export class ContrastChecker extends BaseTool {
         const fgColor = colord(this.foregroundColor);
 
         return html`
-            <style>
-            .preview-container {
-                padding: 24px;
-                border-radius: 2px;
-                margin-bottom: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 60px;
-                word-break: break-word;
-                text-align: center;
-                transition: all 0.2s ease;
-            }
-            
-            .result-badge {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 2px 8px;
-                border-radius: 2px;
-                font-size: 12px;
-            }
-            
-            .pass {
-                background-color: #82d681;
-                color: #000;
-            }
-            
-            .fail {
-                background-color: #d68680;
-                color: #000;
-            }
-            
-            .warning {
-                background-color: #d6d480;
-                color: #000;
-            }
-            
-            .result-container {
-                display: flex;
-                justify-content: space-between;
-                margin: 8px 0;
-                padding: 8px 12px;
-                background-color: var(--vscode-editor-background);
-                border-radius: 2px;
-                border: 1px solid var(--vscode-panel-border);
-            }
-            
-            .result-value {
-                font-size: 20px;
-                font-weight: 600;
-            }
-            
-            .guideline-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 8px;
-                margin-top: 8px;
-            }
-            
-            .guideline-item {
-                display: flex;
-                flex-direction: column;
-                padding: 8px 12px;
-                background-color: var(--vscode-editor-background);
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Check color contrast between text and background for accessibility compliance.</p>
                 <hr />

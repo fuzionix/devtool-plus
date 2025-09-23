@@ -4,10 +4,6 @@ import { BaseTool } from '../../base/BaseTool';
 
 @customElement('diff-checker')
 export class DiffChecker extends BaseTool {
-    static styles = css`
-        ${BaseTool.styles}
-    `;
-
     @state() private originalStats = {
         lines: 0,
         chars: 0,
@@ -38,67 +34,71 @@ export class DiffChecker extends BaseTool {
         });
     }
 
+    private styles = css`
+        ${BaseTool.styles}
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            padding: 4px 8px;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+        }
+        
+        .stat-title {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .diff-indicator {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        
+        .diff-positive {
+            color: var(--vscode-testing-iconPassed, #73c991);
+        }
+        
+        .diff-negative {
+            color: var(--vscode-testing-iconFailed, #f14c4c);
+        }
+        
+        .similarity-container {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 8px 4px;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+        }
+        
+        .similarity-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+    `;
+
     protected renderTool() {
         const lineDiff = this.modifiedStats.lines - this.originalStats.lines;
         const wordDiff = this.modifiedStats.words - this.originalStats.words;
         const charDiff = this.modifiedStats.chars - this.originalStats.chars;
 
         return html`
-            <style>
-            .stats-container {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                margin-top: 8px;
-            }
-            
-            .stat-item {
-                display: flex;
-                flex-direction: column;
-                padding: 4px 8px;
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-            }
-            
-            .stat-title {
-                font-size: 12px;
-                opacity: 0.7;
-                margin-bottom: 4px;
-            }
-            
-            .stat-value {
-                font-size: 14px;
-                font-weight: 600;
-            }
-            
-            .diff-indicator {
-                font-size: 12px;
-                margin-top: 2px;
-            }
-            
-            .diff-positive {
-                color: var(--vscode-testing-iconPassed, #73c991);
-            }
-            
-            .diff-negative {
-                color: var(--vscode-testing-iconFailed, #f14c4c);
-            }
-            
-            .similarity-container {
-                grid-column: span 3;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 6px 8px 4px;
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-            }
-            
-            .similarity-value {
-                font-size: 18px;
-                font-weight: 600;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Compare two texts to see the differences. Left pane is the original text, right pane is the modified text.</p>
                 <hr />

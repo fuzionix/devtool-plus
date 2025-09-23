@@ -27,12 +27,13 @@ export class ShaHashing extends BaseTool {
     @query('#output') private output!: HTMLTextAreaElement;
     @query('#file-input') private fileInput!: HTMLInputElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">SHA (Secure Hash Algorithm) creates fixed-size digital signatures for data, ensuring integrity and authenticity.</p>
                 <hr />

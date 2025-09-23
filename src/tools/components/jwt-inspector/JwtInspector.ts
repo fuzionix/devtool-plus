@@ -34,42 +34,42 @@ export class JwtInspector extends BaseTool {
         await this.decodeJwt();
     }
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .jwt-table {
+            width: 100%;
+            border-radius: 2px;
+            border-collapse: collapse;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .jwt-table th, .jwt-table td {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid var(--vscode-panel-border);
+            text-align: left;
+        }
+        
+        .jwt-table th {
+            background-color: var(--vscode-editor-background);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+        
+        .jwt-section {
+            margin-top: 1rem;
+        }
+        
+        .jwt-value {
+            word-break: break-all;
+            font-family: var(--vscode-editor-font-family);
+        }
     `;
 
     protected renderTool() {
         return html`
-            <style>
-            .jwt-table {
-                width: 100%;
-                border-radius: 2px;
-                border-collapse: collapse;
-                margin-top: 0;
-                margin-bottom: 1rem;
-            }
-            
-            .jwt-table th, .jwt-table td {
-                padding: 0.375rem 0.5rem;
-                border: 1px solid var(--vscode-panel-border);
-                text-align: left;
-            }
-            
-            .jwt-table th {
-                background-color: var(--vscode-editor-background);
-                font-size: 0.75rem;
-                text-align: center;
-            }
-            
-            .jwt-section {
-                margin-top: 1rem;
-            }
-            
-            .jwt-value {
-                word-break: break-all;
-                font-family: var(--vscode-editor-font-family);
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties.</p>
                 <hr />

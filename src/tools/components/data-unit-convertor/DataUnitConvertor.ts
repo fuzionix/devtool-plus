@@ -10,7 +10,7 @@ export class DataUnitConvertor extends BaseTool {
     @state() private conversions: { unit: string; bitValue: string; bitLabel: string; byteValue: string; byteLabel: string }[] = [];
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
@@ -21,6 +21,7 @@ export class DataUnitConvertor extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Data unit conversion allows you to convert between different units of measurement for digital information, such as bytes to kilobytes or megabits to gigabits.</p>
                 <hr />

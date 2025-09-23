@@ -28,50 +28,50 @@ export class UrlParser extends BaseTool {
         this.parseUrl();
     }
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            height: 32px;
+            margin-bottom: 8px;
+            position: relative;
+            background-color: var(--vscode-panel-background);
+            box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .detail-value {
+            flex: 1;
+            padding: 6px 10px;
+            word-break: break-all;
+        }
+
+        .detail-separator {
+            width: 1px;
+            height: 60%;
+            background-color: var(--vscode-panel-border);
+        }
+        
+        .detail-label {
+            width: 70px;
+            padding: 6px 10px;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.75rem;
+            text-align: right;
+        }
+        
+        .empty-value {
+            opacity: 0.5;
+            font-style: italic;
+        }
     `;
 
     protected renderTool() {
         return html`
-            <style>
-            .detail-item {
-                display: flex;
-                align-items: center;
-                height: 32px;
-                margin-bottom: 8px;
-                position: relative;
-                background-color: var(--vscode-panel-background);
-                box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
-                border-radius: 2px;
-                overflow: hidden;
-            }
-            
-            .detail-value {
-                flex: 1;
-                padding: 6px 10px;
-                word-break: break-all;
-            }
-
-            .detail-separator {
-                width: 1px;
-                height: 60%;
-                background-color: var(--vscode-panel-border);
-            }
-            
-            .detail-label {
-                width: 70px;
-                padding: 6px 10px;
-                color: var(--vscode-descriptionForeground);
-                font-size: 0.75rem;
-                text-align: right;
-            }
-            
-            .empty-value {
-                opacity: 0.5;
-                font-style: italic;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">URLs are used to access resources on the web. They consist of several components, including the protocol, domain, path, and query parameters.</p>
                 <hr />

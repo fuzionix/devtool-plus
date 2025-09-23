@@ -8,13 +8,14 @@ export class YamlEditor extends BaseTool {
     @state() private sortOrder: string = 'asc';
     @state() private lastAction: 'minify' | 'format' = 'format';
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">YAML editing tool for modifying YAML data.</p>
                 <hr />

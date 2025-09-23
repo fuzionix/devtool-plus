@@ -19,13 +19,14 @@ export class UUIDGenerator extends BaseTool {
         this.generateUUID();
     }
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">A UUID (Universally Unique Identifier) is a 128-bit unique identifier that uses timestamp or randomness to ensure global uniqueness across space and time.</p>
                 <hr />

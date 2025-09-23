@@ -4,7 +4,7 @@ import { BaseTool } from '../../base/BaseTool';
 
 @customElement('json-editor')
 export class JsonEditor extends BaseTool {
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
@@ -15,6 +15,7 @@ export class JsonEditor extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">JSON editing tool for modifying JSON data.</p>
                 <hr />

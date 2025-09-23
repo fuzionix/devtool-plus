@@ -17,7 +17,7 @@ export class SlugGenerator extends BaseTool {
 
     @query('#output') outputTextarea!: HTMLTextAreaElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
@@ -29,6 +29,7 @@ export class SlugGenerator extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Slug is a URL-friendly string, typically used to identify a resource in a way that is easy to read and type.</p>
                 <hr />

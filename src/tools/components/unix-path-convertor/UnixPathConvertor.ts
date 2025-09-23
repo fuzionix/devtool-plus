@@ -18,13 +18,14 @@ export class UnixPathConvertor extends BaseTool {
     @query('#unix-input') unixPathTextarea!: HTMLTextAreaElement;
     @query('#windows-input') windowsPathTextarea!: HTMLTextAreaElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">UNIX paths use forward slashes (/) to separate directories, while Windows paths use backslashes (\\). This tool converts between the two formats.</p>
                 <hr />

@@ -112,8 +112,82 @@ export class HttpStatusCode extends BaseTool {
         }
     ];
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .http-category {
+            margin-bottom: 16px;
+        }
+
+        .category-title {
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .http-item {
+            display: flex;
+            align-items: flex-start;
+            min-height: 32px;
+            margin-bottom: 8px;
+            position: relative;
+            background-color: var(--vscode-panel-background);
+            box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .http-separator {
+            width: 1px;
+            height: 20px;
+            margin-top: 6px;
+            background-color: var(--vscode-panel-border);
+        }
+
+        .http-content {
+            flex: 1;
+        }
+
+        .http-value {
+            flex: 1;
+            padding: 6px 10px;
+            word-break: break-all;
+        }
+
+        .http-description {
+            padding: 0 10px 6px 10px;
+            opacity: 0.75;
+        }
+
+        .http-description-hidden {
+            display: none;
+        }
+
+        .http-label {
+            width: 50px;
+            padding: 6px 10px;
+            text-align: right;
+        }
+
+        .expand-collapse-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--vscode-foreground);
+            opacity: 0.8;
+            transition: transform 0.2s;
+        }
+
+        .expand-collapse-button:hover {
+            opacity: 1;
+        }
+
+        .expand-collapse-button-active {
+            transform: rotate(180deg);
+        }
     `;
 
     toggleExpand(code: string) {
@@ -128,81 +202,7 @@ export class HttpStatusCode extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>
-            .http-category {
-                margin-bottom: 16px;
-            }
-
-            .category-title {
-                margin-bottom: 8px;
-                opacity: 0.8;
-            }
-
-            .http-item {
-                display: flex;
-                align-items: flex-start;
-                min-height: 32px;
-                margin-bottom: 8px;
-                position: relative;
-                background-color: var(--vscode-panel-background);
-                box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
-                border-radius: 2px;
-                overflow: hidden;
-            }
-
-            .http-separator {
-                width: 1px;
-                height: 20px;
-                margin-top: 6px;
-                background-color: var(--vscode-panel-border);
-            }
-
-            .http-content {
-                flex: 1;
-            }
-
-            .http-value {
-                flex: 1;
-                padding: 6px 10px;
-                word-break: break-all;
-            }
-
-            .http-description {
-                padding: 0 10px 6px 10px;
-                opacity: 0.75;
-            }
-
-            .http-description-hidden {
-                display: none;
-            }
-
-            .http-label {
-                width: 50px;
-                padding: 6px 10px;
-                text-align: right;
-            }
-
-            .expand-collapse-button {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 8px;
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--vscode-foreground);
-                opacity: 0.8;
-                transition: transform 0.2s;
-            }
-
-            .expand-collapse-button:hover {
-                opacity: 1;
-            }
-
-            .expand-collapse-button-active {
-                transform: rotate(180deg);
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">HTTP status codes are standard response codes given by web servers on the Internet. They help identify the cause of the problem when a web page or other resource does not load properly.</p>
                 <hr />

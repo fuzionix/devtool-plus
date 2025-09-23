@@ -33,12 +33,13 @@ export class RsaEncryption extends BaseTool {
     @query('#file-input') private fileInput!: HTMLInputElement;
     @query('#key-file-input') private keyFileInput!: HTMLInputElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">RSA cryptography for secure data exchange. Encrypt messages with public keys, and decrypt with private keys.</p>
                 <hr />

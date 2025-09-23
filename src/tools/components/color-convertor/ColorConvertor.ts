@@ -47,7 +47,7 @@ export class ColorConvertor extends BaseTool {
 
     @query('tool-color-picker') private colorPicker!: ColorPicker;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
@@ -58,6 +58,7 @@ export class ColorConvertor extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, LCH, and named colors. Edit any format directly or use the color picker.</p>
                 <hr />

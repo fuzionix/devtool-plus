@@ -33,8 +33,27 @@ export class PasswordGenerator extends BaseTool {
 
     @query('#output') outputArea!: HTMLTextAreaElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .strength-meter {
+            height: 6px;
+            border-radius: 2px;
+            margin: 10px 0;
+            background-color: var(--vscode-editor-background);
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.25s ease-in-out, background-color 0.25s ease-in-out;
+        }
+
+        .strength-weak { background-color: #ff4545; }
+        .strength-fair { background-color: #ffa534; }
+        .strength-good { background-color: #ffde33; }
+        .strength-strong { background-color: #84c440; }
+        .strength-very-strong { background-color: #33c248; }
     `;
 
     constructor() {
@@ -44,27 +63,7 @@ export class PasswordGenerator extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>
-                .strength-meter {
-                    height: 6px;
-                    border-radius: 2px;
-                    margin: 10px 0;
-                    background-color: var(--vscode-editor-background);
-                }
-
-                .strength-fill {
-                    height: 100%;
-                    border-radius: 2px;
-                    transition: width 0.25s ease-in-out, background-color 0.25s ease-in-out;
-                }
-
-                .strength-weak { background-color: #ff4545; }
-                .strength-fair { background-color: #ffa534; }
-                .strength-good { background-color: #ffde33; }
-                .strength-strong { background-color: #84c440; }
-                .strength-very-strong { background-color: #33c248; }
-            </style>
-
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Generate strong, secure passwords with customizable options for length and character types.</p>
                 <hr />

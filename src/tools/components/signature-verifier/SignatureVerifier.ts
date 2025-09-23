@@ -40,12 +40,13 @@ export class SignatureVerifier extends BaseTool {
     @query('#file-input') private fileInput!: HTMLInputElement;
     @query('#key-file-input') private keyFileInput!: HTMLInputElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Digital signatures verify the authenticity and integrity of messages. This tool supports RSA and ECDSA signatures with various key formats.</p>
                 <hr />

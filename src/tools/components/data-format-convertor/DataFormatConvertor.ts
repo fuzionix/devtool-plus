@@ -8,7 +8,7 @@ export class DataFormatConvertor extends BaseTool {
     @state() private formatTo: string = 'yaml';
     @state() private indentation: number = 2;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
@@ -19,6 +19,7 @@ export class DataFormatConvertor extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Convert between different data formats including JSON, YAML, XML, and TOML.</p>
                 <hr />
