@@ -24,36 +24,91 @@ export class ToolsViewProvider implements vscode.TreeDataProvider<vscode.TreeIte
         return element;
     }
 
+    getPinnedTools(): string[] {
+        return this.context.globalState.get<string[]>('devtool-plus.pinnedTools', []);
+    }
+
+    pinTool(toolId: string): void {
+        const pinnedTools = this.getPinnedTools();
+        if (!pinnedTools.includes(toolId)) {
+            pinnedTools.push(toolId);
+            this.context.globalState.update('devtool-plus.pinnedTools', pinnedTools);
+            this.refresh();
+        }
+    }
+
+    unpinTool(toolId: string): void {
+        const pinnedTools = this.getPinnedTools();
+        const index = pinnedTools.indexOf(toolId);
+        if (index !== -1) {
+            pinnedTools.splice(index, 1);
+            this.context.globalState.update('devtool-plus.pinnedTools', pinnedTools);
+            this.refresh();
+        }
+    }
+
     getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
         if (!element) {
             let filteredTools = TOOLS;
+            const pinnedToolIds = this.getPinnedTools();
+            
             if (this.searchTerm) {
                 filteredTools = TOOLS.filter(tool =>
                     tool.label.toLowerCase().includes(this.searchTerm) ||
                     tool.category.toLowerCase().includes(this.searchTerm) ||
                     (tool.tags && tool.tags.some(tag => tag.toLowerCase().startsWith(this.searchTerm)))
                 );
-            }
-
-            if (this.searchTerm) {
+                
                 return Promise.resolve(
                     filteredTools.map(tool =>
-                        new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None, this.context)
+                        new ToolTreeItem(
+                            tool, 
+                            vscode.TreeItemCollapsibleState.None, 
+                            this.context, 
+                            pinnedToolIds.includes(tool.id)
+                        )
                     )
                 );
             } else {
+                const items: vscode.TreeItem[] = [];
+                
+                if (pinnedToolIds.length > 0) {
+                    items.push(new PinnedSectionTreeItem(vscode.TreeItemCollapsibleState.Expanded));
+                }
+                
                 const categories = [...new Set(TOOLS.map(tool => tool.category))];
-                return Promise.resolve(
-                    categories.map(category =>
-                        new CategoryTreeItem(category, vscode.TreeItemCollapsibleState.Expanded)
-                    )
-                );
+                items.push(...categories.map(category =>
+                    new CategoryTreeItem(category, vscode.TreeItemCollapsibleState.Expanded)
+                ));
+                
+                return Promise.resolve(items);
             }
+        } else if (element instanceof PinnedSectionTreeItem) {
+            const pinnedToolIds = this.getPinnedTools();
+            const pinnedTools = TOOLS.filter(tool => pinnedToolIds.includes(tool.id));
+            
+            return Promise.resolve(
+                pinnedTools.map(tool =>
+                    new ToolTreeItem(
+                        tool, 
+                        vscode.TreeItemCollapsibleState.None, 
+                        this.context, 
+                        true
+                    )
+                )
+            );
         } else if (element instanceof CategoryTreeItem) {
             const toolsInCategory = TOOLS.filter(tool => tool.category === element.category);
+            const pinnedToolIds = this.getPinnedTools();
+            
             return Promise.resolve(
                 toolsInCategory.map(tool =>
-                    new ToolTreeItem(tool, vscode.TreeItemCollapsibleState.None, this.context)
+                    new ToolTreeItem(
+                        tool, 
+                        vscode.TreeItemCollapsibleState.None, 
+                        this.context,
+                        pinnedToolIds.includes(tool.id)
+                    )
                 )
             );
         }
@@ -65,12 +120,13 @@ export class ToolTreeItem extends vscode.TreeItem {
     constructor(
         public readonly tool: Tool,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly context: vscode.ExtensionContext
+        public readonly context: vscode.ExtensionContext,
+        public readonly isPinned: boolean = false
     ) {
         super(tool.label, collapsibleState);
         this.tooltip = tool.label;
         this.description = tool.version;
-        this.contextValue = 'tool';
+        this.contextValue = isPinned ? 'pinnedTool' : 'tool';
         this.command = {
             command: 'devtool-plus.selectTool',
             title: 'Select Tool',
@@ -91,5 +147,14 @@ export class CategoryTreeItem extends vscode.TreeItem {
     ) {
         super(category, collapsibleState);
         this.contextValue = 'category';
+    }
+}
+
+export class PinnedSectionTreeItem extends vscode.TreeItem {
+    constructor(
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState
+    ) {
+        super('📌 Pinned', collapsibleState);
+        this.contextValue = 'pinnedSection';
     }
 }

@@ -62,6 +62,18 @@ export function activate(context: vscode.ExtensionContext) {
             toolsViewProvider.searchTools('');
         }),
 
+        vscode.commands.registerCommand('devtool-plus.pinTool', (toolTreeItem) => {
+            if (toolTreeItem && toolTreeItem.tool) {
+                toolsViewProvider.pinTool(toolTreeItem.tool.id);
+            }
+        }),
+
+        vscode.commands.registerCommand('devtool-plus.unpinTool', (toolTreeItem) => {
+            if (toolTreeItem && toolTreeItem.tool) {
+                toolsViewProvider.unpinTool(toolTreeItem.tool.id);
+            }
+        }),
+
         vscode.commands.registerCommand('devtool-plus.homeButton', () => {
             sidePanelProvider.reset();
         }),

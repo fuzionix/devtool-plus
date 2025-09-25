@@ -99,6 +99,16 @@
                 "command": "devtool-plus.searchButton",
                 "title": "Search Tools",
                 "icon": "$(search)"
+            },
+            {
+                "command": "devtool-plus.pinTool",
+                "title": "Pin Tool",
+                "icon": "$(pin)"
+            },
+            {
+                "command": "devtool-plus.unpinTool",
+                "title": "Unpin Tool",
+                "icon": "$(pinned)"
             }
         ],
         "menus": {
@@ -122,6 +132,18 @@
                     "command": "devtool-plus.searchButton",
                     "when": "view == devtool-plus.toolsExplorer",
                     "group": "navigation@1"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "devtool-plus.pinTool",
+                    "when": "view == devtool-plus.toolsExplorer && viewItem == tool",
+                    "group": "inline"
+                },
+                {
+                    "command": "devtool-plus.unpinTool",
+                    "when": "view == devtool-plus.toolsExplorer && viewItem == pinnedTool",
+                    "group": "inline"
                 }
             ]
         }
