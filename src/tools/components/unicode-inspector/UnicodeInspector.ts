@@ -40,39 +40,39 @@ export class UnicodeInspector extends BaseTool {
         this.processInput();
     }
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .block-label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            border-radius: 2px;
+            padding: 2px 6px;
+            background-color: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+        }
+        
+        .color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+            display: inline-block;
+        }
+        
+        .code-block {
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
     `;
 
     protected renderTool() {
         return html`
-            <style>
-            .block-label {
-                display: inline-flex;
-                align-items: center;
-                margin-right: 8px;
-                margin-bottom: 8px;
-                font-size: 10px;
-                border-radius: 2px;
-                padding: 2px 6px;
-                background-color: var(--vscode-editor-background);
-                border: 1px solid var(--vscode-panel-border);
-            }
-            
-            .color-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                margin-right: 4px;
-                display: inline-block;
-            }
-            
-            .code-block {
-                font-family: monospace;
-                white-space: pre-wrap;
-                word-break: break-word;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Unicode is a standard for representing text in different writing systems. It enables consistent encoding, representation, and handling of text.</p>
                 <hr />

@@ -7,14 +7,16 @@ export class YamlEditor extends BaseTool {
     @state() private orderBy: string = 'default';
     @state() private sortOrder: string = 'asc';
     @state() private lastAction: 'minify' | 'format' = 'format';
+    @state() private indentation: number = 2;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">YAML editing tool for modifying YAML data.</p>
                 <hr />
@@ -65,6 +67,17 @@ export class YamlEditor extends BaseTool {
                     ></tool-dropdown-menu>
                 </div>
             </div>
+
+            <div class="flex justify-between items-center mt-4 text-xs">
+                Indentation
+            </div>
+            <tool-slider
+                min="0"
+                max="10"
+                step="2"
+                .value=${this.indentation}
+                @change=${this.handleSliderChange}
+            ></tool-slider>
         `;
     }
 
@@ -76,6 +89,21 @@ export class YamlEditor extends BaseTool {
     private handleSortOrderChange(e: CustomEvent) {
         this.sortOrder = e.detail.value;
         this.updateYamlOutput();
+    }
+
+    private handleSliderChange(e: CustomEvent) {
+        this.indentation = e.detail.value;
+        
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'yaml-editor',
+            value: {
+                action: 'updateIndentation',
+                indentation: this.indentation,
+                orderBy: this.orderBy,
+                sortOrder: this.sortOrder
+            }
+        });
     }
 
     private updateYamlOutput() {

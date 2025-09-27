@@ -35,7 +35,9 @@ export class CodeEditorProvider {
             }
         );
 
-        const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', `${tool.icon}.svg`);
+        const themeKind = vscode.window.activeColorTheme.kind;
+        const iconTheme = themeKind === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+        const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', iconTheme, `${tool.icon}.svg`);
         this.panel.iconPath = {
             light: iconPath,
             dark: iconPath
@@ -438,7 +440,9 @@ export class CodeEditorProvider {
 
     private updateWebview() {
         if (this.panel && this.currentTool) {
-            const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', `${this.currentTool.icon}.svg`);
+            const themeKind = vscode.window.activeColorTheme.kind;
+            const iconTheme = themeKind === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+            const iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'tools', iconTheme, `${this.currentTool.icon}.svg`);
             this.panel.title = `DevTool+ - ${this.currentTool.label}`;
             this.panel.iconPath = {
                 light: iconPath,

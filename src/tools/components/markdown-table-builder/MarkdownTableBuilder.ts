@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
@@ -23,8 +23,13 @@ export class MarkdownTableBuilder extends BaseTool {
         this.generateMarkdown();
     }
 
+    private styles = css`
+        ${BaseTool.styles}
+    `;
+
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Build Markdown tables with an easy-to-use interface. Add or remove rows and columns as needed.</p>
                 <hr />

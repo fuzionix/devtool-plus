@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { renderCopyButton } from '../../../utils/util';
@@ -30,6 +30,136 @@ export class CubicBezier extends BaseTool {
         easeOut: { x1: 0, y1: 0, x2: 0.58, y2: 1 },
         easeInOut: { x1: 0.42, y1: 0, x2: 0.58, y2: 1 }
     };
+    
+    private styles = css`
+        ${BaseTool.styles}
+
+        .bezier-preview {
+            height: 80px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+            background-color: var(--vscode-editor-background);
+            margin-bottom: 8px;
+            padding: 0 20px;
+        }
+        
+        .bezier-block {
+            width: 20px;
+            height: 20px;
+            background-color: var(--vscode-button-background);
+            position: absolute;
+            top: 15px;
+            border-radius: 2px;
+        }
+        
+        .linear-block {
+            width: 20px;
+            height: 20px;
+            background-color: #777;
+            position: absolute;
+            top: 45px;
+            border-radius: 2px;
+        }
+        
+        .bezier-control {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+            margin: 16px 0;
+            background-color: var(--vscode-editor-background);
+        }
+        
+        .bezier-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: 20px 20px;
+            background-image:
+                linear-gradient(to right, var(--vscode-panel-border) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--vscode-panel-border) 1px, transparent 1px);
+            background-position: center;
+            opacity: 0.4;
+        }
+        
+        .bezier-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: move;
+            z-index: 2;
+        }
+        
+        .bezier-point.p1 {
+            background-color: var(--vscode-terminal-ansiCyan);
+        }
+        
+        .bezier-point.p2 {
+            background-color: var(--vscode-terminal-ansiYellow);
+        }
+        
+        .bezier-point.fixed {
+            background-color: var(--vscode-foreground);
+            cursor: default;
+        }
+        
+        .bezier-line {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .preview-track {
+            position: absolute;
+            bottom: 8px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background-color: var(--vscode-panel-border);
+        }
+        
+        .bezier-output {
+            font-family: var(--vscode-editor-font-family);
+            word-spacing: -3px;
+        }
+        
+        .p1-value {
+            color: var(--vscode-terminal-ansiCyan);
+        }
+        
+        .p2-value {
+            color: var(--vscode-terminal-ansiYellow);
+        }
+        
+        .coordinate-display {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            position: absolute;
+            background: var(--vscode-editor-background);
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid var(--vscode-panel-border);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        
+        .p1-coords {
+            left: ${this.x1 * 100}%;
+            top: ${(1 - this.y1) * 100 + 15}%;
+        }
+        
+        .p2-coords {
+            left: ${this.x2 * 100}%;
+            top: ${(1 - this.y2) * 100 + 15}%;
+        }
+    `;
 
     connectedCallback() {
         super.connectedCallback();
@@ -110,133 +240,7 @@ export class CubicBezier extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>
-            .bezier-preview {
-                height: 80px;
-                position: relative;
-                overflow: hidden;
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-                background-color: var(--vscode-editor-background);
-                margin-bottom: 8px;
-                padding: 0 20px;
-            }
-            
-            .bezier-block {
-                width: 20px;
-                height: 20px;
-                background-color: var(--vscode-button-background);
-                position: absolute;
-                top: 15px;
-                border-radius: 2px;
-            }
-            
-            .linear-block {
-                width: 20px;
-                height: 20px;
-                background-color: #777;
-                position: absolute;
-                top: 45px;
-                border-radius: 2px;
-            }
-            
-            .bezier-control {
-                position: relative;
-                width: 100%;
-                height: 200px;
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-                margin: 16px 0;
-                background-color: var(--vscode-editor-background);
-            }
-            
-            .bezier-grid {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                background-size: 20px 20px;
-                background-image:
-                    linear-gradient(to right, var(--vscode-panel-border) 1px, transparent 1px),
-                    linear-gradient(to bottom, var(--vscode-panel-border) 1px, transparent 1px);
-                background-position: center;
-                opacity: 0.4;
-            }
-            
-            .bezier-point {
-                position: absolute;
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                transform: translate(-50%, -50%);
-                cursor: move;
-                z-index: 2;
-            }
-            
-            .bezier-point.p1 {
-                background-color: var(--vscode-terminal-ansiCyan);
-            }
-            
-            .bezier-point.p2 {
-                background-color: var(--vscode-terminal-ansiYellow);
-            }
-            
-            .bezier-point.fixed {
-                background-color: var(--vscode-foreground);
-                cursor: default;
-            }
-            
-            .bezier-line {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 1;
-            }
-
-            .preview-track {
-                position: absolute;
-                bottom: 8px;
-                left: 20px;
-                right: 20px;
-                height: 1px;
-                background-color: var(--vscode-panel-border);
-            }
-            
-            .bezier-output {
-                font-family: var(--vscode-editor-font-family);
-                word-spacing: -3px;
-            }
-            
-            .p1-value {
-                color: var(--vscode-terminal-ansiCyan);
-            }
-            
-            .p2-value {
-                color: var(--vscode-terminal-ansiYellow);
-            }
-            
-            .coordinate-display {
-                font-size: 11px;
-                color: var(--vscode-descriptionForeground);
-                position: absolute;
-                background: var(--vscode-editor-background);
-                padding: 2px 5px;
-                border-radius: 3px;
-                border: 1px solid var(--vscode-panel-border);
-                opacity: 0.9;
-                pointer-events: none;
-            }
-            
-            .p1-coords {
-                left: ${this.x1 * 100}%;
-                top: ${(1 - this.y1) * 100 + 15}%;
-            }
-            
-            .p2-coords {
-                left: ${this.x2 * 100}%;
-                top: ${(1 - this.y2) * 100 + 15}%;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Create and visualize CSS cubic-bezier timing functions.</p>
                 <hr />

@@ -23,12 +23,13 @@ export class RsaKeyGenerator extends BaseTool {
     @query('#public-key') private publicKeyTextarea!: HTMLTextAreaElement;
     @query('#private-key') private privateKeyTextarea!: HTMLTextAreaElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Generate RSA key pairs for asymmetric encryption, digital signatures, and secure communications.</p>
                 <hr />

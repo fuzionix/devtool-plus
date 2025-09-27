@@ -26,13 +26,14 @@ export class Base64Encoder extends BaseTool {
     @query('#output') output!: HTMLTextAreaElement;
     @query('#file-input') fileInput!: HTMLInputElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Base64 is an encoding scheme that converts binary data into a text format using 64 characters (A-Z, a-z, 0-9, +, /) for safe data transmission across systems that handle text only.</p>
                 <hr />

@@ -13,8 +13,73 @@ export class ColorMixer extends BaseTool {
     @state() private isResultHovered = false;
     @state() private showCopiedMessage = false;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+        
+        .color-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .color-item {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .result-container {
+            position: relative;
+            height: 60px;
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .result-color {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        
+        .result-value {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 14px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .result-value.visible {
+            opacity: 1;
+        }
     `;
 
     connectedCallback() {
@@ -24,72 +89,7 @@ export class ColorMixer extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>
-            .color-list {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                width: 100%;
-            }
-            
-            .color-item {
-                display: flex;
-                gap: 4px;
-                align-items: center;
-            }
-            
-            .result-container {
-                position: relative;
-                height: 60px;
-                border-radius: 2px;
-                overflow: hidden;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-            
-            .result-container::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-image: 
-                    linear-gradient(45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #ccc 75%),
-                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
-                background-size: 10px 10px;
-                background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-                opacity: 0.2;
-                z-index: 0;
-            }
-            
-            .result-color {
-                position: absolute;
-                inset: 0;
-                z-index: 1;
-            }
-            
-            .result-value {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: rgba(0, 0, 0, 0.6);
-                color: white;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                font-size: 14px;
-                z-index: 2;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-            }
-            
-            .result-value.visible {
-                opacity: 1;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Mix multiple colors together to create a new color. Add up to 5 colors or remove colors as needed.</p>
                 <hr />

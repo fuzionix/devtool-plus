@@ -50,8 +50,204 @@ export class GradientMaker extends BaseTool {
 
     @query('.gradient-bar-container') private gradientBar!: HTMLElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .result-container {
+            position: relative;
+            height: 60px;
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .gradient-bar-container {
+            position: relative;
+            height: 24px;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+            margin: 16px 0 8px;
+            cursor: copy;
+        }
+        
+        .gradient-bar-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .gradient-bar-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .gradient-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 2px;
+            z-index: 1;
+        }
+        
+        .color-stop-handles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .color-handle {
+            position: absolute;
+            width: 12px;
+            height: 30px;
+            border: 2px solid white;
+            border-radius: 6px;
+            outline: 2px solid black;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            cursor: ew-resize;
+            pointer-events: auto;
+        }
+        
+        .color-handle.selected {
+            z-index: 3;
+        }
+
+        .color-handle.selected::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 0 0 2px black;
+        }
+        
+        .color-handle:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .color-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 4px;
+            border-radius: 2px;
+            background-color: var(--vscode-panel-background);
+            box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
+        }
+
+        .color-item.selected {
+            box-shadow: inset 0 0 0 1px var(--vscode-focusBorder);
+        }
+        
+        .color-hex-input {
+            flex: 1;
+            min-width: 80px;
+            background-color: transparent !important;
+            color: var(--vscode-input-foreground);
+            padding: 2px 8px;
+            border: none;
+            outline: none;
+            box-shadow: none !important;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 14px;
+        }
+        
+        .color-position-input {
+            width: 60px;
+            background-color: transparent !important;
+            color: var(--vscode-input-foreground);
+            padding: 2px 8px;
+            border: none;
+            outline: none;
+            box-shadow: none !important;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 14px;
+        }
+
+        .color-hex-input:focus,
+        .color-position-input:focus {
+            outline: none;
+        }
+        
+        .remove-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 24px;
+            height: 24px;
+            background: transparent;
+            border: none;
+            color: var(--vscode-editor-foreground);
+            opacity: 0.7;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        
+        .remove-button:hover {
+            opacity: 1;
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        
+        .code-keyword {
+            color: var(--vscode-symbolIcon-variableForeground, #5bbec3);
+        }
+        
+        .code-function {
+            color: var(--vscode-symbolIcon-functionForeground, #c586c0);
+        }
     `;
 
     constructor() {
@@ -69,203 +265,7 @@ export class GradientMaker extends BaseTool {
         const cssOutput = `background: ${resultGradientCSS};`;
 
         return html`
-            <style>
-            .result-container {
-                position: relative;
-                height: 60px;
-                border-radius: 2px;
-                overflow: hidden;
-                box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
-            }
-            
-            .result-container::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-image: 
-                    linear-gradient(45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #ccc 75%),
-                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
-                background-size: 10px 10px;
-                background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-                opacity: 0.2;
-                z-index: 0;
-            }
-
-            .gradient-bar-container {
-                position: relative;
-                height: 24px;
-                border: 1px solid var(--vscode-panel-border);
-                border-radius: 2px;
-                margin: 16px 0 8px;
-                cursor: copy;
-            }
-            
-            .gradient-bar-background {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                border-radius: 2px;
-                overflow: hidden;
-            }
-            
-            .gradient-bar-background::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-image: 
-                    linear-gradient(45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #ccc 75%),
-                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
-                background-size: 10px 10px;
-                background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-                opacity: 0.2;
-                z-index: 0;
-            }
-            
-            .gradient-bar {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border-radius: 2px;
-                z-index: 1;
-            }
-            
-            .color-stop-handles {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 2;
-                pointer-events: none;
-            }
-            
-            .color-handle {
-                position: absolute;
-                width: 12px;
-                height: 30px;
-                border: 2px solid white;
-                border-radius: 6px;
-                outline: 2px solid black;
-                transform: translate(-50%, -50%);
-                top: 50%;
-                cursor: ew-resize;
-                pointer-events: auto;
-            }
-            
-            .color-handle.selected {
-                z-index: 3;
-            }
-
-            .color-handle.selected::before {
-                content: '';
-                position: absolute;
-                top: -8px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 3px;
-                height: 3px;
-                border-radius: 50%;
-                background-color: white;
-                box-shadow: 0 0 0 2px black;
-            }
-            
-            .color-handle:hover {
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-
-            .color-list {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                margin-top: 16px;
-                width: 100%;
-            }
-            
-            .color-item {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 0 4px;
-                border-radius: 2px;
-                background-color: var(--vscode-panel-background);
-                box-shadow: inset 0 0 0 1px var(--vscode-panel-border);
-            }
-
-            .color-item.selected {
-                box-shadow: inset 0 0 0 1px var(--vscode-focusBorder);
-            }
-            
-            .color-hex-input {
-                flex: 1;
-                min-width: 80px;
-                background-color: transparent !important;
-                color: var(--vscode-input-foreground);
-                padding: 2px 8px;
-                border: none;
-                outline: none;
-                box-shadow: none !important;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                font-size: 14px;
-            }
-            
-            .color-position-input {
-                width: 60px;
-                background-color: transparent !important;
-                color: var(--vscode-input-foreground);
-                padding: 2px 8px;
-                border: none;
-                outline: none;
-                box-shadow: none !important;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                font-size: 14px;
-            }
-
-            .color-hex-input:focus,
-            .color-position-input:focus {
-                outline: none;
-            }
-            
-            .remove-button {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 24px;
-                height: 24px;
-                background: transparent;
-                border: none;
-                color: var(--vscode-editor-foreground);
-                opacity: 0.7;
-                cursor: pointer;
-                border-radius: 2px;
-            }
-            
-            .remove-button:hover {
-                opacity: 1;
-                background-color: var(--vscode-list-hoverBackground);
-            }
-            
-            .code-keyword {
-                color: var(--vscode-symbolIcon-variableForeground, #5bbec3);
-            }
-            
-            .code-function {
-                color: var(--vscode-symbolIcon-functionForeground, #c586c0);
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Create and customize CSS gradients with multiple color stops.</p>
                 <hr />

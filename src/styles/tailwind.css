@@ -113,7 +113,7 @@
     hr {
         @apply my-4;
         border: none;
-        border-top: 1px solid var(--vscode-widget-border);
+        border-top: 1px solid var(--vscode-panel-border);
     }
 
     ::-moz-selection {
@@ -213,12 +213,12 @@
 
     /* Radio Button */
     .radio-group {
-        @apply flex min-h-[30px] rounded-sm overflow-hidden border border-[var(--vscode-input-background)];
+        @apply flex min-h-[30px] rounded-sm overflow-hidden border border-[var(--vscode-panel-border)];
     }
 
     .radio-group-button {
         @apply flex-1 px-1.5 rounded-sm bg-[var(--vscode-panel-background)] text-center duration-100 cursor-pointer select-none;
-        @apply border-r border-[var(--vscode-input-background)] last:border-r-0;
+        @apply border-r border-[var(--vscode-panel-border)] last:border-r-0;
         color: var(--vscode-foreground);
     }
 

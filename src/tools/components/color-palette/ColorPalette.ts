@@ -13,80 +13,79 @@ export class ColorPalette extends BaseTool {
     @state() private colorSteps = 12;
     @state() private copiedColor: string | null = null;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .color-section {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+
+        .color-swatch {
+            position: relative;
+            height: 40px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            overflow: hidden;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1);
+        }
+
+        .color-swatch::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.1) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.1) 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            z-index: -1;
+        }
+
+        .color-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .color-label p {
+            margin: 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 14px;
+            color: white;
+            text-align: center;
+        }
+
+        .color-swatch:hover .color-label {
+            opacity: 1;
+        }
     `;
 
     protected renderTool() {
         return html`
-            <style>
-            .color-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                gap: 4px;
-                margin-top: 8px;
-            }
-
-            .color-section {
-                display: flex;
-                flex-direction: column;
-                margin-bottom: 16px;
-            }
-
-            .color-swatch {
-                position: relative;
-                height: 40px;
-                border-radius: 2px;
-                cursor: pointer;
-                transition: transform 0.1s ease;
-                overflow: hidden;
-            }
-
-            .color-swatch:hover {
-                transform: scale(1);
-            }
-
-            .color-swatch::after {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-image: 
-                    linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
-                    linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.1) 75%),
-                    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.1) 75%);
-                background-size: 10px 10px;
-                background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-                z-index: -1;
-            }
-
-            .color-label {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                font-size: 12px;
-                background-color: rgba(0, 0, 0, 0.5);
-                opacity: 0;
-                transition: opacity 0.2s ease;
-            }
-
-            .color-label p {
-                margin: 0;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                font-size: 14px;
-                color: white;
-                text-align: center;
-            }
-
-            .color-swatch:hover .color-label {
-                opacity: 1;
-            }
-            </style>
-
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Generate a harmonious color palette from a base color.</p>
                 <hr />

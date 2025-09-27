@@ -29,7 +29,7 @@ export class TokenGenerator extends BaseTool {
     private readonly lowercase = 'abcdefghijklmnopqrstuvwxyz';
     private readonly uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
@@ -41,6 +41,7 @@ export class TokenGenerator extends BaseTool {
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">Produces unique strings of customizable length and character sets for authentication, API keys, or session identifiers, ensuring randomness and unpredictability.</p>
                 <hr />

@@ -112,10 +112,10 @@ export const TOOLS: Tool[] = [
     {
         id: 'data-format-convertor',
         label: 'Data Format Convertor',
-        version: '1.1.0',
+        version: '1.2.0',
         category: ToolCategory.Data,
         template: '<data-format-convertor></data-format-convertor>',
-        icon: 'shapes',
+        icon: 'chevrons-left-right-ellipsis',
         tags: ['convert', 'format', 'json', 'yaml', 'xml', 'toml', 'data', 'structure', 'parser', 'transform', 'editor'],
         editor: {
             viewType: 'code',
@@ -128,7 +128,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'json-editor',
         label: 'JSON Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<json-editor></json-editor>',
         icon: 'file-json',
@@ -143,7 +143,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'yaml-editor',
         label: 'YAML Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<yaml-editor></yaml-editor>',
         icon: 'file-warning',
@@ -158,7 +158,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'html-xml-editor',
         label: 'HTML / XML Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<html-xml-editor></html-xml-editor>',
         icon: 'file-code',
@@ -199,8 +199,17 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<markdown-table-builder></markdown-table-builder>',
         icon: 'table',
-        isNew: true,
         tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
+    },
+    {
+        id: 'slug-generator',
+        label: 'Slug Generator',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<slug-generator></slug-generator>',
+        icon: 'case-kebab',
+        isNew: true,
+        tags: ['slug', 'url', 'identifier', 'string', 'text', 'format', 'convert', 'title', 'web', 'link', 'seo'],
     },
     {
         id: 'qr-code-generator',
@@ -210,6 +219,26 @@ export const TOOLS: Tool[] = [
         template: '<qr-code-generator></qr-code-generator>',
         icon: 'qr-code',
         tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
+    },
+    {
+        id: 'http-status-code',
+        label: 'HTTP Status Code',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<http-status-code></http-status-code>',
+        icon: 'server',
+        isNew: true,
+        tags: ['http', 'status', 'code', 'response', 'request', 'web', 'protocol', 'error', 'success', 'client', 'server']
+    },
+    {
+        id: 'data-unit-convertor',
+        label: 'Data Unit Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<data-unit-convertor></data-unit-convertor>',
+        icon: 'floppy-disk',
+        isNew: true,
+        tags: ['data', 'unit', 'convertor', 'bytes', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb', 'bit', 'information'],
     },
     {
         id: 'unix-path-convertor',

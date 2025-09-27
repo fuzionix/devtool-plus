@@ -1,3 +1,5 @@
+let jsonIndentation = 2;
+
 function sortJsonObject(obj: any, orderBy: string, sortOrder: string): any {
     if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
         return obj;
@@ -78,14 +80,24 @@ function formatJson(params: any = {}) {
             jsonObj = sortJsonObject(jsonObj, params.orderBy, params.sortOrder || 'asc');
         }
         
-        outputEditor.setValue(JSON.stringify(jsonObj, null, 2));
+        outputEditor.setValue(JSON.stringify(jsonObj, null, jsonIndentation));
     } catch (e: any) {
         outputEditor.setValue(e.message);
         vscode.postMessage({ type: 'error', value: 'Invalid JSON: ' + e.message });
     }
 }
 
+function updateIndentation(args: { indentation: number, orderBy: string, sortOrder: string }) {
+    jsonIndentation = args.indentation;
+    
+    const text = inputEditor.getValue();
+    if (text.length > 0) {
+        formatJson({ orderBy: args.orderBy, sortOrder: args.sortOrder });
+    }
+}
+
 window.toolLogic = {
     minify: minifyJson,
     format: formatJson,
+    updateIndentation,
 };

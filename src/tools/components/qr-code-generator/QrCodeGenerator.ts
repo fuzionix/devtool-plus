@@ -18,8 +18,17 @@ export class QrCodeGenerator extends BaseTool {
     @state() private foregroundColor = '#000000';
     @state() private maskPattern = 2;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
+
+        .qr-image {
+            max-width: 200px;
+            max-height: 200px;
+        }
+        
+        .file-container {
+            margin-top: 8px;
+        }
     `;
 
     constructor() {
@@ -29,16 +38,7 @@ export class QrCodeGenerator extends BaseTool {
 
     protected renderTool() {
         return html`
-            <style>           
-            .qr-image {
-                max-width: 200px;
-                max-height: 200px;
-            }
-            
-            .file-container {
-                margin-top: 8px;
-            }
-            </style>
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">QR codes are a type of matrix barcode (or two-dimensional barcode) that can be read by devices such as smartphones and QR code readers.</p>
                 <hr />
@@ -170,7 +170,6 @@ export class QrCodeGenerator extends BaseTool {
     }
 
     private renderInputField() {
-        console.log('Selected Type:', this.selectedType);
         switch(this.selectedType) {
             case 'link':
                 return html`

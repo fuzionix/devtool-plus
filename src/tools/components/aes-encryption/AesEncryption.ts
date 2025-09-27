@@ -34,12 +34,13 @@ export class AesEncryption extends BaseTool {
     @query('#output') private output!: HTMLTextAreaElement;
     @query('#file-input') private fileInput!: HTMLInputElement;
 
-    static styles = css`
+    private styles = css`
         ${BaseTool.styles}
     `;
 
     protected renderTool() {
         return html`
+            <style>${this.styles}</style>
             <div class="tool-inner-container">
                 <p class="opacity-75">AES (Advanced Encryption Standard) is a symmetric encryption algorithm that securely transforms data using various block cipher modes and key sizes.</p>
                 <hr />
