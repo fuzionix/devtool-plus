@@ -128,7 +128,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'json-editor',
         label: 'JSON Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<json-editor></json-editor>',
         icon: 'file-json',
@@ -143,7 +143,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'yaml-editor',
         label: 'YAML Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<yaml-editor></yaml-editor>',
         icon: 'file-warning',
@@ -158,7 +158,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'html-xml-editor',
         label: 'HTML / XML Editor',
-        version: '1.0.0',
+        version: '1.1.0',
         category: ToolCategory.Data,
         template: '<html-xml-editor></html-xml-editor>',
         icon: 'file-code',

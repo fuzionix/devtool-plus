@@ -153,25 +153,25 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Data Format Convertor</td>
-    <td align="center">1.1.0</td>
+    <td align="center">1.2.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>JSON Editor</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>YAML Editor</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>HTML / XML Editor</td>
-    <td align="center">1.0.0</td>
+    <td align="center">1.1.0</td>
     <td align="center">✅</td>
     <td align="center">✅</td>
   </tr>
@@ -211,15 +211,15 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Markdown Table Builder</td>
+    <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
   <tr>
     <td>Slug Generator</td>
+    <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center"></td>
-    <td align="center">🚧</td>
+    <td align="center">🆕</td>
   </tr>
 
   <tr>
@@ -231,6 +231,18 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
+    <tr>
+    <td>HTTP Status Code</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>Data Unit Converter</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
   <tr>
     <td>UNIX / Windows Path Convertor</td>
     <td align="center">1.0.0</td>
@@ -238,10 +250,10 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center">✅</td>
   </tr>
   <tr>
-    <td>Data Unit Converter</td>
+    <td>Docker Compose Generator</td>
     <td align="center"></td>
     <td align="center"></td>
-    <td align="center">📝</td>
+    <td align="center">🚧</td>
   </tr>
 
   <tr>
