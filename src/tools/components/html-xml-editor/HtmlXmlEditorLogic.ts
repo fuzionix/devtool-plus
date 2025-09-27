@@ -1,3 +1,5 @@
+let htmlXmlIndentation = 2;
+
 function formatMarkup(text: string, indentSize = 2): string {
     const parser = new DOMParser();
     let doc;
@@ -135,7 +137,7 @@ function formatXml() {
             return;
         }
         
-        const result = formatMarkup(inputText, 2);
+        const result = formatMarkup(inputText, htmlXmlIndentation);
         outputEditor.setValue(result);
     } catch (e: any) {
         outputEditor.setValue(e.message);
@@ -143,7 +145,13 @@ function formatXml() {
     }
 }
 
+function updateHtmlXmlIndentation(args: { indentation: number }) {
+    htmlXmlIndentation = args.indentation;
+    formatXml();
+}
+
 window.toolLogic = {
     minify: minifyXml,
     format: formatXml,
+    updateHtmlXmlIndentation
 };

@@ -5,6 +5,7 @@ import { BaseTool } from '../../base/BaseTool';
 @customElement('html-xml-editor')
 export class HtmlXmlEditor extends BaseTool {
     @state() private lastAction: 'minify' | 'format' = 'format';
+    @state() private indentation: number = 2;
 
     private styles = css`
         ${BaseTool.styles}
@@ -33,6 +34,17 @@ export class HtmlXmlEditor extends BaseTool {
                     </button>
                 </div>
             </div>
+
+            <div class="flex justify-between items-center mt-4 text-xs">
+                Indentation
+            </div>
+            <tool-slider
+                min="0"
+                max="10"
+                step="2"
+                .value=${this.indentation}
+                @change=${this.handleSliderChange}
+            ></tool-slider>
         `;
     }
 
@@ -69,5 +81,18 @@ export class HtmlXmlEditor extends BaseTool {
             };
             reader.readAsText(files[0]);
         }
+    }
+
+    private handleSliderChange(e: CustomEvent) {
+        this.indentation = e.detail.value;
+        
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'html-xml-editor',
+            value: {
+                action: 'updateHtmlXmlIndentation',
+                indentation: this.indentation
+            }
+        });
     }
 }

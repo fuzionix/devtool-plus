@@ -12,6 +12,7 @@ export class JsonEditor extends BaseTool {
     @state() private orderBy: string = 'default';
     @state() private sortOrder: string = 'asc';
     @state() private lastAction: 'minify' | 'format' = 'format';
+    @state() private indentation: number = 2;
 
     protected renderTool() {
         return html`
@@ -66,6 +67,17 @@ export class JsonEditor extends BaseTool {
                     ></tool-dropdown-menu>
                 </div>
             </div>
+
+            <div class="flex justify-between items-center mt-4 text-xs">
+                Indentation
+            </div>
+            <tool-slider
+                min="0"
+                max="10"
+                step="2"
+                .value=${this.indentation}
+                @change=${this.handleSliderChange}
+            ></tool-slider>
         `;
     }
 
@@ -77,6 +89,21 @@ export class JsonEditor extends BaseTool {
     private handleSortOrderChange(e: CustomEvent) {
         this.sortOrder = e.detail.value;
         this.updateJsonOutput();
+    }
+
+    private handleSliderChange(e: CustomEvent) {
+        this.indentation = e.detail.value;
+        
+        (window as any).vscode.postMessage({
+            type: 'update',
+            toolId: 'json-editor',
+            value: {
+                action: 'updateIndentation',
+                indentation: this.indentation,
+                orderBy: this.orderBy,
+                sortOrder: this.sortOrder
+            }
+        });
     }
 
     private updateJsonOutput() {

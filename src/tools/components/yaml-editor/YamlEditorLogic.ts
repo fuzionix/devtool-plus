@@ -1,5 +1,7 @@
 import * as yaml from 'js-yaml';
 
+let yamlIndentation = 2;
+
 // Function to sort object by key or value
 function sortObject(obj: any, orderBy: string, sortOrder: string): any {
     // If not an object or is null, return as is
@@ -97,7 +99,7 @@ function formatYaml(params: any = {}) {
         
         // Convert back to YAML with nice formatting
         outputEditor.setValue(yaml.dump(yamlObj, { 
-            indent: 2,
+            indent: yamlIndentation,
             lineWidth: 80,
             noRefs: true
         }));
@@ -107,7 +109,17 @@ function formatYaml(params: any = {}) {
     }
 }
 
+function updateIndentation(args: { indentation: number, orderBy: string, sortOrder: string }) {
+    yamlIndentation = args.indentation;
+    
+    const text = inputEditor.getValue();
+    if (text.length > 0) {
+        formatYaml({ orderBy: args.orderBy, sortOrder: args.sortOrder });
+    }
+}
+
 window.toolLogic = {
     minify: minifyYaml,
     format: formatYaml,
+    updateIndentation
 };
