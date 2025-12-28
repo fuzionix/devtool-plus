@@ -208,7 +208,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<slug-generator></slug-generator>',
         icon: 'case-kebab',
-        isNew: true,
         tags: ['slug', 'url', 'identifier', 'string', 'text', 'format', 'convert', 'title', 'web', 'link', 'seo'],
     },
     {
@@ -227,7 +226,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<http-status-code></http-status-code>',
         icon: 'server',
-        isNew: true,
         tags: ['http', 'status', 'code', 'response', 'request', 'web', 'protocol', 'error', 'success', 'client', 'server']
     },
     {
@@ -237,7 +235,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<data-unit-convertor></data-unit-convertor>',
         icon: 'floppy-disk',
-        isNew: true,
         tags: ['data', 'unit', 'convertor', 'bytes', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb', 'bit', 'information'],
     },
     {
@@ -248,6 +245,16 @@ export const TOOLS: Tool[] = [
         template: '<unix-path-convertor></unix-path-convertor>',
         icon: 'folder-pen',
         tags: ['unix', 'windows', 'path', 'convertor', 'file', 'system', 'directory', 'format', 'slash', 'backslash'],
+    },
+    {
+        id: 'number-base-convertor',
+        label: 'Number Base Convertor',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<number-base-convertor></number-base-convertor>',
+        icon: 'binary',
+        isNew: true,
+        tags: ['number', 'base', 'convertor', 'binary', 'decimal', 'hexadecimal', 'octal', 'math'],
     },
     {
         id: 'token-generator',

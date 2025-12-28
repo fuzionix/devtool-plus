@@ -29,6 +29,7 @@ import './components/http-status-code/HttpStatusCode';
 import './components/json-editor/JsonEditor';
 import './components/jwt-inspector/JwtInspector';
 import './components/markdown-table-builder/MarkdownTableBuilder';
+import './components/number-base-convertor/NumberBaseConvertor';
 import './components/password-generator/PasswordGenerator';
 import './components/qr-code-generator/QrCodeGenerator';
 import './components/token-generator/TokenGenerator';
