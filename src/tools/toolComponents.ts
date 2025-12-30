@@ -28,6 +28,7 @@ import './components/html-xml-editor/HtmlXmlEditor';
 import './components/http-status-code/HttpStatusCode';
 import './components/json-editor/JsonEditor';
 import './components/jwt-inspector/JwtInspector';
+import './components/lorem-ipsum/LoremIpsum';
 import './components/markdown-table-builder/MarkdownTableBuilder';
 import './components/number-base-convertor/NumberBaseConvertor';
 import './components/password-generator/PasswordGenerator';

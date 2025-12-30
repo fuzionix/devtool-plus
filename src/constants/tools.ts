@@ -202,6 +202,16 @@ export const TOOLS: Tool[] = [
         tags: ['markdown', 'table', 'builder', 'format', 'content', 'cell', 'column', 'row'],
     },
     {
+        id: 'lorem-ipsum',
+        label: 'Lorem Ipsum',
+        version: '1.0.0',
+        category: ToolCategory.Text,
+        template: '<lorem-ipsum></lorem-ipsum>',
+        icon: 'notepad-text',
+        isNew: true,
+        tags: ['lorem', 'ipsum', 'placeholder', 'text', 'dummy', 'content', 'filler', 'paragraphs', 'words'],
+    },
+    {
         id: 'slug-generator',
         label: 'Slug Generator',
         version: '1.0.0',
