@@ -19,6 +19,7 @@ export class LoremIpsum extends BaseTool {
     private wordWeights: number[];
     private totalWeight: number;
 
+    private readonly STARTER_WORDS = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit'];
     private readonly STARTER_TEXT = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
 
     private styles = css`
@@ -108,31 +109,31 @@ export class LoremIpsum extends BaseTool {
                             ${renderCopyButton(this.isCopied)}
                         </button>
                         <div class="absolute right-0 top-[1.5rem] pr-0.5 flex justify-items-center">
-                        <button 
-                            id="regenerate" 
-                            class="btn-icon"
-                            @click=${this.generateText}
-                            title="Regenerate Text"
-                        >
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="16" 
-                                height="16" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                stroke-width="2" 
-                                stroke-linecap="round" 
-                                stroke-linejoin="round" 
-                                class="lucide lucide-refresh-ccw-icon lucide-refresh-ccw"
+                            <button 
+                                id="regenerate" 
+                                class="btn-icon"
+                                @click=${this.generateText}
+                                title="Regenerate Text"
                             >
-                                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                    <path d="M3 3v5h5"/>
-                                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                                    <path d="M16 16h5v5"/>
-                            </svg>
-                        </button>
-                    </div>
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    width="16" 
+                                    height="16" 
+                                    viewBox="0 0 24 24" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    stroke-width="2" 
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round" 
+                                    class="lucide lucide-refresh-ccw-icon lucide-refresh-ccw"
+                                >
+                                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                        <path d="M3 3v5h5"/>
+                                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                        <path d="M16 16h5v5"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -165,19 +166,23 @@ export class LoremIpsum extends BaseTool {
             result = this.generateWords(this.amount);
         }
 
-        // Always prepend the starter text
-        this.output = this.STARTER_TEXT + ' ' + result;
+        this.output = result;
     }
 
     private generateParagraphs(count: number): string {
         const paragraphs: string[] = [];
         
         for (let i = 0; i < count; i++) {
-            const sentenceCount = this.variation === 'random' 
+            let sentenceCount = this.variation === 'random' 
                 ? this.getRandomInt(3, 7)
                 : 5;
             
             let paragraph = '';
+            if (i === 0) {
+                paragraph += this.STARTER_TEXT + ' ';
+                sentenceCount -= 1;
+            }
+
             for (let j = 0; j < sentenceCount; j++) {
                 const wordCount = this.variation === 'random'
                     ? this.getRandomInt(5, 15)
@@ -194,9 +199,13 @@ export class LoremIpsum extends BaseTool {
     }
 
     private generateSentences(count: number): string {
-        const sentences: string[] = [];
+        if (count === 1) {
+            return this.STARTER_TEXT;
+        }
+
+        const sentences: string[] = [this.STARTER_TEXT];
         
-        for (let i = 0; i < count; i++) {
+        for (let i = 1; i < count; i++) {
             const wordCount = this.variation === 'random'
                 ? this.getRandomInt(5, 20)
                 : 12;
@@ -209,7 +218,13 @@ export class LoremIpsum extends BaseTool {
     }
 
     private generateWords(count: number): string {
-        return this.generateWordsString(count);
+        if (count <= this.STARTER_WORDS.length) {
+            return this.STARTER_WORDS.slice(0, count).join(' ');
+        } else {
+            const additionalWordCount = count - this.STARTER_WORDS.length;
+            const generatedWords = this.generateWordsString(additionalWordCount);
+            return this.STARTER_TEXT + ' ' + generatedWords;
+        }
     }
 
     private generateWordsString(count: number): string {
