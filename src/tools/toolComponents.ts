@@ -8,6 +8,7 @@ import './common/radio-group/RadioGroup';
 import './common/radio-group/RadioItem';
 import './common/rotary-knob/RotaryKnob';
 import './common/slider/Slider';
+import './common/slider-range/SliderRange';
 import './common/switch/Switch';
 import './common/tooltip/Tooltip';
 
