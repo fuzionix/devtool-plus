@@ -18,6 +18,12 @@ export class SliderRange extends LitElement {
             width: 100%;
         }
 
+        .slider-container.is-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
         .slider-wrapper {
             position: relative;
             flex: 1;
@@ -166,6 +172,7 @@ export class SliderRange extends LitElement {
     @property({ type: Number }) valueEnd = 75;
     @property({ type: String }) unit = '';
     @property({ type: Function }) formatter = (val: number) => val.toString();
+    @property({ type: Boolean }) disabled = false;
 
     @state() private isDragging = false;
 
@@ -183,7 +190,7 @@ export class SliderRange extends LitElement {
         console.log(trackStyle);
         
         return html`
-            <div class="slider-container ${this.isDragging ? 'is-dragging' : ''}">
+            <div class="slider-container ${this.isDragging ? 'is-dragging' : ''} ${this.disabled ? 'is-disabled' : ''}">
                 <div class="slider-wrapper">
                     <div class="slider-base-track"></div>
                     <div class="slider-active-track" style="${trackStyle}"></div>
@@ -196,6 +203,7 @@ export class SliderRange extends LitElement {
                         .max=${this.max} 
                         .step=${this.step} 
                         .value=${this.valueStart}
+                        ?disabled=${this.disabled}
                         @input=${this.handleInputStart}
                         @mousedown=${this.handleMouseDown}
                         @mouseup=${this.handleMouseUp}
@@ -212,6 +220,7 @@ export class SliderRange extends LitElement {
                         .max=${this.max} 
                         .step=${this.step} 
                         .value=${this.valueEnd}
+                        ?disabled=${this.disabled}
                         @input=${this.handleInputEnd}
                         @mousedown=${this.handleMouseDown}
                         @mouseup=${this.handleMouseUp}
@@ -229,6 +238,7 @@ export class SliderRange extends LitElement {
                         .max=${this.valueEnd}
                         .step=${this.step}
                         .value=${this.valueStart}
+                        ?disabled=${this.disabled}
                         @input=${(e: Event) => this.handleNumberInput(e, true)}
                     />
                     <span class="input-separator">-</span>
@@ -239,6 +249,7 @@ export class SliderRange extends LitElement {
                         .max=${this.max}
                         .step=${this.step}
                         .value=${this.valueEnd}
+                        ?disabled=${this.disabled}
                         @input=${(e: Event) => this.handleNumberInput(e, false)}
                     />
                 </div>
