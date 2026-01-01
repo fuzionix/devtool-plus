@@ -10,6 +10,14 @@ export class LoremIpsum extends BaseTool {
     @state() private amount = 5;
     @state() private numberOf: 'paragraphs' | 'sentences' | 'words' = 'paragraphs';
     @state() private variation: 'random' | 'fixed' = 'random';
+    
+    @state() private sentencePerParagraphMin = 3;
+    @state() private sentencePerParagraphMax = 8;
+    @state() private sentencePerParagraphFixed = 5;
+    
+    @state() private wordPerSentenceMin = 5;
+    @state() private wordPerSentenceMax = 15;
+    @state() private wordPerSentenceFixed = 8;
 
     private wordFrequencies: Record<string, number> = {
         "sed": 2.2, "in": 1.8, "ut": 1.6, "sit": 1.5, "amet": 1.5, "et": 1.5, "ac": 1.4, "non": 1.4, "eu": 1.3, "a": 1.3, "quis": 1.2, "eget": 1.2, "vitae": 1.2, "nec": 1.2, "at": 1.2, "nulla": 1.1, "aliquam": 1.1, "id": 1.1, "nunc": 1, "vel": 1, "vestibulum": 1, "mauris": 1, "pellentesque": 1, "ipsum": 0.9, "tincidunt": 0.9, "orci": 0.8, "ex": 0.8, "nisi": 0.8, "donec": 0.8, "ante": 0.8, "turpis": 0.8, "diam": 0.8, "lorem": 0.7, "consectetur": 0.7, "elit": 0.7, "tortor": 0.7, "velit": 0.7, "nisl": 0.7, "augue": 0.7, "risus": 0.7, "quam": 0.7, "volutpat": 0.7, "dolor": 0.6, "leo": 0.6, "praesent": 0.6, "tellus": 0.6, "nibh": 0.6, "finibus": 0.6, "enim": 0.6, "posuere": 0.6, "est": 0.6, "lacus": 0.6, "varius": 0.6, "sem": 0.6, "urna": 0.6, "molestie": 0.6, "malesuada": 0.6, "faucibus": 0.6, "luctus": 0.6, "ultrices": 0.6, "erat": 0.6, "lectus": 0.6, "felis": 0.6, "metus": 0.6, "arcu": 0.6, "justo": 0.6, "purus": 0.6, "mi": 0.6, "neque": 0.6, "dui": 0.6, "eros": 0.6, "massa": 0.6, "ligula": 0.6, "odio": 0.6, "ultricies": 0.5, "accumsan": 0.5, "facilisis": 0.5, "fusce": 0.5, "tempor": 0.5, "sagittis": 0.5, "fringilla": 0.5, "magna": 0.5, "tristique": 0.5, "libero": 0.5, "efficitur": 0.5, "suscipit": 0.5, "vehicula": 0.5, "porttitor": 0.5, "iaculis": 0.5, "dignissim": 0.5, "imperdiet": 0.5, "aenean": 0.5, "lobortis": 0.5, "auctor": 0.5, "suspendisse": 0.5, "bibendum": 0.5, "pharetra": 0.5, "interdum": 0.5, "blandit": 0.5, "mattis": 0.5, "dictum": 0.5, "feugiat": 0.5, "pretium": 0.5, "sapien": 0.5, "mollis": 0.5, "gravida": 0.5, "rhoncus": 0.5, "lacinia": 0.5, "condimentum": 0.4, "duis": 0.4, "ornare": 0.4, "etiam": 0.4, "curabitur": 0.4, "hendrerit": 0.4, "consequat": 0.4, "laoreet": 0.4, "tempus": 0.4, "pulvinar": 0.4, "aliquet": 0.4, "sodales": 0.4, "congue": 0.4, "nullam": 0.4, "maecenas": 0.4, "fermentum": 0.4, "proin": 0.4, "dapibus": 0.4, "integer": 0.4, "viverra": 0.4, "commodo": 0.4, "egestas": 0.4, "semper": 0.4, "quisque": 0.4, "convallis": 0.4, "scelerisque": 0.4, "morbi": 0.4, "eleifend": 0.4, "vivamus": 0.4, "ullamcorper": 0.4, "sollicitudin": 0.4, "maximus": 0.4, "vulputate": 0.4, "cursus": 0.4, "elementum": 0.4, "rutrum": 0.4, "euismod": 0.4, "nam": 0.4, "porta": 0.4, "placerat": 0.4, "venenatis": 0.4, "cras": 0.3, "phasellus": 0.3, "primis": 0.2
@@ -28,7 +36,6 @@ export class LoremIpsum extends BaseTool {
 
     constructor() {
         super();
-        // Initialize word pool and weights once
         this.wordPool = Object.keys(this.wordFrequencies);
         this.wordWeights = Object.values(this.wordFrequencies);
         this.totalWeight = this.wordWeights.reduce((a, b) => a + b, 0);
@@ -59,7 +66,7 @@ export class LoremIpsum extends BaseTool {
                 ></tool-slider>
 
                 <!-- Options Row -->
-                <div class="flex flex-col min-[320px]:flex-row gap-2 my-2">
+                <div class="flex flex-col min-[320px]:flex-row gap-2 mt-2 mb-3">
                     <div class="flex-1">
                         <div class="mb-2 text-xs">Number of</div>
                         <tool-dropdown-menu 
@@ -84,6 +91,60 @@ export class LoremIpsum extends BaseTool {
                         ></tool-dropdown-menu>
                     </div>
                 </div>
+
+                <tool-expandable label="Advanced Settings">
+                    <div class="content-to-expand">
+                        <!-- Sentence per Paragraph -->
+                        <div>
+                            <div class="mb-1 text-xs">Sentence per Paragraph</div>
+                            ${this.variation === 'random' 
+                                ? html`
+                                    <tool-slider-range 
+                                        .min=${1}
+                                        .max=${20}
+                                        .valueStart=${this.sentencePerParagraphMin}
+                                        .valueEnd=${this.sentencePerParagraphMax}
+                                        @change=${this.handleSentencePerParagraphRangeChange}
+                                    ></tool-slider-range>
+                                `
+                                : html`
+                                    <tool-slider
+                                        min="1"
+                                        max="20"
+                                        step="1"
+                                        .value=${this.sentencePerParagraphFixed}
+                                        @change=${this.handleSentencePerParagraphFixedChange}
+                                    ></tool-slider>
+                                `
+                            }
+                        </div>
+
+                        <!-- Word per Sentence -->
+                        <div>
+                            <div class="mb-1 text-xs">Word per Sentence</div>
+                            ${this.variation === 'random' 
+                                ? html`
+                                    <tool-slider-range 
+                                        .min=${1}
+                                        .max=${50}
+                                        .valueStart=${this.wordPerSentenceMin}
+                                        .valueEnd=${this.wordPerSentenceMax}
+                                        @change=${this.handleWordPerSentenceRangeChange}
+                                    ></tool-slider-range>
+                                `
+                                : html`
+                                    <tool-slider
+                                        min="1"
+                                        max="50"
+                                        step="1"
+                                        .value=${this.wordPerSentenceFixed}
+                                        @change=${this.handleWordPerSentenceFixedChange}
+                                    ></tool-slider>
+                                `
+                            }
+                        </div>
+                    </div>
+                </tool-expandable>
 
                 <!-- Arrow Divider -->
                 <div class="flex justify-center mt-2 opacity-75">
@@ -155,6 +216,28 @@ export class LoremIpsum extends BaseTool {
         this.generateText();
     }
 
+    private handleSentencePerParagraphRangeChange(e: CustomEvent) {
+        this.sentencePerParagraphMin = e.detail.start;
+        this.sentencePerParagraphMax = e.detail.end;
+        this.generateText();
+    }
+
+    private handleSentencePerParagraphFixedChange(e: CustomEvent) {
+        this.sentencePerParagraphFixed = e.detail.value;
+        this.generateText();
+    }
+
+    private handleWordPerSentenceRangeChange(e: CustomEvent) {
+        this.wordPerSentenceMin = e.detail.start;
+        this.wordPerSentenceMax = e.detail.end;
+        this.generateText();
+    }
+
+    private handleWordPerSentenceFixedChange(e: CustomEvent) {
+        this.wordPerSentenceFixed = e.detail.value;
+        this.generateText();
+    }
+
     private generateText() {
         let result = '';
         
@@ -173,9 +256,13 @@ export class LoremIpsum extends BaseTool {
         const paragraphs: string[] = [];
         
         for (let i = 0; i < count; i++) {
-            let sentenceCount = this.variation === 'random' 
-                ? this.getRandomInt(3, 7)
-                : 5;
+            let sentenceCount: number;
+            
+            if (this.variation === 'random') {
+                sentenceCount = this.getRandomInt(this.sentencePerParagraphMin, this.sentencePerParagraphMax);
+            } else {
+                sentenceCount = this.sentencePerParagraphFixed;
+            }
             
             let paragraph = '';
             if (i === 0) {
@@ -184,9 +271,13 @@ export class LoremIpsum extends BaseTool {
             }
 
             for (let j = 0; j < sentenceCount; j++) {
-                const wordCount = this.variation === 'random'
-                    ? this.getRandomInt(5, 15)
-                    : 10;
+                let wordCount: number;
+                
+                if (this.variation === 'random') {
+                    wordCount = this.getRandomInt(this.wordPerSentenceMin, this.wordPerSentenceMax);
+                } else {
+                    wordCount = this.wordPerSentenceFixed;
+                }
                 
                 const sentence = this.generateWordsString(wordCount);
                 paragraph += this.capitalize(sentence) + '. ';
@@ -206,9 +297,13 @@ export class LoremIpsum extends BaseTool {
         const sentences: string[] = [this.STARTER_TEXT];
         
         for (let i = 1; i < count; i++) {
-            const wordCount = this.variation === 'random'
-                ? this.getRandomInt(5, 20)
-                : 12;
+            let wordCount: number;
+            
+            if (this.variation === 'random') {
+                wordCount = this.getRandomInt(this.wordPerSentenceMin, this.wordPerSentenceMax);
+            } else {
+                wordCount = this.wordPerSentenceFixed;
+            }
             
             const sentence = this.generateWordsString(wordCount);
             sentences.push(this.capitalize(sentence) + '.');
@@ -247,7 +342,6 @@ export class LoremIpsum extends BaseTool {
             }
         }
         
-        // Fallback to last word (shouldn't normally happen)
         return this.wordPool[this.wordPool.length - 1];
     }
 

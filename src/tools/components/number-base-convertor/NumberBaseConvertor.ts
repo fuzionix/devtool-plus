@@ -27,7 +27,7 @@ export class NumberBaseConvertor extends BaseTool {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.5rem;
-            margin-top: 0.75rem;
+            margin-top: 0.5rem;
         }
 
         .output-item {
@@ -116,7 +116,7 @@ export class NumberBaseConvertor extends BaseTool {
                 ` : ''}
 
                 <!-- Arrow Divider -->
-                <div class="flex justify-center mt-3 opacity-75">
+                <div class="flex justify-center mt-2 opacity-75">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
                 </div>
 
