@@ -307,14 +307,14 @@ code --install-extension Fuzionix.devtool-plus
 </table>
 
 ## FAQ
-❓ **Does this extension collect any telemetry or usage data?**  
-🅰️ No. DevTool+ is built on the principle of absolute privacy. There are no tracking scripts, no telemetry, and no external API calls.
+**Does this extension collect any telemetry or usage data?**  
+No. DevTool+ is built on the principle of absolute privacy. There are no tracking scripts, no telemetry, and no external API calls.
 
-❓ **Will installing this extension slow down code editor?**  
-🅰️ DevTool+ is built using **Lit**, a lightweight web component library. The extension and its views are only loaded into memory when you actually open the side panel or a tool, ensuring your editor remains fast and responsive.
+**Will installing this extension slow down code editor?**  
+DevTool+ is built using **Lit**, a lightweight web component library. The extension and its views are only loaded into memory when you actually open the side panel or a tool, ensuring your editor remains fast and responsive.
 
-❓ **Does it match my code editor's theme?**  
-🅰️ Yes. DevTool+ uses native UI CSS variables. It will automatically adapt its colors, borders, and typography to match whatever theme you are currently using.
+**Does it match my code editor's theme?**  
+Yes. DevTool+ uses native UI CSS variables. It will automatically adapt its colors, borders, and typography to match whatever theme you are currently using.
 
 
 ## License
