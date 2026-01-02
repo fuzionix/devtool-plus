@@ -9,7 +9,7 @@ DevTool+
 </h1>
 
 <p align="center">
-A VSCode extension that provides common I/O tools directly in code editor
+A code editor extension that provides common I/O tools directly in code editor
 </p>
 
 </br>
@@ -18,28 +18,28 @@ A VSCode extension that provides common I/O tools directly in code editor
   <img src="https://raw.githubusercontent.com/fuzionix/devtool-plus/refs/heads/main/media/devtool-plus-demo.gif" alt="Demo" width="840" />
 </p>
 
-## 📖 Introduction
+## Introduction
 
-DevTool+ brings common developer tools into VSCode. It provides a set of utilities that can be used directly in the code editor, enhancing productivity and streamlining workflows. It includes features like a calculator, unit converter, and more, all accessible without leaving the coding environment.
+**DevTool+**, (DevTool Plus) is a code editor extension that provides common developer I/O tools directly into your editor — It's free, no ads, no tracking.
 
-The extension features two main sections:
+The extension keeping everything inside code editor and running entirely on your local machine. There are no network requests involved, making it safe to use even with private or production data. By integrating these tools directly into the development workflow, DevTool+ helps developers work faster, stay focused, and avoid relying on external websites for everyday tasks.
 
-- **Side Panel**: A compact view with an upper I/O section for tool interactions and a lower section listing all tools.
-- **Editor Section**: A full-screen editor panel for more complex tasks (e.g., code editing or diff checking).
+## Features
 
-Built with native VSCode UI components and Lit for a responsive, familiar experience. All tools are dynamic and customizable. 🌟
-
-## ✨ Features
-
-- [🔒 **Security**] - All tools run locally in VSCode—no data is sent to external servers, ensuring privacy and offline usability.
-- [🧰 **Integration with Editor**] - Directly embedded into VSCode workflow; Use tools in the side panel without leaving your coding environment.
-- [🛠️ **Diverse Toolset**] - Over 30 tools across categories like Data, Encoding, Design, Text, and Cryptography. (Will keep expanding)
+- [🔒 **Security**] - All tools run locally in code editor — no data is sent to external servers, ensuring privacy and offline usability.
+- [🧰 **Integration with Editor**] - Directly embedded into code editor workflow; Use tools in the side panel without leaving your coding environment.
+- [🛠️ **Diverse Toolset**] - Over 35 tools across categories like Data, Encoding, Design, Text, and Cryptography. (Will keep expanding)
 - [📔 **Native UI Language**] - Have native-like UI components (e.g., code editors, diff viewers) powered by Lit for a polished, theme-aware interface.
-- [⚡ **Real-Time Update**] - Tools like editors and converters update instantly, with features like auto-formatting, validation, and live previews.
+- [⚡ **Real-Time Update**] - Tools I/O update instantly as you type, providing immediate feedback and results.
 - [💻 **Performance**] - Built with Lit for fast, efficient rendering and minimal resource usage.
+- [📌 **Pinned Tools**] - Pin your favorite tools for quick access and better organization.
 - [🔍 **Searchable Tools**] - Quickly find tools by name, category, or tags.
 
-## 📦 Installation
+## Installation
+
+<p align="center">
+  Directly search for "<b>DevTool+</b>" in your code editor's extension marketplace. Or install through
+</p>
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus">Visual Studio Code</a>
@@ -49,17 +49,11 @@ Built with native VSCode UI components and Lit for a responsive, familiar experi
   <a href="https://open-vsx.org/extension/Fuzionix/devtool-plus">Windsurf</a>
 </p>
 
----
-
-<p align="center">
-  --- or ---
-</p>
-
 ```sh
 code --install-extension Fuzionix.devtool-plus
 ```
 
-## 🧰 Tool List
+## Tool List
 
 <table align="center">
   <tr>
@@ -312,11 +306,18 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
 </table>
 
-## 🔐 Privacy
-> [!NOTE]
-> Tool logic runs locally; no data is sent to any remote service.
+## FAQ
+❓ **Does this extension collect any telemetry or usage data?**  
+🅰️ No. DevTool+ is built on the principle of absolute privacy. There are no tracking scripts, no telemetry, and no external API calls.
 
-## 📄 License
+❓ **Will installing this extension slow down code editor?**  
+🅰️ DevTool+ is built using **Lit**, a lightweight web component library. The extension and its views are only loaded into memory when you actually open the side panel or a tool, ensuring your editor remains fast and responsive.
+
+❓ **Does it match my code editor's theme?**  
+🅰️ Yes. DevTool+ uses native UI CSS variables. It will automatically adapt its colors, borders, and typography to match whatever theme you are currently using.
+
+
+## License
 
 This project is licensed under the [MIT License](LICENSE). See the LICENSE file for details.
 
