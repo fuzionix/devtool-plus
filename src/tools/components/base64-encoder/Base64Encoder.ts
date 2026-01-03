@@ -264,21 +264,26 @@ export class Base64Encoder extends BaseTool {
 
                     if (this.decodedMimeType === 'text/plain') {
                         // Attempt to decode as Base64
-                        const decodedText = decodeURIComponent(
-                            atob(base64Data)
-                                .split('')
-                                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                                .join('')
-                        );
-                        this.decodedData = decodedText;
+                        try {
+                            const decodedText = decodeURIComponent(
+                                atob(base64Data)
+                                    .split('')
+                                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                                    .join('')
+                            );
+                            this.decodedData = decodedText;
+                        } catch (error) {
+                            this.decodedMimeType = 'application/octet-stream';
+                        }
                     }
                     this.requestUpdate();
-                } catch {
+                } catch (error) {
                     this.hideOutput();
                     this.alert = {
                         type: 'error',
                         message: `Failed to Decode: Invalid Base64 string`,
                     };
+                    console.error('Decoding error: Invalid Base64 string', error);
                     return;
                 }
             }
@@ -318,7 +323,9 @@ export class Base64Encoder extends BaseTool {
      * @returns Uint8Array containing the decoded bytes
      */
     private base64ToUint8Array(base64: string): Uint8Array {
-        const binaryString = atob(base64);
+        const cleanedBase64 = base64.replace(/\s/g, '');
+        
+        const binaryString = atob(cleanedBase64);
         const bytes = new Uint8Array(binaryString.length);
         // Convert each character in binary string to its byte value
         for (let i = 0; i < binaryString.length; i++) {
@@ -333,35 +340,109 @@ export class Base64Encoder extends BaseTool {
      * @returns string - The detected MIME type
      */
     private detectMimeType(data: Uint8Array): string {
-        // Define known file signatures (magic numbers) for common file types
-        const signatures: { [key: string]: number[] } = {
-            'image/jpeg': [0xFF, 0xD8, 0xFF],
-            'image/webp': [0x52, 0x49, 0x46, 0x46],
-            'image/png': [0x89, 0x50, 0x4E, 0x47],
-            'image/gif': [0x47, 0x49, 0x46, 0x38],
+        if (data.length === 0) {
+            return 'text/plain';
+        }
 
-            'application/pdf': [0x25, 0x50, 0x44, 0x46],
-            'application/zip': [0x50, 0x4B, 0x03, 0x04],
-            'application/x-rar-compressed': [0x52, 0x61, 0x72, 0x21],
-            'application/xml': [0x3C, 0x3F, 0x78, 0x6D],
-            'application/json': [0x7B],
+        // Define file signatures with variable lengths for better accuracy
+        // Format: [mimeType, [signature bytes], minBytesRequired]
+        const signatures: Array<[string, number[], number]> = [
+            // Images
+            ['image/jpeg', [0xFF, 0xD8, 0xFF], 3],
+            ['image/png', [0x89, 0x50, 0x4E, 0x47], 4],
+            ['image/gif', [0x47, 0x49, 0x46, 0x38], 4],
+            ['image/webp', [0x52, 0x49, 0x46, 0x46], 4],
+            ['image/bmp', [0x42, 0x4D], 2],
+            ['image/tiff', [0x49, 0x49, 0x2A, 0x00], 4], // Little-endian
+            ['image/tiff', [0x4D, 0x4D, 0x00, 0x2A], 4], // Big-endian
+            ['image/svg+xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
+            ['image/x-icon', [0x00, 0x00, 0x01, 0x00], 4],
 
-            'audio/mpeg': [0xFF, 0xFB],
-            'audio/wav': [0x52, 0x49, 0x46, 0x46],
+            // Documents & Archives
+            ['application/pdf', [0x25, 0x50, 0x44, 0x46], 4], // %PDF
+            ['application/zip', [0x50, 0x4B, 0x03, 0x04], 4], // PK.. (zip, jar, docx, xlsx, etc)
+            ['application/zip', [0x50, 0x4B, 0x05, 0x06], 4], // PK.. (empty zip)
+            ['application/zip', [0x50, 0x4B, 0x07, 0x08], 4], // PK.. (spanned zip)
+            ['application/x-rar-compressed', [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07], 6],
+            ['application/x-7z-compressed', [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C], 6],
+            ['application/gzip', [0x1F, 0x8B, 0x08], 3],
+            ['application/x-tar', [0x75, 0x73, 0x74, 0x61, 0x72], 5],
+            ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', [0x50, 0x4B, 0x03, 0x04], 4],
+            ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', [0x50, 0x4B, 0x03, 0x04], 4],
+            ['application/vnd.openxmlformats-officedocument.presentationml.presentation', [0x50, 0x4B, 0x03, 0x04], 4],
+            ['application/xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
 
-            'video/mp4': [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70],
-            'video/webm': [0x1A, 0x45, 0xDF, 0xA3],
-        };
+            // Text formats
+            ['application/json', [0x7B], 1],
+            ['application/json', [0x5B], 1],
+            ['text/html', [0x3C, 0x21, 0x44, 0x4F], 4],
+            ['text/html', [0x3C, 0x48, 0x54, 0x4D], 4],
+            ['text/html', [0x3C, 0x68, 0x74, 0x6D], 4],
+            ['text/css', [0x2F, 0x2A], 2],
+            ['application/javascript', [0x2F, 0x2F], 2],
+            ['text/plain', [0xEF, 0xBB, 0xBF], 3],
 
-        // Check each known signature against the file data
-        for (const [mimeType, signature] of Object.entries(signatures)) {
-            // Compare each byte of the signature with the file data
-            if (signature.every((byte, i) => data[i] === byte)) {
-                return mimeType;
+            // Audio
+            ['audio/mpeg', [0xFF, 0xFB], 2], // MP3 (MPEG-1)
+            ['audio/mpeg', [0xFF, 0xFA], 2], // MP3 (MPEG-2)
+            ['audio/mpeg', [0xFF, 0xF3], 2], // MP3 (MPEG-2.5)
+            ['audio/mpeg', [0x49, 0x44, 0x33], 3], // ID3 tag
+            ['audio/wav', [0x52, 0x49, 0x46, 0x46], 4],
+            ['audio/flac', [0x66, 0x4C, 0x61, 0x43], 4],
+            ['audio/aac', [0xFF, 0xF1], 2],
+            ['audio/ogg', [0x4F, 0x67, 0x67, 0x53], 4],
+
+            // Video
+            ['video/mp4', [0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70], 8],
+            ['video/quicktime', [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], 8],
+            ['video/x-msvideo', [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x41, 0x56, 0x49], 11],
+            ['video/x-matroska', [0x1A, 0x45, 0xDF, 0xA3], 4],
+            ['video/mpeg', [0x00, 0x00, 0x01, 0xB3], 4],
+            ['video/x-flv', [0x46, 0x4C, 0x56, 0x01], 4],
+            ['video/quicktime', [0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20], 7],
+
+            // Executables & System
+            ['application/x-msdownload', [0x4D, 0x5A], 2],
+            ['application/x-mach-binary', [0xFE, 0xED, 0xFA, 0xCE], 4],
+            ['application/x-mach-binary', [0xFE, 0xED, 0xFA, 0xCF], 4],
+            ['application/x-executable', [0x7F, 0x45, 0x4C, 0x46], 4],
+            ['application/x-sharedlib', [0x7F, 0x45, 0x4C, 0x46], 4],
+
+            // Fonts
+            ['font/ttf', [0x00, 0x01, 0x00, 0x00], 4],
+            ['font/otf', [0x4F, 0x54, 0x54, 0x4F], 4],
+            ['font/woff', [0x77, 0x4F, 0x46, 0x46], 4],
+            ['font/woff2', [0x77, 0x4F, 0x46, 0x32], 4],
+
+            // Database & Data
+            ['application/x-sqlite3', [0x53, 0x51, 0x4C, 0x69], 4],
+            ['application/vnd.google-earth.kml+xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
+        ];
+
+        for (const [mimeType, signature, minBytes] of signatures) {
+            if (data.length >= minBytes) {
+                // Handle variable-length signatures and masks
+                let match = true;
+                for (let i = 0; i < signature.length; i++) {
+                    if (data[i] !== signature[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    return mimeType;
+                }
             }
         }
 
-        // Return default MIME type if no matches found
+        // Secondary detection: Check for tar format (signature at offset 257)
+        if (data.length > 262) {
+            const tarSignature = [0x75, 0x73, 0x74, 0x61, 0x72];
+            if (tarSignature.every((byte, i) => data[257 + i] === byte)) {
+                return 'application/x-tar';
+            }
+        }
+
         return 'text/plain';
     }
 
