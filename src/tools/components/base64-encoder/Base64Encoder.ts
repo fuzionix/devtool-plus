@@ -20,7 +20,8 @@ export class Base64Encoder extends BaseTool {
     @state() private uriHeader = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
-    @state() private isShowUriHeader = true;
+    @state() private isShowUriHeader = false;
+    @state() private decodedFileSize = 0;
 
     @query('#input') input!: HTMLTextAreaElement;
     @query('#output') output!: HTMLTextAreaElement;
@@ -122,7 +123,10 @@ export class Base64Encoder extends BaseTool {
                             @click=${() => this.triggerDownload()}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                            <h4>Download File</h4>
+                            <div class="flex items-center gap-2">
+                                <h4>${this.getDownloadButtonText()}</h4>
+                                <span class="text-xs opacity-75">${this.formatFileSize(this.decodedFileSize)}</span>
+                            </div>
                         </button>
                     </div>
                 `;
@@ -277,6 +281,13 @@ export class Base64Encoder extends BaseTool {
                     };
                     return;
                 }
+            }
+
+            // Calculate decoded file size
+            if (this.decodedData instanceof Uint8Array) {
+                this.decodedFileSize = this.decodedData.length;
+            } else if (typeof this.decodedData === 'string') {
+                this.decodedFileSize = new Blob([this.decodedData]).size;
             }
 
             // Set output mode based on MIME type
@@ -439,6 +450,7 @@ export class Base64Encoder extends BaseTool {
         this.input.style.height = `28px`;
         this.uriHeader = '';
         this.alert = null;
+        this.decodedFileSize = 0;
         this.renderOutput();
         this.requestUpdate();
     }
@@ -472,6 +484,24 @@ export class Base64Encoder extends BaseTool {
             return { base64: content, mimeType };
         }
         return { base64: base64Data, mimeType: this.decodedMimeType };
+    }
+
+    private getDownloadButtonText(): string {
+        const extension = this.getFileExtension();
+        if (extension) {
+            return `Download ${extension.toUpperCase()}`;
+        }
+        return 'Download File';
+    }
+
+    private formatFileSize(bytes: number): string {
+        if (bytes === 0) return '0 B';
+        
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     private async triggerDownload(): Promise<void> {
