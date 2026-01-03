@@ -9,6 +9,7 @@
         "url": "https://github.com/fuzionix/devtool-plus.git"
     },
     "engines": {
+        "node": ">=18 <21",
         "vscode": "^1.62.0"
     },
     "galleryBanner": {
