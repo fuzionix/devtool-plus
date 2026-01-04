@@ -88,7 +88,7 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Base64 Encoder / Decoder</td>
-    <td align="center">1.0.1</td>
+    <td align="center">1.0.2</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -116,13 +116,19 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
+  <tr>
+    <td>Escape HTML Entities</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
 
   <tr>
     <th colspan="4">[UI / UX Design]</th>
   </tr>
   <tr>
     <td>Color Convertor</td>
-    <td align="center">1.1.0</td>
+    <td align="center">1.2.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -213,12 +219,6 @@ code --install-extension Fuzionix.devtool-plus
     <th colspan="4">[Text]</th>
   </tr>
   <tr>
-    <td>Text Editor</td>
-    <td align="center">1.0.0</td>
-    <td align="center">✅</td>
-    <td align="center">✅</td>
-  </tr>
-  <tr>
     <td>Difference Checker</td>
     <td align="center">1.1.0</td>
     <td align="center">✅</td>
@@ -231,10 +231,16 @@ code --install-extension Fuzionix.devtool-plus
     <td align="center">✅</td>
   </tr>
   <tr>
-    <td>Slug Generator</td>
+    <td>Lorem Ipsum</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
     <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>Slug Generator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">✅</td>
   </tr>
 
   <tr>
@@ -250,19 +256,37 @@ code --install-extension Fuzionix.devtool-plus
     <td>HTTP Status Code</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
   <tr>
     <td>Data Unit Converter</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
   <tr>
     <td>UNIX / Windows Path Convertor</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td>Number Base Convertor</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>Crontab Generator</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">🚧</td>
+  </tr>
+  <tr>
+    <td>Chmod Calculator</td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center">🚧</td>
   </tr>
   <tr>
     <td>Docker Compose Generator</td>

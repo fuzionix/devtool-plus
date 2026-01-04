@@ -7,12 +7,14 @@ import namesPlugin from 'colord/plugins/names';
 import hwbPlugin from 'colord/plugins/hwb';
 import cmykPlugin from 'colord/plugins/cmyk';
 import lchPlugin from 'colord/plugins/lch';
+import xyzPlugin from 'colord/plugins/xyz';
 
-extend([namesPlugin, hwbPlugin, cmykPlugin, lchPlugin]);
+extend([namesPlugin, hwbPlugin, cmykPlugin, lchPlugin, xyzPlugin]);
 
 @customElement('color-convertor')
 export class ColorConvertor extends BaseTool {
-    @state() private colorValue = '#0f85fa';
+    // Store XYZ as the internal representation
+    @state() private colorXyz = { x: 0, y: 0, z: 0 };
     @state() private formats = {
         hex: '#0f85fa',
         rgb: 'rgb(15, 133, 250)',
@@ -23,7 +25,7 @@ export class ColorConvertor extends BaseTool {
         name: ''
     };
     @state() private isLight = true;
-    @state() private exactName = false; // Track if the name is exact or approximate
+    @state() private exactName = false;
     @state() private errors = {
         hex: '',
         rgb: '',
@@ -53,7 +55,10 @@ export class ColorConvertor extends BaseTool {
 
     constructor() {
         super();
-        this.updateAllFormats(this.colorValue);
+        const initialColor = colord('#0f85fa');
+        // Initialize the internal XYZ representation
+        this.colorXyz = initialColor.toXyz();
+        this.updateAllFormats();
     }
 
     protected renderTool() {
@@ -72,7 +77,7 @@ export class ColorConvertor extends BaseTool {
                     </div>
                     <tool-color-picker
                         class="w-full h-7"
-                        .value="${this.colorValue}"
+                        .value="${this.getHexFromXyz()}"
                         @change="${this.handleColorChange}"
                     ></tool-color-picker>
                     <p class="mt-1 mb-0 text-xs opacity-75 select-none">Pick your color here</p>
@@ -184,9 +189,10 @@ export class ColorConvertor extends BaseTool {
     }
 
     private handleColorChange(e: CustomEvent) {
-        const value = e.detail.value;
-        this.colorValue = value;
-        this.updateAllFormats(value);
+        const hexValue = e.detail.value;
+        const parsedColor = colord(hexValue);
+        this.colorXyz = parsedColor.toXyz();
+        this.updateAllFormats();
         this.clearAllErrors();
     }
 
@@ -206,19 +212,10 @@ export class ColorConvertor extends BaseTool {
         if (validationResult.isValid) {
             this.errors = { ...this.errors, [format]: '' };
             
-            // Only update other formats when the input is valid
-            if (format === 'hsl') {
-                // Special handling for HSL to preserve the exact values
-                this.updateOtherFormatsFromHsl(value);
-            } else if (format === 'lch') {
-                // Special handling for LCH
-                this.updateOtherFormatsFromLch(value);
-            } else {
-                this.colorValue = validationResult.color as string;
-                this.updateOtherFormats(this.colorValue, format);
-            }
+            const parsedColor = colord(value);
+            this.colorXyz = parsedColor.toXyz();
             
-            // Update the color picker value to match
+            this.updateAllFormats();
             this.updateColorPicker();
         } else {
             this.errors = { ...this.errors, [format]: validationResult.error as string };
@@ -230,8 +227,8 @@ export class ColorConvertor extends BaseTool {
             const parsedColor = colord(value);
             
             if (parsedColor.isValid()) {
-                this.colorValue = parsedColor.toHex();
-                this.updateAllFormats(this.colorValue);
+                this.colorXyz = parsedColor.toXyz();
+                this.updateAllFormats();
                 this.updateColorPicker();
                 this.errors = { ...this.errors, name: '' };
                 this.exactName = true;
@@ -243,12 +240,18 @@ export class ColorConvertor extends BaseTool {
         }
     }
 
+    private getHexFromXyz(): string {
+        try {
+            const parsedColor = colord(this.colorXyz);
+            return parsedColor.toHex();
+        } catch (error) {
+            return '#000000';
+        }
+    }
+
     private updateColorPicker() {
         if (this.colorPicker) {
-            // Update the color picker's value property directly
-            this.colorPicker.value = this.colorValue;
-            
-            // Force the color picker to update its internal state
+            this.colorPicker.value = this.getHexFromXyz();
             this.colorPicker.requestUpdate();
         }
     }
@@ -320,11 +323,7 @@ export class ColorConvertor extends BaseTool {
                     break;
             }
             
-            // Return the parsed color in the original format for consistency
-            return { 
-                isValid: true,
-                color: parsedColor.toHex()
-            };
+            return { isValid: true };
             
         } catch (error) {
             return {
@@ -346,9 +345,9 @@ export class ColorConvertor extends BaseTool {
         };
     }
 
-    private updateAllFormats(color: string) {
+    private updateAllFormats() {
         try {
-            const parsedColor = colord(color);
+            const parsedColor = colord(this.colorXyz);
             
             if (!parsedColor.isValid()) {
                 throw new Error('Invalid color');
@@ -388,136 +387,8 @@ export class ColorConvertor extends BaseTool {
         }
     }
 
-    private updateOtherFormats(color: string, currentFormat: keyof typeof this.formats) {
-        try {
-            const parsedColor = colord(color);
-            
-            if (!parsedColor.isValid()) {
-                throw new Error('Invalid color');
-            }
-            
-            const exactName = parsedColor.toName();
-            let colorName = '';
-            
-            if (exactName) {
-                colorName = exactName;
-                this.exactName = true;
-            } else {
-                colorName = parsedColor.toName({ closest: true }) || '';
-                this.exactName = false;
-            }
-            
-            // Update all formats except the one being edited
-            const updatedFormats = { ...this.formats };
-            
-            if (currentFormat !== 'hex') updatedFormats.hex = parsedColor.toHex();
-            if (currentFormat !== 'rgb') updatedFormats.rgb = parsedColor.toRgbString();
-            if (currentFormat !== 'hsl') updatedFormats.hsl = parsedColor.toHslString();
-            if (currentFormat !== 'hwb') updatedFormats.hwb = parsedColor.toHwbString();
-            if (currentFormat !== 'cmyk') updatedFormats.cmyk = parsedColor.toCmykString();
-            if (currentFormat !== 'lch') updatedFormats.lch = parsedColor.toLchString();
-            
-            updatedFormats.name = colorName;
-            
-            this.formats = updatedFormats;
-            this.isLight = parsedColor.isLight();
-        } catch (error) {
-            console.error('Failed to update other color formats:', error);
-        }
-    }
-
-    private updateOtherFormatsFromHsl(hslValue: string) {
-        try {
-            // Parse the HSL values manually to prevent precision issues
-            const hslRegex = /hsla?\(\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%(?:\s*,\s*(\d+(?:\.\d+)?))?\s*\)/i;
-            const matches = hslValue.match(hslRegex);
-            
-            if (!matches) {
-                throw new Error('Invalid HSL format');
-            }
-            
-            const h = parseInt(matches[1], 10);
-            const s = parseFloat(matches[2]);
-            const l = parseFloat(matches[3]);
-            const a = matches[4] ? parseFloat(matches[4]) : 1;
-            
-            const parsedColor = colord({ h, s, l, a });
-            
-            const exactName = parsedColor.toName();
-            let colorName = '';
-            
-            if (exactName) {
-                colorName = exactName;
-                this.exactName = true;
-            } else {
-                colorName = parsedColor.toName({ closest: true }) || '';
-                this.exactName = false;
-            }
-            
-            // Update all formats except HSL
-            this.formats = {
-                ...this.formats,
-                hex: parsedColor.toHex(),
-                rgb: parsedColor.toRgbString(),
-                hwb: parsedColor.toHwbString(),
-                cmyk: parsedColor.toCmykString(),
-                lch: parsedColor.toLchString(),
-                name: colorName
-            };
-            
-            this.colorValue = parsedColor.toHex();
-            this.isLight = parsedColor.isLight();
-        } catch (error) {
-            console.error('Failed to update from HSL:', error);
-        }
-    }
-
-    private updateOtherFormatsFromLch(lchValue: string) {
-        try {
-            const lchRegex = /lch\(\s*(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?\s*\)/i;
-            const matches = lchValue.match(lchRegex);
-            
-            if (!matches) {
-                throw new Error('Invalid LCH format');
-            }
-            
-            const parsedColor = colord(lchValue);
-            
-            if (!parsedColor.isValid()) {
-                throw new Error('Invalid LCH color');
-            }
-            
-            const exactName = parsedColor.toName();
-            let colorName = '';
-            
-            if (exactName) {
-                colorName = exactName;
-                this.exactName = true;
-            } else {
-                colorName = parsedColor.toName({ closest: true }) || '';
-                this.exactName = false;
-            }
-            
-            // Update all formats except LCH
-            this.formats = {
-                ...this.formats,
-                hex: parsedColor.toHex(),
-                rgb: parsedColor.toRgbString(),
-                hsl: parsedColor.toHslString(),
-                hwb: parsedColor.toHwbString(),
-                cmyk: parsedColor.toCmykString(),
-                name: colorName
-            };
-            
-            this.colorValue = parsedColor.toHex();
-            this.isLight = parsedColor.isLight();
-        } catch (error) {
-            console.error('Failed to update from LCH:', error);
-        }
-    }
-
     private async copyToClipboard(format: keyof typeof this.formats) {
-        if (!this.formats[format]) return; // Don't copy empty values
+        if (!this.formats[format]) return;
         
         try {
             await navigator.clipboard.writeText(this.formats[format]);
