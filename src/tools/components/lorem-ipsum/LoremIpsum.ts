@@ -96,9 +96,9 @@ export class LoremIpsum extends BaseTool {
 
                 <tool-expandable label="Advanced Settings">
                     <div class="content-to-expand">
-                        <!-- Sentence per Paragraph -->
+                        <!-- Sentences per Paragraph -->
                         <div>
-                            <div class="mb-1 text-xs">Sentence per Paragraph</div>
+                            <div class="mb-1 text-xs">Sentences per Paragraph</div>
                             ${this.variation === 'random' 
                                 ? html`
                                     <tool-slider-range 
@@ -123,9 +123,9 @@ export class LoremIpsum extends BaseTool {
                             }
                         </div>
 
-                        <!-- Word per Sentence -->
+                        <!-- Words per Sentence -->
                         <div>
-                            <div class="mb-1 text-xs">Word per Sentence</div>
+                            <div class="mb-1 text-xs">Words per Sentence</div>
                             ${this.variation === 'random' 
                                 ? html`
                                     <tool-slider-range 

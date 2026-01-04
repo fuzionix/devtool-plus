@@ -186,8 +186,6 @@ export class SliderRange extends LitElement {
         const trackLeft = `calc(${halfThumb}px + (${startPercent} * (100% - ${this.THUMB_WIDTH}px) / 100))`;
         const trackRight = `calc(${halfThumb}px + (${endPercent} * (100% - ${this.THUMB_WIDTH}px) / 100))`;
         const trackStyle = `left: ${trackLeft}; right: calc(100% - ${trackRight})`;
-
-        console.log(trackStyle);
         
         return html`
             <div class="slider-container ${this.isDragging ? 'is-dragging' : ''} ${this.disabled ? 'is-disabled' : ''}">

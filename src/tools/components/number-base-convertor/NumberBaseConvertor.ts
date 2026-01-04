@@ -186,16 +186,16 @@ export class NumberBaseConvertor extends BaseTool {
             const base = baseMap[this.inputBase];
 
             // For non-decimal inputs, verify the conversion is valid
-            if (this.inputBase === 'binary' && !/^[01]+$/.test(input)) {
+            if (this.inputBase === 'binary' && !/^-?[01]+$/.test(input)) {
                 throw new Error('Binary numbers can only contain 0 and 1');
             }
-            if (this.inputBase === 'octal' && !/^[0-7]+$/.test(input)) {
+            if (this.inputBase === 'octal' && !/^-?[0-7]+$/.test(input)) {
                 throw new Error('Octal numbers can only contain 0-7');
             }
             if (this.inputBase === 'decimal' && !/^-?\d+$/.test(input)) {
                 throw new Error('Decimal numbers can only contain digits 0-9');
             }
-            if (this.inputBase === 'hexadecimal' && !/^[0-9a-fA-F]+$/.test(input)) {
+            if (this.inputBase === 'hexadecimal' && !/^-?[0-9a-fA-F]+$/.test(input)) {
                 throw new Error('Hexadecimal numbers can only contain 0-9, a-f, A-F');
             }
 
