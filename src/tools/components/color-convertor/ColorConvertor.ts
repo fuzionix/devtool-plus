@@ -214,8 +214,18 @@ export class ColorConvertor extends BaseTool {
         const validationResult = this.validateColor(value, format);
         if (validationResult.isValid) {
             this.errors = { ...this.errors, [format]: '' };
+
+            let parsedColor: any;
             
-            const parsedColor = colord(value);
+            if (format === 'xyz') {
+                const xyzValues = this.parseXyzString(value);
+                if (xyzValues) {
+                    parsedColor = colord(xyzValues);
+                }
+            } else {
+                parsedColor = colord(value);
+            }
+
             this.colorXyz = parsedColor.toXyz();
             
             this.updateAllFormats();
@@ -252,8 +262,39 @@ export class ColorConvertor extends BaseTool {
         }
     }
 
+    private adaptD50toD65(xyz: { x: number; y: number; z: number }) {
+        const matrix = [
+            [0.9555766, -0.0230393, 0.0631636],
+            [-0.0282895, 1.0099416, 0.0210077],
+            [0.0122982, -0.0204830, 1.3299098]
+        ];
+
+        return {
+            x: xyz.x * matrix[0][0] + xyz.y * matrix[0][1] + xyz.z * matrix[0][2],
+            y: xyz.x * matrix[1][0] + xyz.y * matrix[1][1] + xyz.z * matrix[1][2],
+            z: xyz.x * matrix[2][0] + xyz.y * matrix[2][1] + xyz.z * matrix[2][2]
+        };
+    }
+
+    private adaptD65toD50(xyz: { x: number; y: number; z: number }) {
+        const matrix = [
+            [1.0478112, 0.0228866, -0.0501270],
+            [0.0295424, 0.9904844, -0.0170491],
+            [-0.0092345, 0.0150436, 0.7521316]
+        ];
+        return {
+            x: xyz.x * matrix[0][0] + xyz.y * matrix[0][1] + xyz.z * matrix[0][2],
+            y: xyz.x * matrix[1][0] + xyz.y * matrix[1][1] + xyz.z * matrix[1][2],
+            z: xyz.x * matrix[2][0] + xyz.y * matrix[2][1] + xyz.z * matrix[2][2]
+        };
+    }
+
     private formatXyzString(xyz: { x: number; y: number; z: number }): string {
-        return `color(xyz ${xyz.x.toFixed(2)} ${xyz.y.toFixed(2)} ${xyz.z.toFixed(2)})`;
+        const d65 = this.adaptD50toD65(xyz);
+        const x = parseFloat((d65.x / 100).toFixed(4));
+        const y = parseFloat((d65.y / 100).toFixed(4));
+        const z = parseFloat((d65.z / 100).toFixed(4));
+        return `color(xyz ${x} ${y} ${z})`;
     }
 
     private parseXyzString(value: string): { x: number; y: number; z: number } | null {
@@ -263,12 +304,14 @@ export class ColorConvertor extends BaseTool {
         if (!matches) {
             return null;
         }
-        
-        return {
-            x: parseFloat(matches[1]),
-            y: parseFloat(matches[2]),
-            z: parseFloat(matches[3])
+
+        const d65 = {
+            x: parseFloat(matches[1]) * 100,
+            y: parseFloat(matches[2]) * 100,
+            z: parseFloat(matches[3]) * 100
         };
+        
+        return this.adaptD65toD50(d65);
     }
 
     private updateColorPicker() {
@@ -394,32 +437,31 @@ export class ColorConvertor extends BaseTool {
             }
             
             const exactName = parsedColor.toName();
+            const newFormats = {
+                hex: parsedColor.toHex(),
+                rgb: parsedColor.toRgbString(),
+                hsl: parsedColor.toHslString(),
+                hwb: parsedColor.toHwbString(),
+                cmyk: parsedColor.toCmykString(),
+                lch: parsedColor.toLchString(),
+                xyz: this.formatXyzString(this.colorXyz),
+                name: exactName || ''
+            };
+            
+            // Preserve the value of the currently editing format
+            if (this.editingFormat) {
+                newFormats[this.editingFormat as keyof typeof newFormats] = this.formats[this.editingFormat as keyof typeof this.formats];
+            }
+            
+            this.formats = newFormats;
             
             if (exactName) {
-                this.formats = {
-                    hex: parsedColor.toHex(),
-                    rgb: parsedColor.toRgbString(),
-                    hsl: parsedColor.toHslString(),
-                    hwb: parsedColor.toHwbString(),
-                    cmyk: parsedColor.toCmykString(),
-                    lch: parsedColor.toLchString(),
-                    xyz: this.formatXyzString(this.colorXyz),
-                    name: exactName
-                };
                 this.exactName = true;
             } else {
                 const closestName = parsedColor.toName({ closest: true });
-                
-                this.formats = {
-                    hex: parsedColor.toHex(),
-                    rgb: parsedColor.toRgbString(),
-                    hsl: parsedColor.toHslString(),
-                    hwb: parsedColor.toHwbString(),
-                    cmyk: parsedColor.toCmykString(),
-                    lch: parsedColor.toLchString(),
-                    xyz: this.formatXyzString(this.colorXyz),
-                    name: closestName || ''
-                };
+                if (closestName) {
+                    this.formats = { ...this.formats, name: closestName };
+                }
                 this.exactName = false;
             }
             
