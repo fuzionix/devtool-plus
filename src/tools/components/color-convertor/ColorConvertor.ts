@@ -22,6 +22,7 @@ export class ColorConvertor extends BaseTool {
         hwb: 'hwb(210 6% 2%)',
         cmyk: 'device-cmyk(94% 47% 0% 2%)',
         lch: 'lch(54.78% 67.95 273.92)',
+        xyz: 'color(xyz 0.26 0.24 0.94)',
         name: ''
     };
     @state() private isLight = true;
@@ -33,6 +34,7 @@ export class ColorConvertor extends BaseTool {
         hwb: '',
         cmyk: '',
         lch: '',
+        xyz: '',
         name: ''
     };
     @state() private copiedFormat: string | null = null;
@@ -44,6 +46,7 @@ export class ColorConvertor extends BaseTool {
         hwb: '',
         cmyk: '',
         lch: '',
+        xyz: '',
         name: ''
     };
 
@@ -56,7 +59,6 @@ export class ColorConvertor extends BaseTool {
     constructor() {
         super();
         const initialColor = colord('#0f85fa');
-        // Initialize the internal XYZ representation
         this.colorXyz = initialColor.toXyz();
         this.updateAllFormats();
     }
@@ -65,7 +67,7 @@ export class ColorConvertor extends BaseTool {
         return html`
             <style>${this.styles}</style>
             <div class="tool-inner-container">
-                <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, LCH, and named colors. Edit any format directly or use the color picker.</p>
+                <p class="opacity-75">Convert colors between different formats: HEX, RGB, HSL, HWB, CMYK, XYZ, LCH, and named colors. Edit any format directly or use the color picker.</p>
                 <hr />
 
                 <div class="relative flex flex-col items-center">
@@ -96,6 +98,7 @@ export class ColorConvertor extends BaseTool {
                     ${this.renderFormatRow('hwb', 'HWB')}
                     ${this.renderFormatRow('cmyk', 'CMYK')}
                     ${this.renderFormatRow('lch', 'LCH')}
+                    ${this.renderFormatRow('xyz', 'XYZ')}
                     ${this.renderNameRow()}
                 </div>
             </div>
@@ -103,7 +106,7 @@ export class ColorConvertor extends BaseTool {
     }
 
     private renderFormatRow(format: keyof typeof this.formats, label: string) {
-        if (format === 'name') return html``; // Name has a special renderer
+        if (format === 'name') return html``;
         
         const isCopied = this.copiedFormat === format;
         const hasError = !!this.errors[format];
@@ -249,6 +252,25 @@ export class ColorConvertor extends BaseTool {
         }
     }
 
+    private formatXyzString(xyz: { x: number; y: number; z: number }): string {
+        return `color(xyz ${xyz.x.toFixed(2)} ${xyz.y.toFixed(2)} ${xyz.z.toFixed(2)})`;
+    }
+
+    private parseXyzString(value: string): { x: number; y: number; z: number } | null {
+        const xyzRegex = /color\(\s*xyz\s+([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s*\)/i;
+        const matches = value.match(xyzRegex);
+        
+        if (!matches) {
+            return null;
+        }
+        
+        return {
+            x: parseFloat(matches[1]),
+            y: parseFloat(matches[2]),
+            z: parseFloat(matches[3])
+        };
+    }
+
     private updateColorPicker() {
         if (this.colorPicker) {
             this.colorPicker.value = this.getHexFromXyz();
@@ -258,7 +280,21 @@ export class ColorConvertor extends BaseTool {
 
     private validateColor(value: string, format: keyof typeof this.formats): { isValid: boolean; color?: string; error?: string } {
         try {
-            const parsedColor = colord(value);
+            let parsedColor: any;
+            
+            // Special handling for XYZ format
+            if (format === 'xyz') {
+                const xyzValues = this.parseXyzString(value);
+                if (!xyzValues) {
+                    return {
+                        isValid: false,
+                        error: 'Invalid XYZ format. Use color(xyz x y z) e.g., color(xyz 0.26 0.24 0.94)'
+                    };
+                }
+                parsedColor = colord(xyzValues);
+            } else {
+                parsedColor = colord(value);
+            }
             
             if (!parsedColor.isValid()) {
                 return {
@@ -321,6 +357,9 @@ export class ColorConvertor extends BaseTool {
                         };
                     }
                     break;
+
+                case 'xyz':
+                    break;
             }
             
             return { isValid: true };
@@ -341,6 +380,7 @@ export class ColorConvertor extends BaseTool {
             hwb: '',
             cmyk: '',
             lch: '',
+            xyz: '',
             name: ''
         };
     }
@@ -363,6 +403,7 @@ export class ColorConvertor extends BaseTool {
                     hwb: parsedColor.toHwbString(),
                     cmyk: parsedColor.toCmykString(),
                     lch: parsedColor.toLchString(),
+                    xyz: this.formatXyzString(this.colorXyz),
                     name: exactName
                 };
                 this.exactName = true;
@@ -376,6 +417,7 @@ export class ColorConvertor extends BaseTool {
                     hwb: parsedColor.toHwbString(),
                     cmyk: parsedColor.toCmykString(),
                     lch: parsedColor.toLchString(),
+                    xyz: this.formatXyzString(this.colorXyz),
                     name: closestName || ''
                 };
                 this.exactName = false;
