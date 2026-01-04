@@ -9,6 +9,27 @@ DevTool+
 </h1>
 
 <p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus">
+    <img src="https://img.shields.io/badge/VS%20Code-DevTool%2B-3799fb?style=flat-square&labelColor=1f1f1f" alt="VS Code Extension" />
+  </a>
+  <a href="https://open-vsx.org/extension/Fuzionix/devtool-plus">
+    <img src="https://img.shields.io/badge/OpenVSX-DevTool%2B-6537fb?style=flat-square&labelColor=1f1f1f" alt="Open VSX" />
+  </a>
+  <a href="https://github.com/fuzionix/devtool-plus/releases">
+    <img src="https://img.shields.io/github/v/release/fuzionix/devtool-plus?style=flat-square&color=fb8237&labelColor=1f1f1f" alt="Latest Release" />
+  </a>
+  <a href="https://github.com/fuzionix/devtool-plus">
+    <img src="https://img.shields.io/github/stars/fuzionix/devtool-plus?style=flat-square&color=fff&labelColor=1f1f1f" alt="GitHub Stars" />
+  </a>
+  <a href="https://github.com/fuzionix/devtool-plus/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=d4fb37&labelColor=1f1f1f" alt="MIT License" />
+  </a>
+  <a href="https://github.com/fuzionix/devtool-plus/issues">
+    <img src="https://img.shields.io/github/issues/fuzionix/devtool-plus?style=flat-square&color=fb5437&labelColor=1f1f1f" alt="Issues" />
+  </a>
+</p>
+
+<p align="center">
 A code editor extension that provides common I/O tools directly in code editor
 </p>
 
@@ -20,9 +41,9 @@ A code editor extension that provides common I/O tools directly in code editor
 
 ## Introduction
 
-**DevTool+**, (DevTool Plus) is a code editor extension that provides common developer I/O tools directly into your editor — It's free, no ads, no tracking.
+**DevTool+**, (DevTool Plus) is a code editor extension that provides common developer I/O tools directly into your editor — It's **free**, **no ads**, and **no tracking**.
 
-The extension keeping everything inside code editor and running entirely on your local machine. There are no network requests involved, making it safe to use even with private or production data. By integrating these tools directly into the development workflow, DevTool+ helps developers work faster, stay focused, and avoid relying on external websites for everyday tasks.
+The extension keeping everything inside code editor and running entirely on your local machine. There are **no network requests involved**, making it safe to use even with private or production data. By integrating these tools directly into the development workflow, DevTool+ helps developers work faster, stay focused, and avoid relying on external websites for everyday tasks.
 
 ## Features
 
