@@ -190,6 +190,7 @@
         "colord": "^2.9.3",
         "fast-xml-parser": "^5.2.5",
         "fs-extra": "^11.3.1",
+        "html-entities": "^2.6.0",
         "js-yaml": "^4.1.0",
         "lit": "^3.2.1",
         "mime-db": "^1.53.0",

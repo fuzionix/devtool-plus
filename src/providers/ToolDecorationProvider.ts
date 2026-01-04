@@ -19,7 +19,7 @@ export class ToolDecorationProvider implements vscode.FileDecorationProvider {
 
         if (tool?.isNew) {
             return {
-                badge: '❗',
+                badge: '✨',
                 tooltip: 'New Tool'
             };
         }

@@ -52,7 +52,7 @@ export class LoremIpsum extends BaseTool {
         return html`
             <style>${this.styles}</style>
             <div class="tool-inner-container">
-                <p class="opacity-75">Generate dummy Lorem Ipsum text for design and development.</p>
+                <p class="opacity-75">Lorem Ipsum is simply dummy text of the printing and typesetting industry. It has been the industry's standard dummy text ever since the 1500s.</p>
                 <hr />
 
                 <!-- Amount Slider -->

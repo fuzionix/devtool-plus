@@ -177,7 +177,7 @@ export class ContrastChecker extends BaseTool {
                 </div>
                 
                 <!-- Help Text -->
-                <p class="text-xs opacity-75 mt-4">
+                <p class="text-[11px] opacity-75 mt-4">
                     <strong>WCAG AA:</strong> Minimum requirement for most websites<br>
                     <strong>WCAG AAA:</strong> Enhanced requirement for optimal accessibility
                 </p>

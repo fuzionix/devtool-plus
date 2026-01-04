@@ -4,7 +4,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
-        version: '1.0.1',
+        version: '1.0.2',
         category: ToolCategory.Encode,
         template: '<base64-encoder></base64-encoder>',
         icon: 'file-digit',
@@ -45,6 +45,16 @@ export const TOOLS: Tool[] = [
         template: '<unicode-inspector></unicode-inspector>',
         icon: 'book-type',
         tags: ['unicode', 'inspect', 'text', 'string', 'character', 'codepoint']
+    },
+    {
+        id: 'escape-html-entities',
+        label: 'Escape HTML Entities',
+        version: '1.0.0',
+        category: ToolCategory.Encode,
+        template: '<escape-html-entities></escape-html-entities>',
+        icon: 'code-xml',
+        isNew: true,
+        tags: ['html', 'escape', 'entities', 'encode', 'decode', 'text', 'string', 'web']
     },
     {
         id: 'color-convertor',
