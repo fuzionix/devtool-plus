@@ -19,6 +19,12 @@ export class Slider extends LitElement {
             width: 100%;
         }
 
+        .slider-container.is-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
         .slider-wrapper {
             position: relative;
             flex: 1;
@@ -165,7 +171,8 @@ export class Slider extends LitElement {
     @property({ type: String }) unit = '';
     @property({ type: Function }) formatter = (val: number) => val.toString();
     @property({ type: Number }) inputWidth = 30;
-
+    @property({ type: Boolean }) disabled = false;
+    
     @state() private isDragging = false;
     @query('.slider') private sliderElement!: HTMLInputElement;
     @query('.value-tooltip') private tooltipElement!: HTMLDivElement;
@@ -177,7 +184,7 @@ export class Slider extends LitElement {
         const trackWidth = this.calculateTrackWidth();
 
         return html`
-            <div class="slider-container ${this.isDragging ? 'is-dragging' : ''}">
+            <div class="slider-container ${this.isDragging ? 'is-dragging' : ''} ${this.disabled ? 'is-disabled' : ''}">
                 <div class="slider-wrapper">
                     <input 
                         type="range" 
@@ -186,6 +193,7 @@ export class Slider extends LitElement {
                         .max=${this.max} 
                         .step=${this.step} 
                         .value=${this.value}
+                        ?disabled=${this.disabled}
                         @input=${this.handleSliderInput}
                         @mouseover=${this.updateTooltipPosition}
                         @mousedown=${this.handleMouseDown}
@@ -204,6 +212,7 @@ export class Slider extends LitElement {
                         .max=${this.max}
                         .step=${this.step}
                         .value=${this.value}
+                        ?disabled=${this.disabled}
                         @input=${this.handleNumberInput}
                     />
                 </div>

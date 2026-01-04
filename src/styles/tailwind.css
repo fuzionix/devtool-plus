@@ -208,7 +208,7 @@
 
     /* Input Expandable */
     .input-expandable {
-        @apply w-full pr-16 min-h-[28px] max-h-[300px] resize-none overflow-x-hidden pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground focus:opacity-100 focus:ring-1 focus:ring-offset-[-1px] focus:ring-[var(--vscode-focusBorder)] disabled:opacity-50 disabled:cursor-not-allowed;
+        @apply w-full min-h-[28px] max-h-[300px] resize-none overflow-x-hidden pr-14 pt-1 pb-0.5 px-1.5 rounded-sm text-vscode-input-foreground focus:opacity-100 focus:ring-1 focus:ring-offset-[-1px] focus:ring-[var(--vscode-focusBorder)] disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
     /* Radio Button */
