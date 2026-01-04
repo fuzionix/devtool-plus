@@ -3,7 +3,7 @@
     "displayName": "DevTool+",
     "publisher": "Fuzionix",
     "description": "An extension that provides common I/O tools directly in code editor",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/fuzionix/devtool-plus.git"
