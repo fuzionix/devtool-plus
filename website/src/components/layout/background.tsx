@@ -6,7 +6,7 @@ export default function Background() {
     // Parallax Logic:
     // As the user scrolls down, the background elements shift slightly.
     const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
-    const y2 = useTransform(scrollY, [0, 1000], [0, -150]);
+    const y2 = useTransform(scrollY, [0, 1000], [0, 200]);
 
     return (
         <div className="fixed inset-0 z-0 h-full w-full overflow-hidden pointer-events-none select-none">

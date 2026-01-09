@@ -44,7 +44,7 @@ export default function Hero() {
             className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white/50 px-3 py-1 text-xs font-medium text-slate-600 backdrop-blur-sm transition-all hover:border-primary-300 hover:bg-white/80"
           >
             <span className="flex h-2 w-2 rounded-full bg-primary-500"></span>
-            <span>v0.5.0 Released</span>
+            <span>Latest release • v0.5.0</span>
             <ChevronRight className="h-3 w-3 text-slate-400 transition-transform group-hover:translate-x-0.5" />
           </a>
         </motion.div>
@@ -65,7 +65,7 @@ export default function Hero() {
         {/* 3. Subtitle */}
         <motion.div variants={itemVariants} className="mb-12 max-w-2xl px-4">
           <p className="text-sm text-slate-500 leading-relaxed sm:text-base">
-            Privacy-first. Local-only. Built for VS Code. Access 35+ developer tools without leaving your editor.
+            Privacy-first. Local-only. Built for modern code editors. Access 35+ developer tools without leaving your IDE.
           </p>
         </motion.div>
 
