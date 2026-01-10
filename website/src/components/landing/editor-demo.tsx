@@ -1,15 +1,25 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   Command, 
   Settings, 
   GitGraph, 
   Files, 
-  Beaker,
-  Maximize2,
   MoreHorizontal,
+  Fingerprint,
+  Hash,
+  Link2,
+  Maximize2,
+  PaintbrushVertical,
+  CirclePlus
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+
+import UuidGenerator from './tools/uuid-generator';
+import UrlParser from './tools/url-parser';
+import ShaHashing from './tools/sha-hashing';
+import ColorFormat from './tools/color-format';
 
 // 1. The "Code Stick" - simulates syntax highlighted text
 const CodeStick = ({ width, color = "bg-slate-200" }: { width: string, color?: string }) => (
@@ -29,13 +39,59 @@ const CodeLine = ({ lineNo, indent = 0, sticks }: { lineNo: number, indent?: num
 );
 
 export default function EditorDemo() {
+  const [activeTool, setActiveTool] = useState<'uuid' | 'url' | 'sha' | 'color'>('uuid');
+
+  const tools = [
+    { id: 'uuid', label: 'UUID Gen', icon: Fingerprint },
+    { id: 'url', label: 'URL Parser', icon: Link2 },
+    { id: 'sha', label: 'SHA Hashing', icon: Hash },
+    { id: 'color', label: 'Color Format', icon: PaintbrushVertical },
+  ] as const;
+
   return (
     <section className="relative z-20 mx-auto mt-[80px] w-full max-w-7xl px-8 pb-20">
+      {/* Tool Selector Tabs */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+        className="mb-4 flex justify-center gap-2"
+      >
+        <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
+          {tools.map((tool) => {
+            const isActive = activeTool === tool.id;
+            const Icon = tool.icon;
+            return (
+              <button
+                key={tool.id}
+                onClick={() => setActiveTool(tool.id)}
+                className={cn(
+                  "flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200",
+                  isActive 
+                    ? "bg-slate-900 text-white shadow-md" 
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{tool.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
+          <button
+            className={cn("flex items-center gap-2 rounded-full px-1.5 py-1.5 text-xs font-medium transition-all duration-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900")}
+          >
+            <CirclePlus className="h-4 w-4" />
+          </button>
+        </div>
+      </motion.div>
+
       {/* 3D Perspective Wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 100, rotateX: 10 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
         className="relative mx-auto rounded-lg bg-white/60 shadow-2xl shadow-gray-200 backdrop-blur-xl ring-1 ring-slate-900/5 dark:ring-white/10"
         style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
       >
@@ -89,15 +145,23 @@ export default function EditorDemo() {
               </div>
             </div>
 
-            {/* Empty State / Content Area */}
-            <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-                <div className="mb-3 rounded-full bg-slate-100 p-3">
-                    <Beaker className="h-6 w-6 text-slate-400" />
-                </div>
-                <h3 className="text-sm font-medium text-slate-700">Select a Tool</h3>
-                <p className="mt-4 text-xs text-slate-400 leading-normal">
-                   Choose from the list to start converting, formatting, or generating data.
-                </p>
+            {/* Dynamic Tool Content */}
+            <div className="relative flex-1 overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTool}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full"
+                >
+                  {activeTool === 'uuid' && <UuidGenerator />}
+                  {activeTool === 'url' && <UrlParser />}
+                  {activeTool === 'sha' && <ShaHashing />}
+                  {activeTool === 'color' && <ColorFormat />}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Bottom Info Section */}
