@@ -1,6 +1,7 @@
 import Background from './components/layout/background';
 import Navbar from './components/layout/navbar';
 import Hero from './components/landing/hero';
+import EditorDemo from './components/landing/editor-demo';
 
 function App() {
     return (
@@ -12,8 +13,14 @@ function App() {
             <Navbar />
 
             {/* The Content: Scrollable Context */}
-            <main className="relative z-10 flex min-h-screen flex-col items-center px-6 pt-24 pb-20">
+            <main className="relative z-10 flex min-h-screen flex-col items-center pt-24 pb-20">
+                {/* Hero Section */}
                 <Hero />
+                
+                {/* Editor Demo Visualization */}
+                <div className="mt-[-20px] w-full sm:mt-0">
+                    <EditorDemo />
+                </div>
             </main>
         </div>
     );

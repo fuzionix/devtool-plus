@@ -21,6 +21,12 @@
     --radius: 0.75rem;
   }
 
+  html {
+    @apply scroll-smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
   body {
     @apply bg-porcelain text-slate-900 antialiased selection:bg-primary/20 selection:text-primary-900;
   }
