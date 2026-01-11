@@ -12,7 +12,7 @@ import {
   Link2,
   Maximize2,
   PaintbrushVertical,
-  CirclePlus
+  CircleChevronDown
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -100,7 +100,7 @@ export default function EditorDemo() {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
         className="mb-6 flex justify-center gap-2"
       >
-        <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
+        <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
           {TOOLS.map((tool) => {
             const isActive = activeTool === tool.id;
             const Icon = tool.icon;
@@ -137,7 +137,7 @@ export default function EditorDemo() {
           <button
             className={cn("flex items-center gap-2 rounded-full px-1.5 py-1.5 text-xs font-medium transition-all duration-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900")}
           >
-            <CirclePlus className="h-4 w-4" />
+            <CircleChevronDown className="h-4 w-4" />
           </button>
         </div>
       </motion.div>
