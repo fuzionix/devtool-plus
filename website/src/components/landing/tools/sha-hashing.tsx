@@ -65,7 +65,7 @@ export default function ShaHashing() {
         </div>
         
         <div className="relative h-16 w-full rounded-md border border-slate-200 bg-white p-2 pl-3 transition-colors focus-within:border-primary-300 hover:border-slate-300">
-          <TextStick width="w-32" className="h-2.5 bg-slate-600" />
+          <TextStick width="w-32" className="h-2.5 bg-primary-500" />
           
           {/* Action Icons (Top Right) */}
           <div className="absolute right-0.5 top-0.5 flex">
@@ -87,7 +87,7 @@ export default function ShaHashing() {
       {/* 6. Output Area */}
       <div className="flex flex-col gap-2">
         <div className="relative h-12 w-full rounded-md border border-slate-200 bg-slate-50/50 p-2 pl-3">
-          <TextStick width="w-48" className="h-2.5 bg-slate-600/60" />
+          <TextStick width="w-48" className="h-2.5 bg-primary-500/60" />
           
           {/* Copy Icon (Bottom Right) */}
           <div className="absolute bottom-0.5 right-0.5 cursor-pointer rounded p-1.5 transition-colors hover:bg-slate-200/50">

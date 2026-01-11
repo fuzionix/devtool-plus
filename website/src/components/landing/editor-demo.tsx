@@ -55,7 +55,7 @@ export default function EditorDemo() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-        className="mb-4 flex justify-center gap-2"
+        className="mb-6 flex justify-center gap-2"
       >
         <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
           {tools.map((tool) => {
@@ -92,8 +92,8 @@ export default function EditorDemo() {
         initial={{ opacity: 0, y: 100, rotateX: 10 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-        className="relative mx-auto rounded-lg bg-white/60 shadow-2xl shadow-gray-200 backdrop-blur-xl ring-1 ring-slate-900/5 dark:ring-white/10"
-        style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
+        className="relative mx-auto rounded-lg bg-white/60 backdrop-blur-xl ring-1 ring-slate-900/5 dark:ring-white/10"
+        style={{ outline: '8px solid rgba(200, 200, 200, 0.25)' }}
       >
         {/* Window Header (macOS style) */}
         <div className="flex h-8 items-center justify-between border-b border-slate-200/60 bg-white/50 px-4 backdrop-blur-md rounded-t-lg">

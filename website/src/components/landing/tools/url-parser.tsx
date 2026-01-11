@@ -20,11 +20,11 @@ export default function UrlParser() {
 
       {/* 2. Controls (Toggle Buttons) */}
       <div className="flex rounded-md bg-slate-100/50 mb-2 border border-slate-200/50">
-        <div className="flex-1 flex items-center justify-center py-2.5 rounded bg-transparent cursor-pointer hover:bg-slate-200/50 transition-colors">
-             <TextStick width="w-16" className="bg-slate-400/60" />
-        </div>
         <div className="flex-1 flex items-center justify-center py-2.5 rounded bg-primary-500 cursor-pointer">
              <TextStick width="w-16" className="bg-white/90" />
+        </div>
+        <div className="flex-1 flex items-center justify-center py-2.5 rounded bg-transparent cursor-pointer hover:bg-slate-200/50 transition-colors">
+             <TextStick width="w-16" className="bg-slate-400/60" />
         </div>
       </div>
 
