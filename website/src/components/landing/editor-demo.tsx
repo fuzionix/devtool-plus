@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -38,15 +38,58 @@ const CodeLine = ({ lineNo, indent = 0, sticks }: { lineNo: number, indent?: num
   </div>
 );
 
-export default function EditorDemo() {
-  const [activeTool, setActiveTool] = useState<'uuid' | 'url' | 'sha' | 'color'>('uuid');
+const TOOLS = [
+  {
+    id: 'uuid',
+    label: 'UUID Gen',
+    icon: Fingerprint,
+    component: UuidGenerator
+  },
+  {
+    id: 'url',
+    label: 'URL Parser',
+    icon: Link2,
+    component: UrlParser
+  },
+  {
+    id: 'sha',
+    label: 'SHA Hashing',
+    icon: Hash,
+    component: ShaHashing
+  },
+  {
+    id: 'color',
+    label: 'Color Format',
+    icon: PaintbrushVertical,
+    component: ColorFormat
+  },
+] as const;
 
-  const tools = [
-    { id: 'uuid', label: 'UUID Gen', icon: Fingerprint },
-    { id: 'url', label: 'URL Parser', icon: Link2 },
-    { id: 'sha', label: 'SHA Hashing', icon: Hash },
-    { id: 'color', label: 'Color Format', icon: PaintbrushVertical },
-  ] as const;
+type ToolId = typeof TOOLS[number]['id'];
+
+export default function EditorDemo() {
+  const [activeTool, setActiveTool] = useState<ToolId>('uuid');
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Auto-play logic to cycle through tools
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setActiveTool((current) => {
+        const currentIndex = TOOLS.findIndex((t) => t.id === current);
+        const nextIndex = (currentIndex + 1) % TOOLS.length;
+        return TOOLS[nextIndex].id;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
+  const handleToolClick = (id: ToolId) => {
+    setIsAutoPlaying(false);
+    setActiveTool(id);
+  };
 
   return (
     <section className="relative z-20 mx-auto mt-[80px] w-full max-w-7xl px-8 pb-20">
@@ -58,22 +101,34 @@ export default function EditorDemo() {
         className="mb-6 flex justify-center gap-2"
       >
         <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/50 p-1 backdrop-blur-md shadow-sm">
-          {tools.map((tool) => {
+          {TOOLS.map((tool) => {
             const isActive = activeTool === tool.id;
             const Icon = tool.icon;
             return (
               <button
                 key={tool.id}
-                onClick={() => setActiveTool(tool.id)}
+                onClick={() => handleToolClick(tool.id)}
                 className={cn(
-                  "flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200",
+                  "relative flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-500",
                   isActive 
-                    ? "bg-slate-900 text-white shadow-md" 
+                    ? "text-white shadow-md" 
                     : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 )}
               >
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tool.label}</span>
+                {/* Animated Background for Active State */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 rounded-full bg-slate-900"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                  />
+                )}
+                
+                {/* Content (Z-index ensures it sits on top of the motion background) */}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{tool.label}</span>
+                </span>
               </button>
             );
           })}
@@ -110,7 +165,7 @@ export default function EditorDemo() {
         </div>
 
         {/* Main Editor Body */}
-        <div className="flex h-[640px] w-full overflow-hidden rounded-b-lg bg-white/40">
+        <div className="flex h-[600px] w-full overflow-hidden rounded-b-lg bg-white/40">
           
           {/* 1. Activity Bar (Left Vertical Strip) */}
           <div className="hidden flex-col items-center gap-6 border-r border-slate-200/60 bg-slate-50/50 py-4 sm:flex w-12">
@@ -118,7 +173,7 @@ export default function EditorDemo() {
             <Search className="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" />
             <GitGraph className="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" />
             <div className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-bold-cross-rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bold-cross-rounded">
                 <path d="M15 15L9 9V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4"/>
                 <path d="M9 9v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h4z"/>
                 <path d="M9 15h6v4a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-4z"/>
@@ -153,7 +208,7 @@ export default function EditorDemo() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className="h-full"
                 >
                   {activeTool === 'uuid' && <UuidGenerator />}
