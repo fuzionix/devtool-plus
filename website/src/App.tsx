@@ -2,6 +2,7 @@ import Background from './components/layout/background';
 import Navbar from './components/layout/navbar';
 import Hero from './components/landing/hero';
 import EditorDemo from './components/landing/editor-demo';
+import Features from './components/landing/features';
 
 function App() {
     return (
@@ -21,6 +22,9 @@ function App() {
                 <div className="mt-[-20px] w-full sm:mt-0">
                     <EditorDemo />
                 </div>
+
+                {/* Value Proposition */}
+                <Features />
             </main>
         </div>
     );

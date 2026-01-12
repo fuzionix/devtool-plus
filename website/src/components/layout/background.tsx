@@ -26,12 +26,8 @@ export default function Background() {
 
             {/* 3. Grid Pattern (Defined in index.css) */}
             <div className="absolute inset-0 bg-grid-pattern opacity-0.75" />
-
-            {/* 4. Noise Texture (Defined in index.css) */}
-            {/* mix-blend-overlay allows the noise to texture the gradients without darkening the page too much */}
-            <div className="absolute inset-0 bg-noise opacity-100 mix-blend-overlay" />
             
-            {/* 5. Bottom Vignette */}
+            {/* 4. Bottom Vignette */}
             {/* Soft fade at the bottom to ensure infinite scroll feel if needed */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-porcelain to-transparent" />
         </div>
