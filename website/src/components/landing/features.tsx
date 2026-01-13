@@ -5,7 +5,6 @@ import TextGradient from '../ui/text-gradient';
 
 const SecurityVisual = () => (
   <div className="relative flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-100/50">
-    <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-50" />
     <div className="relative flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
       <div className="relative flex h-3 w-3">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
@@ -21,7 +20,7 @@ const SecurityVisual = () => (
 
 const PerformanceVisual = () => (
   <div className="relative flex h-24 w-full items-end justify-center gap-1 overflow-hidden rounded-lg bg-slate-100/50 px-8 pb-4">
-    {[40, 70, 50, 90, 60, 80].map((height, i) => (
+    {[50, 60, 30, 80, 40, 70].map((height, i) => (
       <motion.div
         key={i}
         initial={{ height: 0 }}
@@ -113,9 +112,9 @@ export default function Features() {
       <div className="mx-auto max-w-7xl px-8 pb-20">
         <div className="grid grid-cols-1 gap-12 xl:grid-cols-2">
           
-          {/* Left Column: Sticky Narrative */}
+          {/* Left Column: Narrative */}
           <div className="relative">
-            <div className="sticky top-32 flex flex-col gap-8">
+            <div className="top-32 flex flex-col gap-8">
               <motion.div 
                 initial={{ opacity: 0, y: -20 }}
                 whileInView={{ opacity: 1, y: 0 }}

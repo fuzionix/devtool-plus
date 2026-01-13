@@ -3,6 +3,7 @@ import Navbar from './components/layout/navbar';
 import Hero from './components/landing/hero';
 import EditorDemo from './components/landing/editor-demo';
 import Features from './components/landing/features';
+import ToolShowcase from './components/landing/tool-showcase';
 
 function App() {
     return (
@@ -25,6 +26,9 @@ function App() {
 
                 {/* Value Proposition */}
                 <Features />
+
+                {/* Tool Showcase Marquee */}
+                <ToolShowcase />
             </main>
         </div>
     );
