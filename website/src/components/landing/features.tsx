@@ -115,15 +115,12 @@ export default function Features() {
           {/* Left Column: Narrative */}
           <div className="relative">
             <div className="top-32 flex flex-col gap-8">
-              <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+              <div 
                 className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/50 px-3 py-1 text-xs font-medium text-primary-700 backdrop-blur-sm"
               >
                 <Zap className="h-3 w-3 fill-primary-700" />
                 <span>Workflow Optimized</span>
-              </motion.div>
+              </div>
 
               <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
                 <TextGradient className="from-slate-900 via-slate-800 to-slate-500">

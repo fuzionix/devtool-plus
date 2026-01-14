@@ -4,6 +4,7 @@ import Hero from './components/landing/hero';
 import EditorDemo from './components/landing/editor-demo';
 import Features from './components/landing/features';
 import ToolShowcase from './components/landing/tool-showcase';
+import Installation from './components/landing/installation';
 
 function App() {
     return (
@@ -29,6 +30,9 @@ function App() {
 
                 {/* Tool Showcase Marquee */}
                 <ToolShowcase />
+
+                {/* Installation Instructions */}
+                <Installation />
             </main>
         </div>
     );
