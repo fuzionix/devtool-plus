@@ -76,7 +76,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"
             >
-              <span>Install</span>
+              <span>Donate ❤️</span>
             </a>
           </div>
         </div>

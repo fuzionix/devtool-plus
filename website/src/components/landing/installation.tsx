@@ -8,6 +8,28 @@ import {
 } from 'lucide-react';
 import TextGradient from '../ui/text-gradient';
 
+import vscodeLogo from '../../assets/brand/visual-studio-code.svg';
+import cursorLogo from '../../assets/brand/cursor.svg';
+import windsurfLogo from '../../assets/brand/windsurf-black-symbol.svg';
+
+const MARKETPLACES = [
+  {
+    name: "Visual Studio Code",
+    url: "https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus",
+    icon: vscodeLogo,
+  },
+  {
+    name: "Cursor",
+    url: "https://open-vsx.org/extension/Fuzionix/devtool-plus",
+    icon: cursorLogo,
+  },
+  {
+    name: "Windsurf",
+    url: "https://open-vsx.org/extension/Fuzionix/devtool-plus",
+    icon: windsurfLogo,
+  }
+];
+
 const TerminalWindow = () => {
   const [step, setStep] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -30,7 +52,7 @@ const TerminalWindow = () => {
   };
 
   return (
-    <div className="relative group w-full mx-auto mb-4">
+    <div className="relative group w-full mx-auto mb-2">
       {/* Ambient Glow behind Terminal */}
       <div className="absolute w-full rounded-lg" />
 
@@ -120,8 +142,6 @@ export default function Installation() {
   return (
     <section className="relative w-full py-24 px-8 overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-100/30 rounded-full blur-3xl -z-10 pointer-events-none mix-blend-multiply" />
-
       <div className="max-w-4xl w-full mx-auto flex flex-col items-center gap-8">
 
         {/* Header */}
@@ -130,7 +150,7 @@ export default function Installation() {
             className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/50 px-3 py-1 mb-4 text-xs font-medium text-primary-700 backdrop-blur-sm"
           >
             <Download className="h-3 w-3 text-primary-700" />
-            <span>Installation Options</span>
+            <span>Get Started</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             Ready to Use <TextGradient className="from-primary-600 via-primary-500 to-primary-400">DevTool+</TextGradient>?
@@ -143,6 +163,37 @@ export default function Installation() {
         {/* The Terminal */}
         <div className="w-full">
           <TerminalWindow />
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center w-full max-w-sm gap-4">
+          <div className="h-px bg-slate-200 flex-1" />
+          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Or open in marketplace</span>
+          <div className="h-px bg-slate-200 flex-1" />
+        </div>
+
+        {/* Marketplace Buttons */}
+        <div className="flex items-center justify-center gap-6">
+          {MARKETPLACES.map((market, index) => (
+            <motion.a
+              key={market.name}
+              href={market.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 + (index * 0.1) }}
+              className={`group relative flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-white/50 backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-lg`}
+            >
+              {/* Icon */}
+              <img 
+                src={market.icon} 
+                alt={`${market.name} Logo`} 
+                className="h-6 w-6 object-contain transition-transform duration-300 group-hover:scale-110" 
+              />
+            </motion.a>
+          ))}
         </div>
       </div>
     </section>
