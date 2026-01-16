@@ -5,6 +5,7 @@ import EditorDemo from './components/landing/editor-demo';
 import Features from './components/landing/features';
 import ToolShowcase from './components/landing/tool-showcase';
 import Installation from './components/landing/installation';
+import FAQ from './components/landing/faq';
 
 function App() {
     return (
@@ -16,7 +17,7 @@ function App() {
             <Navbar />
 
             {/* The Content: Scrollable Context */}
-            <main className="relative z-10 flex min-h-screen flex-col items-center pt-24 pb-20">
+            <main className="relative z-10 flex min-h-screen flex-col items-center pt-24 pb-0">
                 {/* Hero Section */}
                 <Hero />
                 
@@ -33,6 +34,9 @@ function App() {
 
                 {/* Installation Instructions */}
                 <Installation />
+
+                {/* FAQ Section */}
+                <FAQ />
             </main>
         </div>
     );
