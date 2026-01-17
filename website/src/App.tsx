@@ -6,6 +6,7 @@ import Features from './components/landing/features';
 import ToolShowcase from './components/landing/tool-showcase';
 import Installation from './components/landing/installation';
 import FAQ from './components/landing/faq';
+import Footer from './components/landing/footer';
 
 function App() {
     return (
@@ -37,6 +38,9 @@ function App() {
 
                 {/* FAQ Section */}
                 <FAQ />
+
+                {/* Footer Section */}
+                <Footer />
             </main>
         </div>
     );

@@ -102,7 +102,7 @@ export default function FAQ() {
           
           {/* Left Column: Narrative */}
           <div className="relative">
-            <div className="sticky top-32 flex flex-col gap-8">
+            <div className="top-32 flex flex-col gap-8">
               <motion.div 
                 initial={{ opacity: 0, y: -20 }}
                 whileInView={{ opacity: 1, y: 0 }}
