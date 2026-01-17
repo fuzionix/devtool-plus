@@ -37,7 +37,7 @@ export default function Footer() {
                 <li><a href="#features" className="transition-colors hover:text-primary-600">Features</a></li>
                 <li><a href="#tools" className="transition-colors hover:text-primary-600">Tool Library</a></li>
                 <li><a href="#installation" className="transition-colors hover:text-primary-600">Installation</a></li>
-                <li><a href="https://github.com/fuzionix/devtool-plus/releases" className="transition-colors hover:text-primary-600">Changelog</a></li>
+                <li><a href="#faq" className="transition-colors hover:text-primary-600">FAQ</a></li>
               </ul>
             </div>
 
@@ -48,7 +48,7 @@ export default function Footer() {
                 <li><a href="https://github.com/fuzionix/devtool-plus" className="transition-colors hover:text-primary-600">Documentation</a></li>
                 <li><a href="https://github.com/fuzionix/devtool-plus/issues" className="transition-colors hover:text-primary-600">Report an Issue</a></li>
                 <li><a href="#" className="transition-colors hover:text-primary-600">Contributing</a></li>
-                <li><a href="#faq" className="transition-colors hover:text-primary-600">FAQ</a></li>
+                <li><a href="https://github.com/fuzionix/devtool-plus/releases" className="transition-colors hover:text-primary-600">Changelog</a></li>
               </ul>
             </div>
 

@@ -140,7 +140,7 @@ const TerminalWindow = () => {
 
 export default function Installation() {
   return (
-    <section className="relative w-full py-24 px-8 overflow-hidden">
+    <section id="installation" className="relative w-full py-24 px-8 overflow-hidden">
       {/* Background Decoration */}
       <div className="max-w-4xl w-full mx-auto flex flex-col items-center gap-8">
 

@@ -108,7 +108,7 @@ export default function Features() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section ref={containerRef} className="relative z-10 w-full py-12">
+    <section ref={containerRef} id="features" className="relative z-10 w-full py-12">
       <div className="mx-auto max-w-7xl px-8 pb-20">
         <div className="grid grid-cols-1 gap-12 xl:grid-cols-2">
           

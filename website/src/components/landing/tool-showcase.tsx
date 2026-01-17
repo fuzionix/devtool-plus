@@ -164,7 +164,7 @@ export default function ToolShowcase() {
   const row3 = shuffledTools.slice(16, 24);
 
   return (
-    <section className="relative z-10 w-full overflow-hidden py-12">
+    <section id="tools" className="relative z-10 w-full overflow-hidden py-12">
       <div className="mx-auto max-w-7xl px-8">
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
           

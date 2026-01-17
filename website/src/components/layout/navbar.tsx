@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 const navLinks = [
   { name: 'Features', href: '#features' },
   { name: 'Tool List', href: '#tools' },
+  { name: 'Installation', href: '#installation' },
   { name: 'FAQ', href: '#faq' },
 ];
 
@@ -30,7 +31,7 @@ export default function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300",
           isScrolled 
-            ? "backdrop-blur-lg border-b border-slate-200/50 shadow-sm" 
+            ? "backdrop-blur-lg border-b border-slate-200/50 bg-white/50 shadow-sm" 
             : "bg-transparent border-b border-transparent"
         )}
       >

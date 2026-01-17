@@ -75,8 +75,7 @@ export default function Hero() {
           {/* Primary Action Group */}
           <div className="flex flex-col items-center gap-2">
             <a
-              href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus"
-              target="_blank"
+              href="#installation"
               rel="noopener noreferrer"
               className={cn(
                 "group relative flex h-12 w-full sm:min-w-[180px] items-center justify-center gap-2 rounded-lg bg-slate-900 px-6 font-medium text-white text-sm transition-all duration-200",
