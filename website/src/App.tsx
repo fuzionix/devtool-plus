@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import Background from './components/layout/background';
 import Navbar from './components/layout/navbar';
 import Hero from './components/landing/hero';
@@ -9,6 +11,10 @@ import FAQ from './components/landing/faq';
 import Footer from './components/landing/footer';
 
 function App() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <div className="relative min-h-screen w-full font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900">
             {/* The Stage: Fixed Background with Parallax */}
