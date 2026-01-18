@@ -2,11 +2,14 @@
     "name": "devtool-plus-website",
     "private": true,
     "version": "0.0.0",
+    "homepage": "https://fuzionix.github.io/devtool-plus",
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d dist"
     },
     "devDependencies": {
         "@eslint/js": "^9.33.0",
