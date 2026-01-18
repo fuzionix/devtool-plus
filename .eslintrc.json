@@ -1,0 +1,55 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "unicorn"
+    ],
+    "rules": {
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            {
+                "selector": "import",
+                "format": [
+                    "camelCase",
+                    "PascalCase"
+                ]
+            }
+        ],
+        "@typescript-eslint/semi": "warn",
+        "eqeqeq": "warn",
+        "no-duplicate-imports": "warn",
+        "no-throw-literal": "warn",
+        "no-eval": "error",
+        "no-new-func": "error",
+        "semi": "off",
+        "no-restricted-imports": [
+            "error",
+            {
+                "paths": [
+                    "http",
+                    "https",
+                    "net",
+                    "tls",
+                    "dns",
+                    "dgram",
+                    "undici",
+                    "node-fetch",
+                    "axios"
+                ]
+            }
+        ],
+        "unicorn/no-useless-switch-case": "warn",
+        "unicorn/no-useless-undefined": "warn",
+        "unicorn/no-unnecessary-await": "warn"
+    },
+    "ignorePatterns": [
+        "out",
+        "dist",
+        "**/*.d.ts"
+    ]
+}
