@@ -1,5 +1,5 @@
 import { motion, type Variants } from 'framer-motion';
-import { Github, ChevronRight, Star } from 'lucide-react';
+import { Github, ChevronRight, Star, Heart } from 'lucide-react';
 import TextGradient from '../ui/text-gradient';
 import { cn } from '../../lib/utils';
 
@@ -85,8 +85,12 @@ export default function Hero() {
             >
               <span>Install Now</span>
             </a>
-            <span className="text-xs font-medium text-slate-500">
-              15k+ Installs
+            <span className="flex items-center h-4 gap-0.5 text-xs font-medium text-slate-500">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
             </span>
           </div>
 
@@ -105,9 +109,9 @@ export default function Hero() {
               <Github className="h-4 w-4 transition-transform" />
               <span>GitHub</span>
             </a>
-            <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
-              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-              <span>1.2k Stars</span>
+            <div className="flex items-center h-4 gap-1 text-xs font-medium text-slate-500">
+              <Heart className="h-3 w-3 fill-red-400 text-red-400" />
+              <span>Support us!</span>
             </div>
           </div>
 

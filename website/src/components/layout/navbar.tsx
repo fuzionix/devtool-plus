@@ -72,7 +72,7 @@ export default function Navbar() {
             </a>
             <div className="h-4 w-px bg-slate-200" />
             <a
-              href="https://marketplace.visualstudio.com/items?itemName=Fuzionix.devtool-plus"
+              href="https://github.com/sponsors/fuzionix"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"

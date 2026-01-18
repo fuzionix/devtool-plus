@@ -1,4 +1,4 @@
-import { Github, Twitter, Heart } from 'lucide-react';
+import { Github, Heart } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -7,7 +7,6 @@ export default function Footer() {
     <footer className="relative z-10 w-full pt-12 pb-8">
       <div className="mx-auto max-w-7xl px-8">
         <div className="flex flex-col md:flex-row pt-12 gap-12 lg:gap-16">
-          
           {/* Brand Column */}
           <div className="flex flex-1 flex-col gap-4">
             <a href="#" className="flex items-center gap-2 w-fit">
@@ -16,12 +15,13 @@ export default function Footer() {
               </span>
             </a>
             <p className="text-sm leading-relaxed max-w-xs text-slate-500">
-              The privacy-first developer toolbox that lives directly inside your editor. Open source and free forever.
+              The privacy-first developer toolbox that lives directly inside
+              your editor. Open source and free forever.
             </p>
             <div className="flex items-center gap-4">
-              <a 
-                href="https://github.com/fuzionix/devtool-plus" 
-                target="_blank" 
+              <a
+                href="https://github.com/fuzionix/devtool-plus"
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 <Github className="h-5 w-5 text-slate-500 hover:text-slate-900" />
@@ -34,21 +34,83 @@ export default function Footer() {
             <div className="flex flex-col gap-4 text-left md:text-right">
               <h4 className="font-semibold text-sm text-slate-900">Product</h4>
               <ul className="flex flex-col gap-2 text-sm text-slate-500">
-                <li><a href="#features" className="transition-colors hover:text-primary-600">Features</a></li>
-                <li><a href="#tools" className="transition-colors hover:text-primary-600">Tool Library</a></li>
-                <li><a href="#installation" className="transition-colors hover:text-primary-600">Installation</a></li>
-                <li><a href="#faq" className="transition-colors hover:text-primary-600">FAQ</a></li>
+                <li>
+                  <a
+                    href="#features"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#tools"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Tool Library
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#installation"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Installation
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#faq"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    FAQ
+                  </a>
+                </li>
               </ul>
             </div>
 
             {/* Links Column 2 */}
             <div className="flex flex-col gap-4 text-left md:text-right">
-              <h4 className="font-semibold text-sm text-slate-900">Resources</h4>
+              <h4 className="font-semibold text-sm text-slate-900">
+                Resources
+              </h4>
               <ul className="flex flex-col gap-2 text-sm text-slate-500">
-                <li><a href="https://github.com/fuzionix/devtool-plus" className="transition-colors hover:text-primary-600">Documentation</a></li>
-                <li><a href="https://github.com/fuzionix/devtool-plus/issues" className="transition-colors hover:text-primary-600">Report an Issue</a></li>
-                <li><a href="#" className="transition-colors hover:text-primary-600">Contributing</a></li>
-                <li><a href="https://github.com/fuzionix/devtool-plus/releases" className="transition-colors hover:text-primary-600">Changelog</a></li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus"
+                    target="_blank"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus/issues"
+                    target="_blank"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Report an Issue
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus/discussions"
+                    target="_blank"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Discussions
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus/releases"
+                    target="_blank"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Changelog
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -56,9 +118,23 @@ export default function Footer() {
             <div className="flex flex-col gap-4 text-left md:text-right">
               <h4 className="font-semibold text-sm text-slate-900">Legal</h4>
               <ul className="flex flex-col gap-2 text-sm text-slate-500">
-                <li><a href="#" className="transition-colors hover:text-primary-600">Privacy Policy</a></li>
-                <li><a href="#" className="transition-colors hover:text-primary-600">Terms of Service</a></li>
-                <li><a href="https://github.com/fuzionix/devtool-plus/blob/main/LICENSE" className="transition-colors hover:text-primary-600">MIT License</a></li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus/blob/main/PRIVACY.md"
+                    target="_blank"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/fuzionix/devtool-plus/blob/main/LICENSE"
+                    className="transition-colors hover:text-primary-600"
+                  >
+                    MIT License
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
