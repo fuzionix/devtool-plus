@@ -16,12 +16,12 @@ export default function Background() {
             {/* 2. Ambient Light Sources (The "Breath") */}
             <motion.div
                 style={{ y: y1, opacity: 0.6 }}
-                className="absolute -left-[10%] -top-[10%] h-[700px] w-[700px] rounded-full bg-primary-200 blur-[120px] mix-blend-multiply will-change-transform"
+                className="hidden lg:block absolute -left-[10%] -top-[10%] h-[700px] w-[700px] rounded-full bg-primary-200 blur-[120px] mix-blend-multiply will-change-transform"
             />
             
             <motion.div
                 style={{ y: y2, opacity: 0.6 }}
-                className="absolute -right-[5%] top-[20%] h-[600px] w-[600px] rounded-full bg-purple-200 blur-[120px] mix-blend-multiply will-change-transform"
+                className="hidden lg:block absolute -right-[5%] top-[20%] h-[600px] w-[600px] rounded-full bg-purple-200 blur-[120px] mix-blend-multiply will-change-transform"
             />
 
             {/* 3. Grid Pattern (Defined in index.css) */}

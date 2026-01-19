@@ -155,7 +155,7 @@ export default function Installation() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             Ready to Use <TextGradient className="from-primary-600 via-primary-500 to-primary-400">DevTool+</TextGradient>?
           </h2>
-          <p className="text-slate-500 text-md max-w-xl mx-auto">
+          <p className="text-slate-500 text-sm max-w-xl mx-auto sm:text-base">
             Get started in seconds. Install directly from your editor marketplace or via command line.
           </p>
         </div>
