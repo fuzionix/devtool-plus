@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fuzionix.github.io/devtool-plus/sitemap.xml
