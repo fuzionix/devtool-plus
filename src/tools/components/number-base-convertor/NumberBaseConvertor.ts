@@ -171,59 +171,43 @@ export class NumberBaseConvertor extends BaseTool {
         this.processInput();
     }
 
-    private parseInput(): number | null {
+    private parseInput(): bigint | null {
         const input = this.input.trim();
         if (!input) return null;
 
-        try {
-            const baseMap = {
-                binary: 2,
-                octal: 8,
-                decimal: 10,
-                hexadecimal: 16
-            };
-
-            const base = baseMap[this.inputBase];
-
-            // For non-decimal inputs, verify the conversion is valid
-            if (this.inputBase === 'binary' && !/^-?[01]+$/.test(input)) {
-                throw new Error('Binary numbers can only contain 0 and 1');
+        const validators = {
+            binary: {
+                regex: /^-?[01]+$/,
+                message: 'Binary numbers can only contain 0 and 1'
+            },
+            octal: {
+                regex: /^-?[0-7]+$/,
+                message: 'Octal numbers can only contain 0-7'
+            },
+            decimal: {
+                regex: /^-?\d+$/,
+                message: 'Decimal numbers can only contain digits 0-9'
+            },
+            hexadecimal: {
+                regex: /^-?[0-9a-fA-F]+$/,
+                message: 'Hexadecimal numbers can only contain 0-9, a-f, A-F'
             }
-            if (this.inputBase === 'octal' && !/^-?[0-7]+$/.test(input)) {
-                throw new Error('Octal numbers can only contain 0-7');
-            }
-            if (this.inputBase === 'decimal' && !/^-?\d+$/.test(input)) {
-                throw new Error('Decimal numbers can only contain digits 0-9');
-            }
-            if (this.inputBase === 'hexadecimal' && !/^-?[0-9a-fA-F]+$/.test(input)) {
-                throw new Error('Hexadecimal numbers can only contain 0-9, a-f, A-F');
-            }
+        };
 
-            const decimalValue = parseInt(input, base);
+        const rule = validators[this.inputBase];
 
-            if (isNaN(decimalValue)) {
-                throw new Error(`Invalid ${this.inputBase} number`);
-            }
-
-            return decimalValue;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    private convertDecimalToBase(decimal: number, base: number): string {
-        if (decimal === 0) return '0';
-
-        const digits = '0123456789abcdef';
-        let result = '';
-        let num = Math.abs(decimal);
-
-        while (num > 0) {
-            result = digits[num % base] + result;
-            num = Math.floor(num / base);
+        if (!rule.regex.test(input)) {
+            throw new Error(rule.message);
         }
 
-        return decimal < 0 ? '-' + result : result;
+        const prefixMap = {
+            binary: '0b',
+            octal: '0o',
+            decimal: '',
+            hexadecimal: '0x'
+        };
+
+        return BigInt(prefixMap[this.inputBase] + input);
     }
 
     private async processInput(): Promise<void> {
@@ -253,10 +237,10 @@ export class NumberBaseConvertor extends BaseTool {
             }
 
             this.outputs = {
-                binary: this.convertDecimalToBase(decimalValue, 2),
-                octal: this.convertDecimalToBase(decimalValue, 8),
-                decimal: decimalValue.toString(),
-                hexadecimal: this.convertDecimalToBase(decimalValue, 16)
+                binary: decimalValue.toString(2),
+                octal: decimalValue.toString(8),
+                decimal: decimalValue.toString(10),
+                hexadecimal: decimalValue.toString(16)
             };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Invalid input';
