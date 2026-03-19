@@ -491,20 +491,20 @@ export class Base64Encoder extends BaseTool {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
-            reader.onload = async (e) => {
+            reader.onload = (e) => {
                 try {
                     const result = e.target?.result;
-                    if (typeof result === 'string') {
-                        this.outputText = btoa(result);
-                    } else if (result instanceof ArrayBuffer) {
-                        const bytes = new Uint8Array(result);
-                        let binary = '';
-                        // Convert byte array to binary string
-                        bytes.forEach(byte => binary += String.fromCharCode(byte));
-                        this.outputText = btoa(binary);
+                    if (!(result instanceof ArrayBuffer)) {
+                        reject(new Error('Failed to read file as binary data.'));
+                        return;
                     }
+
+                    this.outputText = this.arrayBufferToBase64(result);
                     this.uriHeader = `data:${this.inputMimeType};base64,`;
-                    this.outputText = this.isShowUriHeader ? `${this.uriHeader}${this.outputText}` : this.outputText;
+                    this.outputText = this.isShowUriHeader
+                        ? `${this.uriHeader}${this.outputText}`
+                        : this.outputText;
+
                     this.requestUpdate();
                     resolve();
                 } catch (error) {
@@ -513,11 +513,7 @@ export class Base64Encoder extends BaseTool {
             };
 
             reader.onerror = () => reject(reader.error);
-            if (file.type.startsWith('text/')) {
-                reader.readAsText(file);
-            } else {
-                reader.readAsArrayBuffer(file);
-            }
+            reader.readAsArrayBuffer(file);
         });
     }
 
@@ -565,6 +561,19 @@ export class Base64Encoder extends BaseTool {
             return { base64: content, mimeType };
         }
         return { base64: base64Data, mimeType: this.decodedMimeType };
+    }
+
+    private arrayBufferToBase64(buffer: ArrayBuffer): string {
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000; // avoid call stack/memory issues on larger files
+        let binary = '';
+
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, i + chunkSize);
+            binary += String.fromCharCode(...chunk);
+        }
+
+        return btoa(binary);
     }
 
     private getDownloadButtonText(): string {
