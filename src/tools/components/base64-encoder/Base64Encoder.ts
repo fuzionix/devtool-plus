@@ -256,7 +256,12 @@ export class Base64Encoder extends BaseTool {
                 const [header, content] = base64Data.split(',');
                 base64Data = content;
                 this.decodedMimeType = header.split(';')[0].split(':')[1];
-                this.decodedData = this.base64ToUint8Array(content);
+                if (this.decodedMimeType.startsWith('text/plain')) {
+                    const bytes = this.base64ToUint8Array(content);
+                    this.decodedData = new TextDecoder('utf-8').decode(bytes);
+                } else {
+                    this.decodedData = this.base64ToUint8Array(content);
+                }
             } else {
                 try {
                     this.decodedData = this.base64ToUint8Array(base64Data);
@@ -517,43 +522,6 @@ export class Base64Encoder extends BaseTool {
         });
     }
 
-    private clearAll(): void {
-        this.inputText = '';
-        this.outputText = '';
-        this.fileName = '';
-        this.file = null;
-        this.fileInput.value = '';
-        this.outputMode = 'text';
-        this.input.style.height = `28px`;
-        this.uriHeader = '';
-        this.alert = null;
-        this.decodedFileSize = 0;
-        this.renderOutput();
-        this.requestUpdate();
-    }
-
-    private async copyToClipboard() {
-        if (!this.outputText) {
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(this.outputText);
-            this.isCopied = true;
-            setTimeout(() => {
-                this.isCopied = false;
-            }, 2000);
-        } catch (err) {
-            this.isCopied = false;
-        }
-    }
-
-    private hideOutput() {
-        this.outputText = '';
-        this.outputMode = 'error';
-        this.requestUpdate();
-    }
-
     private getBase64String(base64Data: string): { base64: string; mimeType: string } {
         if (base64Data.startsWith('data:')) {
             const [header, content] = base64Data.split(',');
@@ -613,5 +581,42 @@ export class Base64Encoder extends BaseTool {
             return mimeEntry.extensions[0];
         }
         return '';
+    }
+
+    private clearAll(): void {
+        this.inputText = '';
+        this.outputText = '';
+        this.fileName = '';
+        this.file = null;
+        this.fileInput.value = '';
+        this.outputMode = 'text';
+        this.input.style.height = `28px`;
+        this.uriHeader = '';
+        this.alert = null;
+        this.decodedFileSize = 0;
+        this.renderOutput();
+        this.requestUpdate();
+    }
+
+    private async copyToClipboard() {
+        if (!this.outputText) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(this.outputText);
+            this.isCopied = true;
+            setTimeout(() => {
+                this.isCopied = false;
+            }, 2000);
+        } catch (err) {
+            this.isCopied = false;
+        }
+    }
+
+    private hideOutput() {
+        this.outputText = '';
+        this.outputMode = 'error';
+        this.requestUpdate();
     }
 }
