@@ -253,7 +253,29 @@ export class Base64Encoder extends BaseTool {
 
             // Handle data:URI format (e.g. data:image/png;base64,...)
             if (base64Data.startsWith('data:')) {
-                const [header, content] = base64Data.split(',');
+                const commaIndex = base64Data.indexOf(',');
+                if (commaIndex === -1) {
+                    this.hideOutput();
+                    this.alert = {
+                        type: 'error',
+                        message: 'Invalid data URI format: missing comma separator'
+                    };
+                    return;
+                }
+
+                const header = base64Data.substring(0, commaIndex);
+                const content = base64Data.substring(commaIndex + 1);
+
+                // Check if the data URI explicitly contains base64 encoding
+                if (!header.includes(';base64')) {
+                    this.hideOutput();
+                    this.alert = {
+                        type: 'error',
+                        message: 'Data URI must contain ";base64" for Base64 decoding. Plain data URIs are not supported.'
+                    };
+                    return;
+                }
+
                 base64Data = content;
                 this.decodedMimeType = header.split(';')[0].split(':')[1];
                 if (this.decodedMimeType.startsWith('text/plain')) {
