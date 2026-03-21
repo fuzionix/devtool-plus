@@ -216,8 +216,9 @@ export class UrlEncoder extends BaseTool {
         try {
             if (this.decodePreserveUrl) {
                 return decodeURIComponent(input);
+            } else {
+                return decodeURI(input);
             }
-            return decodeURI(input);
         } catch (error) {
             this.alert = {
                 type: 'error',
