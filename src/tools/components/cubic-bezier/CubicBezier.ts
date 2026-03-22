@@ -2,7 +2,7 @@ import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { renderCopyButton } from '../../../utils/util';
-import BezierEasing from 'bezier-easing';
+import { createCubicBezierEasing } from './cubicBezierUtils';
 
 @customElement('cubic-bezier')
 export class CubicBezier extends BaseTool {
@@ -13,8 +13,8 @@ export class CubicBezier extends BaseTool {
     @state() private isCopied = false;
     @state() private animationId: number | null = null;
     @state() private linearAnimationId: number | null = null;
-    @state() private easing: any = null;
-    @state() private linearEasing = BezierEasing(0, 0, 1, 1);
+    @state() private easing: ((x: number) => number) | null = null;
+    @state() private linearEasing = createCubicBezierEasing(0, 0, 1, 1);
     @state() private isDragging = false;
 
     @query('.bezier-line') private bezierLine!: HTMLElement;
@@ -206,11 +206,10 @@ export class CubicBezier extends BaseTool {
 
     private updateEasing() {
         try {
-            this.easing = BezierEasing(this.x1, this.y1, this.x2, this.y2);
+            this.easing = createCubicBezierEasing(this.x1, this.y1, this.x2, this.y2);
         } catch (e) {
-            console.error("Invalid bezier values:", e);
-            // Use a fallback if values are invalid
-            this.easing = BezierEasing(0.42, 0, 0.58, 1);
+            console.error('Invalid bezier values:', e);
+            this.easing = createCubicBezierEasing(0.42, 0, 0.58, 1);
         }
     }
 
