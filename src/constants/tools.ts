@@ -231,13 +231,13 @@ export const TOOLS: Tool[] = [
         tags: ['slug', 'url', 'identifier', 'string', 'text', 'format', 'convert', 'title', 'web', 'link', 'seo'],
     },
     {
-        id: 'qr-code-generator',
-        label: 'QR Code Generator',
+        id: 'crontab-generator',
+        label: 'Crontab Generator',
         version: '1.0.0',
         category: ToolCategory.Util,
-        template: '<qr-code-generator></qr-code-generator>',
-        icon: 'qr-code',
-        tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
+        template: '<crontab-generator></crontab-generator>',
+        icon: 'alarm-clock',
+        tags: ['crontab', 'generator', 'schedule', 'cron expression', 'time', 'job', 'task', 'automation']
     },
     {
         id: 'http-status-code',
@@ -247,6 +247,15 @@ export const TOOLS: Tool[] = [
         template: '<http-status-code></http-status-code>',
         icon: 'server',
         tags: ['http', 'status', 'code', 'response', 'request', 'web', 'protocol', 'error', 'success', 'client', 'server']
+    },
+    {
+        id: 'qr-code-generator',
+        label: 'QR Code Generator',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<qr-code-generator></qr-code-generator>',
+        icon: 'qr-code',
+        tags: ['qr', 'code', 'generator', 'barcode', 'scan', 'url', 'data', 'link']
     },
     {
         id: 'data-unit-convertor',
@@ -269,7 +278,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'number-base-convertor',
         label: 'Number Base Convertor',
-        version: '1.0.0',
+        version: '1.0.1',
         category: ToolCategory.Util,
         template: '<number-base-convertor></number-base-convertor>',
         icon: 'binary',
