@@ -22,16 +22,20 @@ export class JwtInspector extends BaseTool {
     @state() private header: Record<string, any> = {};
     @state() private payload: Record<string, any> = {};
 
-    @query('#input') inputArea!: HTMLTextAreaElement;
-    @query('#secretKey') secretKeyArea!: HTMLTextAreaElement;
-
-    constructor() {
-        super();
-    }
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#secretKey') secretKeyElement!: HTMLTextAreaElement;
 
     async connectedCallback() {
         super.connectedCallback();
         await this.decodeJwt();
+    }
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
+
+    constructor() {
+        super();
     }
 
     private styles = css`
@@ -315,9 +319,8 @@ export class JwtInspector extends BaseTool {
         this.alertInput = null;
         this.verificationStatus = 'none';
         
-        const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
-        if (inputTextarea) {
-            inputTextarea.style.height = '28px';
+        if (this.inputElement) {
+            this.inputElement.style.height = '28px';
         }
         
         this.requestUpdate();
@@ -328,9 +331,8 @@ export class JwtInspector extends BaseTool {
         this.alertSecretKey = null;
         this.verificationStatus = 'none';
         
-        const secretKeyTextarea = this.querySelector('#secretKey') as HTMLTextAreaElement;
-        if (secretKeyTextarea) {
-            secretKeyTextarea.style.height = '28px';
+        if (this.secretKeyElement) {
+            this.secretKeyElement.style.height = '28px';
         }
         
         this.requestUpdate();

@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 
 @customElement('data-unit-convertor')
@@ -9,6 +9,12 @@ export class DataUnitConvertor extends BaseTool {
     @state() private inputUnit = 'B';
     @state() private conversions: { unit: string; bitValue: string; bitLabel: string; byteValue: string; byteLabel: string }[] = [];
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
+
+    @query('#input') inputElement!: HTMLInputElement;
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
@@ -67,6 +73,7 @@ export class DataUnitConvertor extends BaseTool {
                 <div class="relative flex items-center mt-2">
                     <div class="flex w-full">
                         <input 
+                            id="input"
                             type="text" 
                             class="flex-grow"
                             placeholder="Enter value..."

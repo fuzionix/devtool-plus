@@ -24,9 +24,13 @@ export class Base64Encoder extends BaseTool {
     @state() private isShowUriHeader = false;
     @state() private decodedFileSize = 0;
 
-    @query('#input') input!: HTMLTextAreaElement;
-    @query('#output') output!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#output') outputElement!: HTMLTextAreaElement;
     @query('#file-input') fileInput!: HTMLInputElement;
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
@@ -178,8 +182,8 @@ export class Base64Encoder extends BaseTool {
     protected updated(changedProperties: Map<string, unknown>): void {
         super.updated(changedProperties);
 
-        if (this.output && changedProperties.has('outputText')) {
-            adjustTextareaHeight(this.output);
+        if (this.outputElement && changedProperties.has('outputText')) {
+            adjustTextareaHeight(this.outputElement);
         }
     }
 
@@ -501,7 +505,7 @@ export class Base64Encoder extends BaseTool {
         this.file = null;
         this.fileInput.value = '';
         this.outputMode = 'text';
-        this.input.style.height = `28px`;
+        this.inputElement.style.height = `28px`;
         this.uriHeader = '';
         this.alert = null;
         this.decodedFileSize = 0;

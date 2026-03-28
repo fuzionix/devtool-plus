@@ -16,16 +16,18 @@ export class UrlEncoder extends BaseTool {
     @state() private encodePreserveUrl = true;
     @state() private decodePreserveUrl = true;
 
-    @query('#output') outputTextarea!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#output') outputElement!: HTMLTextAreaElement;
+
+    firstUpdated() {
+        this.processInput();
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */
     `;
-
-    firstUpdated() {
-        this.processInput();
-    }
 
     protected renderTool() {
         const isEncode = this.selectedMode === 'encode';
@@ -190,9 +192,9 @@ export class UrlEncoder extends BaseTool {
             this.output = '';
         }
 
-        if (this.outputTextarea) {
+        if (this.outputElement) {
             await this.updateComplete;
-            adjustTextareaHeight(this.outputTextarea);
+            adjustTextareaHeight(this.outputElement);
         }
     }
 

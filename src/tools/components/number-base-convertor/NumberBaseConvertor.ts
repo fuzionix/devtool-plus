@@ -19,7 +19,16 @@ export class NumberBaseConvertor extends BaseTool {
     @state() private copiedBase: string | null = null;
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
 
-    @query('#input') inputTextarea!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.processInput();
+    }
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
@@ -58,11 +67,6 @@ export class NumberBaseConvertor extends BaseTool {
             padding-right: 0.125rem;
         }
     `;
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.processInput();
-    }
 
     protected renderTool() {
         return html`
@@ -288,9 +292,8 @@ export class NumberBaseConvertor extends BaseTool {
         this.alert = null;
         this.copiedBase = null;
 
-        const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
-        if (inputTextarea) {
-            inputTextarea.style.height = '28px';
+        if (this.inputElement) {
+            this.inputElement.style.height = '28px';
         }
 
         this.requestUpdate();

@@ -16,7 +16,7 @@ export class MarkdownTableBuilder extends BaseTool {
     @state() private isCopied = false;
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
 
-    @query('#output') private outputEl!: HTMLTextAreaElement;
+    @query('#output') private outputElement!: HTMLTextAreaElement;
 
     connectedCallback() {
         super.connectedCallback();
@@ -191,8 +191,8 @@ export class MarkdownTableBuilder extends BaseTool {
         this.output = markdown;
         
         setTimeout(() => {
-            if (this.outputEl) {
-                adjustTextareaHeight(this.outputEl);
+            if (this.outputElement) {
+                adjustTextareaHeight(this.outputElement);
             }
         }, 0);
     }

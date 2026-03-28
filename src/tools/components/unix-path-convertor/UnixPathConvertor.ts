@@ -18,6 +18,10 @@ export class UnixPathConvertor extends BaseTool {
     @query('#unix-input') unixPathTextarea!: HTMLTextAreaElement;
     @query('#windows-input') windowsPathTextarea!: HTMLTextAreaElement;
 
+    firstUpdated() {
+        setTimeout(() => this.unixPathTextarea?.focus(), 0);
+    }
+
     private styles = css`
         ${BaseTool.styles}
         /* Minimal local styling if needed. */

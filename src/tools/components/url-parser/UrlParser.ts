@@ -21,11 +21,15 @@ export class UrlParser extends BaseTool {
         hash: ''
     };
 
-    @query('#input') inputArea!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
 
     constructor() {
         super();
         this.parseUrl();
+    }
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
     }
 
     private styles = css`
@@ -173,7 +177,7 @@ export class UrlParser extends BaseTool {
     private handleInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.input = target.value;
-        adjustTextareaHeight(this.inputArea);
+        adjustTextareaHeight(this.inputElement);
         this.parseUrl();
     }
 
@@ -284,7 +288,7 @@ export class UrlParser extends BaseTool {
         
         this.params = newParams;
         this.updateUrlFromParams();
-        adjustTextareaHeight(this.inputArea);
+        adjustTextareaHeight(this.inputElement);
     }
     
     private removeParam(index: number): void {
@@ -343,7 +347,7 @@ export class UrlParser extends BaseTool {
         this.params = [{key: '', value: ''}];
         this.resetUrlComponents();
         this.alert = null;
-        const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
+        const inputTextarea = this.inputElement;
         if (inputTextarea) {
             inputTextarea.style.height = '28px';
         }

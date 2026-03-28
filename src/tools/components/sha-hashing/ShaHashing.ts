@@ -27,6 +27,10 @@ export class ShaHashing extends BaseTool {
     @query('#output') private output!: HTMLTextAreaElement;
     @query('#file-input') private fileInput!: HTMLInputElement;
 
+    firstUpdated() {
+        setTimeout(() => this.input?.focus(), 0);
+    }
+
     private styles = css`
         ${BaseTool.styles}
     `;
