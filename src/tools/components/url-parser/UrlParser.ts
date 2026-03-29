@@ -332,7 +332,6 @@ export class UrlParser extends BaseTool {
             }
             
             this.input = url.toString();
-            this.parseUrl();
             this.alert = null;
         } catch (error) {
             this.alert = {
