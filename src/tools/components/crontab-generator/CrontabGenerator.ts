@@ -608,7 +608,9 @@ export class CrontabGenerator extends BaseTool {
                 `when day-of-month matches "${parsed.dayOfMonth.raw}" or weekday is ${this.describeWeekdays(parsed.dayOfWeek.values)}`
             );
         } else if (!parsed.dayOfMonth.any) {
-            clauses.push(`on day-of-month ${this.describeDayOfMonth(parsed.dayOfMonth.raw)}`);
+            const dayDesc = this.describeDayOfMonth(parsed.dayOfMonth.raw);
+            const article = dayDesc.startsWith('every') ? '' : 'the ';
+            clauses.push(`on ${article}${dayDesc} of the month`);
         } else if (!parsed.dayOfWeek.any) {
             clauses.push(`on ${this.describeWeekdays(parsed.dayOfWeek.values)}`);
         }
@@ -632,7 +634,7 @@ export class CrontabGenerator extends BaseTool {
         const wildcardStep = raw.match(/^\*\/(\d+)$/);
         if (wildcardStep) {
             const step = Number.parseInt(wildcardStep[1], 10);
-            return `every ${this.toOrdinal(step)} ${unit}`;
+            return `every ${step} ${unit}`;
         }
 
         const rangeStep = raw.match(/^(\d+)-(\d+)\/(\d+)$/);
@@ -640,13 +642,19 @@ export class CrontabGenerator extends BaseTool {
             const start = Number.parseInt(rangeStep[1], 10);
             const end = Number.parseInt(rangeStep[2], 10);
             const step = Number.parseInt(rangeStep[3], 10);
-            return `every ${this.toOrdinal(step)} ${unit} from ${start} through ${end}`;
+            if (unit === 'hour') {
+                return `every ${step} ${unit} from ${this.pad2(start)}:00 through ${this.pad2(end)}:00`;
+            }
+            return `every ${step} ${unit} from ${start} through ${end}`;
         }
 
         const range = raw.match(/^(\d+)-(\d+)$/);
         if (range) {
             const start = Number.parseInt(range[1], 10);
             const end = Number.parseInt(range[2], 10);
+            if (unit === 'hour') {
+                return `every ${unit} from ${this.pad2(start)}:00 through ${this.pad2(end)}:00`;
+            }
             return `every ${unit} from ${start} through ${end}`;
         }
 
@@ -664,7 +672,8 @@ export class CrontabGenerator extends BaseTool {
 
     private describeDayOfMonth(raw: string): string {
         if (this.isSingleNumber(raw)) {
-            return raw;
+            const dayNum = Number.parseInt(raw, 10);
+            return this.toOrdinal(dayNum);
         }
 
         const wildcardStep = raw.match(/^\*\/(\d+)$/);
