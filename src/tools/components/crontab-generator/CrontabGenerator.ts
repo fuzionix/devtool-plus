@@ -197,19 +197,7 @@ export class CrontabGenerator extends BaseTool {
                 <p class="opacity-75">Crontab is a time-based job scheduler in Unix-like operating systems. It allows users to schedule tasks to run automatically at specified times and intervals.</p>
                 <hr />
 
-                <div class="summary-card mb-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs opacity-70">Next at</span>
-                        <span class="text-xs next-at-value">${this.nextAt}</span>
-                    </div>
-                </div>
-
-                <div class="summary-card mb-2">
-                    <div class="text-xs opacity-70 mb-1">Human readable</div>
-                    <div class="text-base font-medium">${this.humanReadable}</div>
-                </div>
-
-                <div class="relative flex items-center mt-2">
+                <div class="relative flex items-center mb-2">
                     <textarea
                         id="cron-input"
                         class="input-expandable font-mono"
@@ -235,6 +223,18 @@ export class CrontabGenerator extends BaseTool {
                 ${this.alert ? html`
                     <tool-alert .type=${this.alert.type} .message=${this.alert.message}></tool-alert>
                 ` : ''}
+                
+                <div class="summary-card mb-2">
+                    <div class="text-xs opacity-70 mb-1">Human readable</div>
+                    <div class="text-base font-medium">${this.humanReadable}</div>
+                </div>
+                
+                <div class="summary-card mb-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs opacity-70">Next at</span>
+                        <span class="text-xs next-at-value">${this.nextAt}</span>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <h6 class="text-xs opacity-70 mb-2">Common Examples</h6>
