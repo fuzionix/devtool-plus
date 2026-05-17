@@ -15,6 +15,7 @@ import './common/tooltip/Tooltip';
 import './components/aes-encryption/AesEncryption';
 import './components/ascii-encoder/AsciiEncoder';
 import './components/base64-encoder/Base64Encoder';
+import './components/chmod-calculator/ChmodCalculator';
 import './components/color-convertor/ColorConvertor';
 import './components/color-mixer/ColorMixer';
 import './components/color-palette/ColorPalette';

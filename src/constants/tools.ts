@@ -240,6 +240,15 @@ export const TOOLS: Tool[] = [
         tags: ['crontab', 'generator', 'schedule', 'cron expression', 'time', 'job', 'task', 'automation']
     },
     {
+        id: 'chmod-calculator',
+        label: 'Chmod Calculator',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<chmod-calculator></chmod-calculator>',
+        icon: 'id-card-lanyard',
+        tags: ['chmod', 'calculator', 'permissions', 'unix', 'linux', 'file', 'system', 'access', 'mode']
+    },
+    {
         id: 'http-status-code',
         label: 'HTTP Status Code',
         version: '1.0.0',
