@@ -4,7 +4,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'base64-encoder',
         label: 'Base64 Encoder / Decoder',
-        version: '1.0.2',
+        version: '1.0.3',
         category: ToolCategory.Encode,
         template: '<base64-encoder></base64-encoder>',
         icon: 'file-digit',
@@ -13,7 +13,7 @@ export const TOOLS: Tool[] = [
     {
         id: 'url-encoder',
         label: 'URL Encoder',
-        version: '1.0.1',
+        version: '1.1.0',
         category: ToolCategory.Encode,
         template: '<url-encoder></url-encoder>',
         icon: 'link-2',
@@ -53,13 +53,12 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Encode,
         template: '<escape-html-entities></escape-html-entities>',
         icon: 'code-xml',
-        isNew: true,
         tags: ['html', 'escape', 'entities', 'encode', 'decode', 'text', 'string', 'web']
     },
     {
         id: 'color-convertor',
         label: 'Color Convertor',
-        version: '1.1.0',
+        version: '1.2.0',
         category: ToolCategory.Design,
         template: '<color-convertor></color-convertor>',
         icon: 'paintbrush-vertical',
@@ -218,7 +217,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Text,
         template: '<lorem-ipsum></lorem-ipsum>',
         icon: 'notepad-text',
-        isNew: true,
         tags: ['lorem', 'ipsum', 'placeholder', 'text', 'dummy', 'content', 'filler', 'paragraphs', 'words'],
     },
     {
@@ -237,6 +235,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<crontab-generator></crontab-generator>',
         icon: 'alarm-clock',
+        isNew: true,
         tags: ['crontab', 'generator', 'schedule', 'cron expression', 'time', 'job', 'task', 'automation']
     },
     {
@@ -246,6 +245,7 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<chmod-calculator></chmod-calculator>',
         icon: 'id-card-lanyard',
+        isNew: true,
         tags: ['chmod', 'calculator', 'permissions', 'unix', 'linux', 'file', 'system', 'access', 'mode']
     },
     {
@@ -291,7 +291,6 @@ export const TOOLS: Tool[] = [
         category: ToolCategory.Util,
         template: '<number-base-convertor></number-base-convertor>',
         icon: 'binary',
-        isNew: true,
         tags: ['number', 'base', 'convertor', 'binary', 'decimal', 'hexadecimal', 'octal', 'math'],
     },
     {
