@@ -275,6 +275,15 @@ export const TOOLS: Tool[] = [
         icon: 'floppy-disk',
         tags: ['data', 'unit', 'convertor', 'bytes', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb', 'bit', 'information'],
     },
+     {
+        id: 'character-counter',
+        label: 'Character Counter',
+        version: '1.0.0',
+        category: ToolCategory.Util,
+        template: '<character-counter></character-counter>',
+        icon: 'rectangle-ellipsis',
+        tags: ['character', 'counter', 'length'],
+    },
     {
         id: 'unix-path-convertor',
         label: 'UNIX / Windows Path Convertor',
