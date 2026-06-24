@@ -111,6 +111,16 @@ export const TOOLS: Tool[] = [
         tags: ['color', 'mix', 'blend', 'combine', 'design', 'rgb', 'hsl', 'shade', 'tint', 'tone', 'saturation', 'hue']
     },
     {
+        id: 'blend-unmixer',
+        label: 'Blend Unmixer',
+        version: '1.0.0',
+        category: ToolCategory.Design,
+        template: '<blend-unmixer></blend-unmixer>',
+        icon: 'unblender',
+        isNew: true,
+        tags: ['color', 'blend', 'unmix', 'transparent', 'foreground', 'background', 'alpha', 'rgba', 'design', 'ui', 'transparency', 'color-analysis']
+    },
+    {
         id: 'uuid-generator',
         label: 'UUID Generator',
         version: '1.1.0',
