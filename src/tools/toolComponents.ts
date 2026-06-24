@@ -17,6 +17,7 @@ import './components/ascii-encoder/AsciiEncoder';
 import './components/base64-encoder/Base64Encoder';
 import './components/color-convertor/ColorConvertor';
 import './components/color-mixer/ColorMixer';
+import './components/blend-unmixer/BlendUnmixer';
 import './components/color-palette/ColorPalette';
 import './components/contrast-checker/ContrastChecker';
 import './components/cubic-bezier/CubicBezier';
