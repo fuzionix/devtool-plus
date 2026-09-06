@@ -33,6 +33,11 @@ export class AesEncryption extends BaseTool {
     @query('#input') private input!: HTMLTextAreaElement;
     @query('#output') private output!: HTMLTextAreaElement;
     @query('#file-input') private fileInput!: HTMLInputElement;
+    @query('#password') private passwordInput!: HTMLInputElement;
+
+    firstUpdated() {
+        setTimeout(() => this.passwordInput?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}

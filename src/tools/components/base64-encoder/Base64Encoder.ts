@@ -6,6 +6,7 @@ import {
     renderCopyButton
 } from '../../../utils/util';
 import mimeDb from 'mime-db';
+import { detectMimeType } from './mimeUtils';
 
 @customElement('base64-encoder')
 export class Base64Encoder extends BaseTool {
@@ -23,9 +24,13 @@ export class Base64Encoder extends BaseTool {
     @state() private isShowUriHeader = false;
     @state() private decodedFileSize = 0;
 
-    @query('#input') input!: HTMLTextAreaElement;
-    @query('#output') output!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#output') outputElement!: HTMLTextAreaElement;
     @query('#file-input') fileInput!: HTMLInputElement;
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
@@ -177,8 +182,8 @@ export class Base64Encoder extends BaseTool {
     protected updated(changedProperties: Map<string, unknown>): void {
         super.updated(changedProperties);
 
-        if (this.output && changedProperties.has('outputText')) {
-            adjustTextareaHeight(this.output);
+        if (this.outputElement && changedProperties.has('outputText')) {
+            adjustTextareaHeight(this.outputElement);
         }
     }
 
@@ -253,14 +258,41 @@ export class Base64Encoder extends BaseTool {
 
             // Handle data:URI format (e.g. data:image/png;base64,...)
             if (base64Data.startsWith('data:')) {
-                const [header, content] = base64Data.split(',');
+                const commaIndex = base64Data.indexOf(',');
+                if (commaIndex === -1) {
+                    this.hideOutput();
+                    this.alert = {
+                        type: 'error',
+                        message: 'Invalid data URI format: missing comma separator'
+                    };
+                    return;
+                }
+
+                const header = base64Data.substring(0, commaIndex);
+                const content = base64Data.substring(commaIndex + 1);
+
+                // Check if the data URI explicitly contains base64 encoding
+                if (!header.includes(';base64')) {
+                    this.hideOutput();
+                    this.alert = {
+                        type: 'error',
+                        message: 'Data URI must contain ";base64" for Base64 decoding. Plain data URIs are not supported.'
+                    };
+                    return;
+                }
+
                 base64Data = content;
                 this.decodedMimeType = header.split(';')[0].split(':')[1];
-                this.decodedData = this.base64ToUint8Array(content);
+                if (this.decodedMimeType.startsWith('text/plain')) {
+                    const bytes = this.base64ToUint8Array(content);
+                    this.decodedData = new TextDecoder('utf-8').decode(bytes);
+                } else {
+                    this.decodedData = this.base64ToUint8Array(content);
+                }
             } else {
                 try {
                     this.decodedData = this.base64ToUint8Array(base64Data);
-                    this.decodedMimeType = this.detectMimeType(this.decodedData);
+                    this.decodedMimeType = detectMimeType(this.decodedData);
 
                     if (this.decodedMimeType === 'text/plain') {
                         // Attempt to decode as Base64
@@ -334,118 +366,6 @@ export class Base64Encoder extends BaseTool {
         return bytes;
     }
 
-    /**
-     * Detects the MIME type of a file based on its binary signature/magic numbers
-     * @param data - Uint8Array containing the file's binary data to analyze
-     * @returns string - The detected MIME type
-     */
-    private detectMimeType(data: Uint8Array): string {
-        if (data.length === 0) {
-            return 'text/plain';
-        }
-
-        // Define file signatures with variable lengths for better accuracy
-        // Format: [mimeType, [signature bytes], minBytesRequired]
-        const signatures: Array<[string, number[], number]> = [
-            // Images
-            ['image/jpeg', [0xFF, 0xD8, 0xFF], 3],
-            ['image/png', [0x89, 0x50, 0x4E, 0x47], 4],
-            ['image/gif', [0x47, 0x49, 0x46, 0x38], 4],
-            ['image/webp', [0x52, 0x49, 0x46, 0x46], 4],
-            ['image/bmp', [0x42, 0x4D], 2],
-            ['image/tiff', [0x49, 0x49, 0x2A, 0x00], 4], // Little-endian
-            ['image/tiff', [0x4D, 0x4D, 0x00, 0x2A], 4], // Big-endian
-            ['image/svg+xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
-            ['image/x-icon', [0x00, 0x00, 0x01, 0x00], 4],
-
-            // Documents & Archives
-            ['application/pdf', [0x25, 0x50, 0x44, 0x46], 4], // %PDF
-            ['application/zip', [0x50, 0x4B, 0x03, 0x04], 4], // PK.. (zip, jar, docx, xlsx, etc)
-            ['application/zip', [0x50, 0x4B, 0x05, 0x06], 4], // PK.. (empty zip)
-            ['application/zip', [0x50, 0x4B, 0x07, 0x08], 4], // PK.. (spanned zip)
-            ['application/x-rar-compressed', [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07], 6],
-            ['application/x-7z-compressed', [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C], 6],
-            ['application/gzip', [0x1F, 0x8B, 0x08], 3],
-            ['application/x-tar', [0x75, 0x73, 0x74, 0x61, 0x72], 5],
-            ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', [0x50, 0x4B, 0x03, 0x04], 4],
-            ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', [0x50, 0x4B, 0x03, 0x04], 4],
-            ['application/vnd.openxmlformats-officedocument.presentationml.presentation', [0x50, 0x4B, 0x03, 0x04], 4],
-            ['application/xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
-
-            // Text formats
-            ['application/json', [0x7B], 1],
-            ['application/json', [0x5B], 1],
-            ['text/html', [0x3C, 0x21, 0x44, 0x4F], 4],
-            ['text/html', [0x3C, 0x48, 0x54, 0x4D], 4],
-            ['text/html', [0x3C, 0x68, 0x74, 0x6D], 4],
-            ['text/css', [0x2F, 0x2A], 2],
-            ['application/javascript', [0x2F, 0x2F], 2],
-            ['text/plain', [0xEF, 0xBB, 0xBF], 3],
-
-            // Audio
-            ['audio/mpeg', [0xFF, 0xFB], 2], // MP3 (MPEG-1)
-            ['audio/mpeg', [0xFF, 0xFA], 2], // MP3 (MPEG-2)
-            ['audio/mpeg', [0xFF, 0xF3], 2], // MP3 (MPEG-2.5)
-            ['audio/mpeg', [0x49, 0x44, 0x33], 3], // ID3 tag
-            ['audio/wav', [0x52, 0x49, 0x46, 0x46], 4],
-            ['audio/flac', [0x66, 0x4C, 0x61, 0x43], 4],
-            ['audio/aac', [0xFF, 0xF1], 2],
-            ['audio/ogg', [0x4F, 0x67, 0x67, 0x53], 4],
-
-            // Video
-            ['video/mp4', [0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70], 8],
-            ['video/quicktime', [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], 8],
-            ['video/x-msvideo', [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x41, 0x56, 0x49], 11],
-            ['video/x-matroska', [0x1A, 0x45, 0xDF, 0xA3], 4],
-            ['video/mpeg', [0x00, 0x00, 0x01, 0xB3], 4],
-            ['video/x-flv', [0x46, 0x4C, 0x56, 0x01], 4],
-            ['video/quicktime', [0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20], 7],
-
-            // Executables & System
-            ['application/x-msdownload', [0x4D, 0x5A], 2],
-            ['application/x-mach-binary', [0xFE, 0xED, 0xFA, 0xCE], 4],
-            ['application/x-mach-binary', [0xFE, 0xED, 0xFA, 0xCF], 4],
-            ['application/x-executable', [0x7F, 0x45, 0x4C, 0x46], 4],
-            ['application/x-sharedlib', [0x7F, 0x45, 0x4C, 0x46], 4],
-
-            // Fonts
-            ['font/ttf', [0x00, 0x01, 0x00, 0x00], 4],
-            ['font/otf', [0x4F, 0x54, 0x54, 0x4F], 4],
-            ['font/woff', [0x77, 0x4F, 0x46, 0x46], 4],
-            ['font/woff2', [0x77, 0x4F, 0x46, 0x32], 4],
-
-            // Database & Data
-            ['application/x-sqlite3', [0x53, 0x51, 0x4C, 0x69], 4],
-            ['application/vnd.google-earth.kml+xml', [0x3C, 0x3F, 0x78, 0x6D], 4],
-        ];
-
-        for (const [mimeType, signature, minBytes] of signatures) {
-            if (data.length >= minBytes) {
-                // Handle variable-length signatures and masks
-                let match = true;
-                for (let i = 0; i < signature.length; i++) {
-                    if (data[i] !== signature[i]) {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match) {
-                    return mimeType;
-                }
-            }
-        }
-
-        // Secondary detection: Check for tar format (signature at offset 257)
-        if (data.length > 262) {
-            const tarSignature = [0x75, 0x73, 0x74, 0x61, 0x72];
-            if (tarSignature.every((byte, i) => data[257 + i] === byte)) {
-                return 'application/x-tar';
-            }
-        }
-
-        return 'text/plain';
-    }
-
     private triggerFileInput(): void {
         this.fileInput.click();
     }
@@ -491,20 +411,20 @@ export class Base64Encoder extends BaseTool {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
-            reader.onload = async (e) => {
+            reader.onload = (e) => {
                 try {
                     const result = e.target?.result;
-                    if (typeof result === 'string') {
-                        this.outputText = btoa(result);
-                    } else if (result instanceof ArrayBuffer) {
-                        const bytes = new Uint8Array(result);
-                        let binary = '';
-                        // Convert byte array to binary string
-                        bytes.forEach(byte => binary += String.fromCharCode(byte));
-                        this.outputText = btoa(binary);
+                    if (!(result instanceof ArrayBuffer)) {
+                        reject(new Error('Failed to read file as binary data.'));
+                        return;
                     }
+
+                    this.outputText = this.arrayBufferToBase64(result);
                     this.uriHeader = `data:${this.inputMimeType};base64,`;
-                    this.outputText = this.isShowUriHeader ? `${this.uriHeader}${this.outputText}` : this.outputText;
+                    this.outputText = this.isShowUriHeader
+                        ? `${this.uriHeader}${this.outputText}`
+                        : this.outputText;
+
                     this.requestUpdate();
                     resolve();
                 } catch (error) {
@@ -513,49 +433,8 @@ export class Base64Encoder extends BaseTool {
             };
 
             reader.onerror = () => reject(reader.error);
-            if (file.type.startsWith('text/')) {
-                reader.readAsText(file);
-            } else {
-                reader.readAsArrayBuffer(file);
-            }
+            reader.readAsArrayBuffer(file);
         });
-    }
-
-    private clearAll(): void {
-        this.inputText = '';
-        this.outputText = '';
-        this.fileName = '';
-        this.file = null;
-        this.fileInput.value = '';
-        this.outputMode = 'text';
-        this.input.style.height = `28px`;
-        this.uriHeader = '';
-        this.alert = null;
-        this.decodedFileSize = 0;
-        this.renderOutput();
-        this.requestUpdate();
-    }
-
-    private async copyToClipboard() {
-        if (!this.outputText) {
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(this.outputText);
-            this.isCopied = true;
-            setTimeout(() => {
-                this.isCopied = false;
-            }, 2000);
-        } catch (err) {
-            this.isCopied = false;
-        }
-    }
-
-    private hideOutput() {
-        this.outputText = '';
-        this.outputMode = 'error';
-        this.requestUpdate();
     }
 
     private getBase64String(base64Data: string): { base64: string; mimeType: string } {
@@ -565,6 +444,19 @@ export class Base64Encoder extends BaseTool {
             return { base64: content, mimeType };
         }
         return { base64: base64Data, mimeType: this.decodedMimeType };
+    }
+
+    private arrayBufferToBase64(buffer: ArrayBuffer): string {
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000; // avoid call stack/memory issues on larger files
+        let binary = '';
+
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, i + chunkSize);
+            binary += String.fromCharCode(...chunk);
+        }
+
+        return btoa(binary);
     }
 
     private getDownloadButtonText(): string {
@@ -604,5 +496,42 @@ export class Base64Encoder extends BaseTool {
             return mimeEntry.extensions[0];
         }
         return '';
+    }
+
+    private clearAll(): void {
+        this.inputText = '';
+        this.outputText = '';
+        this.fileName = '';
+        this.file = null;
+        this.fileInput.value = '';
+        this.outputMode = 'text';
+        this.inputElement.style.height = `28px`;
+        this.uriHeader = '';
+        this.alert = null;
+        this.decodedFileSize = 0;
+        this.renderOutput();
+        this.requestUpdate();
+    }
+
+    private async copyToClipboard() {
+        if (!this.outputText) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(this.outputText);
+            this.isCopied = true;
+            setTimeout(() => {
+                this.isCopied = false;
+            }, 2000);
+        } catch (err) {
+            this.isCopied = false;
+        }
+    }
+
+    private hideOutput() {
+        this.outputText = '';
+        this.outputMode = 'error';
+        this.requestUpdate();
     }
 }

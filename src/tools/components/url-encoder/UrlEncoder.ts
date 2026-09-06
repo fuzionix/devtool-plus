@@ -9,13 +9,20 @@ import {
 @customElement('url-encoder')
 export class UrlEncoder extends BaseTool {
     @state() private selectedMode: 'encode' | 'decode' = 'encode';
-    @state() private input = '';
+    @state() private input = 'https://localhost:3000/naïveté';
     @state() private output = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
-    @state() private preserveUrl = true;
+    @state() private encodePreserveUrl = true;
+    @state() private decodePreserveUrl = true;
 
-    @query('#output') outputTextarea!: HTMLTextAreaElement;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#output') outputElement!: HTMLTextAreaElement;
+
+    firstUpdated() {
+        this.processInput();
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}
@@ -23,6 +30,12 @@ export class UrlEncoder extends BaseTool {
     `;
 
     protected renderTool() {
+        const isEncode = this.selectedMode === 'encode';
+        const preserveCurrentMode = isEncode ? this.encodePreserveUrl : this.decodePreserveUrl;
+        const switchLabel = isEncode
+            ? 'Preserve URL structure'
+            : 'Fully decode URL structure';
+
         return html`
             <style>${this.styles}</style>
             <div class="tool-inner-container">
@@ -56,6 +69,7 @@ export class UrlEncoder extends BaseTool {
                         </button>
                     </div>
                 </div>
+
                 <!-- Input Field -->
                 <div class="relative flex items-center mt-2">
                     <textarea
@@ -74,6 +88,7 @@ export class UrlEncoder extends BaseTool {
                         </tool-tooltip>
                     </div>
                 </div>
+
                 ${this.alert ? html`
                     <tool-alert
                         .type=${this.alert.type}
@@ -107,17 +122,14 @@ export class UrlEncoder extends BaseTool {
                     </div>
                 </div>
 
-                ${this.selectedMode === 'encode' ? html`
-                    <div class="mt-2">
-                        <tool-switch
-                            .checked=${this.preserveUrl}
-                            rightLabel="Preserve URL structure"
-                            ariaLabel="Encoding Method"
-                            @change=${this.handleEncodingMethodChange}
-                        ></tool-switch>
-                    </div>
-                ` : ''}
-                
+                <div class="mt-2">
+                    <tool-switch
+                        .checked=${preserveCurrentMode}
+                        rightLabel=${switchLabel}
+                        ariaLabel=${isEncode ? 'Encoding Method' : 'Decoding Method'}
+                        @change=${this.handleMethodChange}
+                    ></tool-switch>
+                </div>
             </div>
         `;
     }
@@ -127,8 +139,15 @@ export class UrlEncoder extends BaseTool {
         this.processInput();
     }
 
-    private handleEncodingMethodChange(event: CustomEvent) {
-        this.preserveUrl = event.detail.checked;
+    private handleMethodChange(event: CustomEvent) {
+        const checked = event.detail.checked as boolean;
+
+        if (this.selectedMode === 'encode') {
+            this.encodePreserveUrl = checked;
+        } else {
+            this.decodePreserveUrl = checked;
+        }
+
         this.processInput();
     }
 
@@ -173,15 +192,15 @@ export class UrlEncoder extends BaseTool {
             this.output = '';
         }
 
-        if (this.outputTextarea) {
+        if (this.outputElement) {
             await this.updateComplete;
-            adjustTextareaHeight(this.outputTextarea);
+            adjustTextareaHeight(this.outputElement);
         }
     }
 
     private encodeURL(input: string): string {
         try {
-            if (this.preserveUrl) {
+            if (this.encodePreserveUrl) {
                 return encodeURI(input);
             } else {
                 return encodeURIComponent(input);
@@ -197,10 +216,10 @@ export class UrlEncoder extends BaseTool {
 
     private decodeURL(input: string): string {
         try {
-            if (this.preserveUrl) {
-                return decodeURI(input);
-            } else {
+            if (this.decodePreserveUrl) {
                 return decodeURIComponent(input);
+            } else {
+                return decodeURI(input);
             }
         } catch (error) {
             this.alert = {

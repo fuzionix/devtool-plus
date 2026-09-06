@@ -3,7 +3,7 @@
     "displayName": "DevTool+",
     "publisher": "Fuzionix",
     "description": "An extension that provides common I/O tools directly in code editor",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/fuzionix/devtool-plus.git"
@@ -186,7 +186,6 @@
     },
     "dependencies": {
         "@types/qrcode": "^1.5.5",
-        "bezier-easing": "^2.1.0",
         "colord": "^2.9.3",
         "fast-xml-parser": "^5.2.5",
         "fs-extra": "^11.3.1",
@@ -196,7 +195,7 @@
         "mime-db": "^1.53.0",
         "monaco-editor-core": "^0.52.2",
         "qrcode": "^1.5.4",
-        "toml": "^3.0.0",
+        "smol-toml": "^1.6.1",
         "uuid": "^11.0.5",
         "xml2js": "^0.6.2"
     },

@@ -88,13 +88,13 @@ code --install-extension Fuzionix.devtool-plus
   </tr>
   <tr>
     <td>Base64 Encoder / Decoder</td>
-    <td align="center">1.0.2</td>
+    <td align="center">1.0.3</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
   <tr>
     <td>URL Encoder</td>
-    <td align="center">1.0.1</td>
+    <td align="center">1.1.0</td>
     <td align="center"></td>
     <td align="center">✅</td>
   </tr>
@@ -274,16 +274,22 @@ code --install-extension Fuzionix.devtool-plus
     <td>Number Base Convertor</td>
     <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center">🆕</td>
+    <td align="center">✅</td>
   </tr>
   <tr>
     <td>Crontab Generator</td>
+    <td align="center">1.0.0</td>
     <td align="center"></td>
-    <td align="center"></td>
-    <td align="center">🚧</td>
+    <td align="center">🆕</td>
   </tr>
   <tr>
     <td>Chmod Calculator</td>
+    <td align="center">1.0.0</td>
+    <td align="center"></td>
+    <td align="center">🆕</td>
+  </tr>
+  <tr>
+    <td>User Agent Generator</td>
     <td align="center"></td>
     <td align="center"></td>
     <td align="center">🚧</td>
@@ -292,7 +298,7 @@ code --install-extension Fuzionix.devtool-plus
     <td>Docker Compose Generator</td>
     <td align="center"></td>
     <td align="center"></td>
-    <td align="center">🚧</td>
+    <td align="center">📝</td>
   </tr>
 
   <tr>

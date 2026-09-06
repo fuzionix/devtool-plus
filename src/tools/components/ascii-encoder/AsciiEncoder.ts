@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     adjustTextareaHeight,
@@ -13,6 +13,12 @@ export class AsciiEncoder extends BaseTool {
     @state() private output = '';
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
+
+    @query('#input') inputElement!: HTMLTextAreaElement;
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}

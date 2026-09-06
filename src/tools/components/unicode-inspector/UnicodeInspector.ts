@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state, property } from 'lit/decorators.js';
+import { customElement, state, property, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import {
     adjustTextareaHeight,
@@ -34,10 +34,16 @@ export class UnicodeInspector extends BaseTool {
 
     @property({ type: Array }) formatOptions = FORMAT_OPTIONS;
 
+    @query('#input') inputElement!: HTMLTextAreaElement;
+
     constructor() {
         super();
         this.initUnicodeBlocks();
         this.processInput();
+    }
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
     }
 
     private styles = css`

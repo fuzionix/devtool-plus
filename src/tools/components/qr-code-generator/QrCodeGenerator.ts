@@ -1,5 +1,5 @@
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, query } from 'lit/decorators.js';
 import { BaseTool } from '../../base/BaseTool';
 import { adjustTextareaHeight } from '../../../utils/util';
 import * as QRCode from 'qrcode';
@@ -17,6 +17,12 @@ export class QrCodeGenerator extends BaseTool {
     @state() private backgroundColor = '#ffffff';
     @state() private foregroundColor = '#000000';
     @state() private maskPattern = 2;
+
+    @query('#input-link') inputElement!: HTMLTextAreaElement;
+
+    firstUpdated() {
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
 
     private styles = css`
         ${BaseTool.styles}

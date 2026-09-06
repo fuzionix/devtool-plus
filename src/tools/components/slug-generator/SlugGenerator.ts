@@ -15,17 +15,23 @@ export class SlugGenerator extends BaseTool {
     @state() private alert: { type: 'error' | 'warning'; message: string } | null = null;
     @state() private isCopied = false;
 
-    @query('#output') outputTextarea!: HTMLTextAreaElement;
-
-    private styles = css`
-        ${BaseTool.styles}
-        /* Minimal local styling if needed. */
-    `;
+    @query('#input') inputElement!: HTMLTextAreaElement;
+    @query('#output') outputElement!: HTMLTextAreaElement;
 
     connectedCallback() {
         super.connectedCallback();
         this.processInput();
     }
+
+    firstUpdated() {
+        this.processInput();
+        setTimeout(() => this.inputElement?.focus(), 0);
+    }
+
+    private styles = css`
+        ${BaseTool.styles}
+        /* Minimal local styling if needed. */
+    `;
 
     protected renderTool() {
         return html`
@@ -188,9 +194,9 @@ export class SlugGenerator extends BaseTool {
             this.output = '';
         }
 
-        if (this.outputTextarea) {
+        if (this.outputElement) {
             await this.updateComplete;
-            adjustTextareaHeight(this.outputTextarea);
+            adjustTextareaHeight(this.outputElement);
         }
     }
 
@@ -199,11 +205,8 @@ export class SlugGenerator extends BaseTool {
         this.output = '';
         this.alert = null;
 
-        const inputTextarea = this.querySelector('#input') as HTMLTextAreaElement;
-        const outputTextarea = this.querySelector('#output') as HTMLTextAreaElement;
-
-        inputTextarea.style.height = `28px`;
-        outputTextarea.style.height = `auto`;
+        this.inputElement.style.height = `28px`;
+        this.outputElement.style.height = `auto`;
         this.requestUpdate();
     }
 }
