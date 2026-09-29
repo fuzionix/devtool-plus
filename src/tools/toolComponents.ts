@@ -25,6 +25,7 @@ import './components/cubic-bezier/CubicBezier';
 import './components/data-format-convertor/DataFormatConvertor';
 import './components/datetime-convertor/DatetimeConvertor';
 import './components/data-unit-convertor/DataUnitConvertor';
+import './components/character-counter/CharacterCounter';
 import './components/diff-checker/DiffChecker';
 import './components/escape-html-entities/EscapeHtmlEntities';
 import './components/gradient-maker/GradientMaker';

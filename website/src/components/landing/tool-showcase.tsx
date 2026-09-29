@@ -74,6 +74,7 @@ const TOOLS: Tool[] = [
   { name: 'QR Code', category: 'utility', icon: QrCode },
   { name: 'HTTP Status', category: 'utility', icon: Server },
   { name: 'Data Unit', category: 'utility', icon: Save },
+  { name: 'Char Count', category: 'utility', icon: RectangleEllipsis },
   { name: 'Path Convertor', category: 'utility', icon: FolderPen },
   { name: 'Number Base', category: 'utility', icon: Binary },
   { name: 'Token Generator', category: 'crypto', icon: Tag },
