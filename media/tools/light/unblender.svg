@@ -1,0 +1,49 @@
+<svg width="750" height="750" viewBox="0 0 750 750" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_337_45" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="250" y="0" width="500" height="500">
+<g style="mix-blend-mode:soft-light">
+<rect x="250.5" y="0.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="250.5" y="100.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="250.5" y="200.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="350.5" y="0.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="400.5" y="50.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="450.5" y="0.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="450.5" y="100.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="500.5" y="150.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="550.5" y="200.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="600.5" y="250.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="650.5" y="300.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="700.5" y="350.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="500.5" y="50.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="550.5" y="0.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="550.5" y="100.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="600.5" y="150.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="650.5" y="200.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="700.5" y="250.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="600.5" y="50.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="650.5" y="0.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="650.5" y="100.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="700.5" y="150.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="700.5" y="50.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="300.5" y="50.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="300.5" y="150.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="350.5" y="200.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="500.5" y="350.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="550.5" y="400.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="600.5" y="450.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="500.5" y="450.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="350.5" y="100.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="400.5" y="150.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="450.5" y="200.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="500.5" y="250.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="550.5" y="300.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="600.5" y="350.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="650.5" y="400.5" width="49" height="49" fill="black" stroke="#444444"/>
+<rect x="700.5" y="450.5" width="49" height="49" fill="black" stroke="#444444"/>
+</g>
+</mask>
+<g mask="url(#mask0_337_45)">
+<rect x="250.5" y="0.5" width="499" height="499" fill="#444444" stroke="#444444"/>
+</g>
+<rect x="16.5" y="266.5" width="467" height="467" stroke="#444444" stroke-width="33"/>
+<rect x="250.5" y="250.5" width="249" height="249" fill="#444444" stroke="#444444"/>
+</svg>
