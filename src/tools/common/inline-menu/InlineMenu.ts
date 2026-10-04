@@ -1,13 +1,16 @@
-import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { LitElement, html, css } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 
-@customElement('tool-inline-menu')
+@customElement("tool-inline-menu")
 export class InlineMenu extends LitElement {
     @property({ type: Array }) options: { label: string; value: string }[] = [];
-    @property({ type: String }) placeholder: string = 'Select';
-    @property({ type: String }) value: string = '';
+    @property({ type: String }) placeholder: string = "Select";
+    @property({ type: String }) value: string = "";
 
     @state() private isOpen: boolean = false;
+
+    // The menu that is currently open, so opening another one can close it
+    private static openMenu: InlineMenu | null = null;
 
     static styles = css`
         :host {
@@ -26,7 +29,10 @@ export class InlineMenu extends LitElement {
         }
 
         .inline-menu:hover {
-            background-color: var(--vscode-input-background, rgba(90, 93, 94, 0.31));
+            background-color: var(
+                --vscode-input-background,
+                rgba(90, 93, 94, 0.31)
+            );
         }
 
         .selection-text {
@@ -64,6 +70,11 @@ export class InlineMenu extends LitElement {
             opacity: 1;
         }
 
+        :host([align="left"]) .options-panel {
+            left: 0;
+            right: auto;
+        }
+
         .option {
             margin: 0 4px;
             padding: 4px 10px;
@@ -98,15 +109,24 @@ export class InlineMenu extends LitElement {
     `;
 
     render() {
-        const selectedOption = this.options.find(opt => opt.value === this.value);
+        const selectedOption = this.options.find(
+            (opt) => opt.value === this.value,
+        );
 
         return html`
-            <div class="inline-menu" @click=${this.toggleDropdown}>
-                <span class="selection-text ${!selectedOption ? 'placeholder' : ''}">
+            <div
+                class="inline-menu"
+                @click=${this.toggleDropdown}
+            >
+                <span
+                    class="selection-text ${!selectedOption
+                        ? "placeholder"
+                        : ""}"
+                >
                     ${selectedOption ? selectedOption.label : this.placeholder}
                 </span>
-                <svg 
-                    class="chevron ${this.isOpen ? 'open' : ''}"
+                <svg
+                    class="chevron ${this.isOpen ? "open" : ""}"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -117,54 +137,72 @@ export class InlineMenu extends LitElement {
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </div>
-            <div class="options-panel ${this.isOpen ? 'open' : ''}">
-                ${this.options.map(option => html`
-                    <div 
-                        class="option ${option.value === this.value ? 'selected' : ''}"
-                        @click=${() => this.selectOption(option)}
-                    >
-                        ${option.label}
-                    </div>
-                `)}
+            <div class="options-panel ${this.isOpen ? "open" : ""}">
+                ${this.options.map(
+                    (option) => html`
+                        <div
+                            class="option ${option.value === this.value
+                                ? "selected"
+                                : ""}"
+                            @click=${() => this.selectOption(option)}
+                        >
+                            ${option.label}
+                        </div>
+                    `,
+                )}
             </div>
         `;
     }
 
     private toggleDropdown(event: Event) {
         event.stopPropagation();
-        this.isOpen = !this.isOpen;
         if (this.isOpen) {
-            // Add click outside listener when dropdown is opened
-            setTimeout(() => {
-                window.addEventListener('click', this.handleClickOutside);
-            });
+            this.close();
+            return;
+        }
+
+        // Only one inline menu can be open at a time
+        InlineMenu.openMenu?.close();
+        InlineMenu.openMenu = this;
+        this.isOpen = true;
+
+        // Add click outside listener when dropdown is opened
+        setTimeout(() => {
+            window.addEventListener("click", this.handleClickOutside);
+        });
+    }
+
+    private close() {
+        this.isOpen = false;
+        window.removeEventListener("click", this.handleClickOutside);
+        if (InlineMenu.openMenu === this) {
+            InlineMenu.openMenu = null;
         }
     }
 
     private selectOption(option: { label: string; value: string }) {
         this.value = option.value;
-        this.isOpen = false;
-        // Remove click outside listener when option is selected
-        window.removeEventListener('click', this.handleClickOutside);
+        this.close();
 
         // Dispatch custom event
-        this.dispatchEvent(new CustomEvent('change', {
-            detail: { value: option.value },
-            bubbles: true,
-            composed: true
-        }));
+        this.dispatchEvent(
+            new CustomEvent("change", {
+                detail: { value: option.value },
+                bubbles: true,
+                composed: true,
+            }),
+        );
     }
 
     private handleClickOutside = (event: MouseEvent) => {
         const path = event.composedPath();
         if (!path.includes(this)) {
-            this.isOpen = false;
-            window.removeEventListener('click', this.handleClickOutside);
+            this.close();
         }
     };
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        window.removeEventListener('click', this.handleClickOutside);
+        this.close();
     }
 }
